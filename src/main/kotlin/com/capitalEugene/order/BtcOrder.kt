@@ -40,10 +40,12 @@ val CHANNELS = listOf(
 
 val json = Json { ignoreUnknownKeys = true }
 
+// 默认降序
 fun aggregateToUsdt(
     depthList: List<List<Double>>,
     precision: Int = 2,
-    multiplier: BigDecimal = BigDecimal.ONE
+    multiplier: BigDecimal = BigDecimal.ONE,
+    ascending: Boolean = false
 ): List<Pair<BigDecimal, BigDecimal>> {
     val depthMap = mutableMapOf<BigDecimal, BigDecimal>()
     val safeDepthList = depthList.toList()  // ✅ 快照副本，防止并发修改
@@ -56,7 +58,13 @@ fun aggregateToUsdt(
         val usdtValue = price.multiply(size).multiply(multiplier)
         depthMap[roundedPrice] = depthMap.getOrDefault(roundedPrice, BigDecimal.ZERO) + usdtValue
     }
-    return depthMap.entries.sortedByDescending { it.key }.map { it.toPair() }
+
+    val sorted = if (ascending) {
+        depthMap.entries.sortedBy { it.key }
+    } else {
+        depthMap.entries.sortedByDescending { it.key }
+    }
+    return sorted.map { it.toPair() }
 }
 
 fun printAggregatedDepth() {
@@ -74,7 +82,8 @@ fun printAggregatedDepth() {
             val agg = aggregateToUsdt(
                 depthListSnapshot,
                 precision = 2,
-                multiplier = if (source == "spot") BigDecimal.ONE else CONTRACT_VALUE
+                multiplier = if (source == "spot") BigDecimal.ONE else CONTRACT_VALUE,
+                ascending = (side == "asks") // asks 卖单 升序， bids 买单 降序
             )
 
             agg.take(5).forEach { (priceVal, usdt) ->
