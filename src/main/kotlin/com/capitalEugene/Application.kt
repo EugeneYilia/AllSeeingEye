@@ -41,7 +41,7 @@ fun Application.module() {
             // 协程出现异常被取消时
             // 父协程或作用域被取消
             while (isActive) {
-                delay(5000)
+                delay(1000)
                 printAggregatedDepth()
             }
         }
