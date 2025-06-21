@@ -1,12 +1,15 @@
-import com.capitalEugene.configureRouting
+package com.capitalEugene
+
 import com.capitalEugene.order.printAggregatedDepth
 import com.capitalEugene.order.startWs
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.server.application.*
-import io.ktor.server.netty.EngineMain
-import kotlinx.coroutines.*
+import io.ktor.server.netty.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 fun main(args: Array<String>) {
     EngineMain.main(args)

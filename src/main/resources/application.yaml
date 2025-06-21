@@ -1,6 +1,6 @@
 ktor:
   application:
     modules:
-      - com.CapitalEugene.ApplicationKt.module
+      - com.capitalEugene.ApplicationKt.module
   deployment:
     port: 8080
