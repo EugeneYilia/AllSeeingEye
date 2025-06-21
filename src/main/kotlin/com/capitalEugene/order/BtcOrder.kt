@@ -13,9 +13,15 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 // 现货和合约的支撑位挂单和阻力位挂单列表
-val depthCache = mutableMapOf(
-    "spot" to mutableMapOf("bids" to mutableListOf<List<String>>(), "asks" to mutableListOf<List<String>>()),
-    "swap" to mutableMapOf("bids" to mutableListOf<List<String>>(), "asks" to mutableListOf<List<String>>())
+val depthCache: MutableMap<String, MutableMap<String, MutableList<List<Double>>>> = mutableMapOf(
+    "spot" to mutableMapOf(
+        "bids" to mutableListOf(),
+        "asks" to mutableListOf()
+    ),
+    "swap" to mutableMapOf(
+        "bids" to mutableListOf(),
+        "asks" to mutableListOf()
+    )
 )
 
 // 当前现货和合约的实时价格
@@ -35,15 +41,15 @@ val CHANNELS = listOf(
 val json = Json { ignoreUnknownKeys = true }
 
 fun aggregateToUsdt(
-    depthList: List<List<String>>,
+    depthList: List<List<Double>>,
     precision: Int = 5,
     multiplier: BigDecimal = BigDecimal.ONE
 ): List<Pair<BigDecimal, BigDecimal>> {
     val depthMap = mutableMapOf<BigDecimal, BigDecimal>()
     val safeDepthList = depthList.toList()  // ✅ 快照副本，防止并发修改
     for (entry in safeDepthList) {
-        val price = entry.getOrNull(0)?.toBigDecimalOrNull() ?: continue
-        val size = entry.getOrNull(1)?.toBigDecimalOrNull() ?: continue
+        val price = entry.getOrNull(0)?.toBigDecimal() ?: continue
+        val size = entry.getOrNull(1)?.toBigDecimal() ?: continue
         val factor = BigDecimal.TEN.pow(precision)
         val roundedPrice = price.divide(factor).setScale(0, RoundingMode.HALF_UP).multiply(factor)
         val usdtValue = price.multiply(size).multiply(multiplier)
@@ -62,7 +68,7 @@ fun printAggregatedDepth() {
             val price = priceCache[source]?.takeIf { !it.isNaN() }?.let { "%.2f".format(it) } ?: "N/A"
             println("  来源: ${source.uppercase()} | 实时价格: $price")
 
-            val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<String>>)?.toList() ?: emptyList()
+            val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<Double>>)?.toList() ?: emptyList()
             val agg = aggregateToUsdt(
                 depthListSnapshot,
                 precision = 2,
@@ -130,8 +136,23 @@ fun handleMessage(message: String) {
     val first = dataArray.firstOrNull()?.jsonObject ?: return
 
     if (channel == "books") {
-        val bids = first["bids"]?.jsonArray?.map { it.jsonArray.map { e -> e.jsonPrimitive.content } } ?: emptyList()
-        val asks = first["asks"]?.jsonArray?.map { it.jsonArray.map { e -> e.jsonPrimitive.content } } ?: emptyList()
+        val bids = first["bids"]?.jsonArray?.mapNotNull { bidEntry ->
+            val price = bidEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.doubleOrNull
+            val size = bidEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.doubleOrNull
+            if (price != null && size != null) listOf(price, size) else {
+                println("⚠️ 解析失败数据: $bidEntry")
+                null
+            }
+        } ?: emptyList()
+
+        val asks = first["asks"]?.jsonArray?.mapNotNull { askEntry ->
+            val price = askEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.doubleOrNull
+            val size = askEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.doubleOrNull
+            if (price != null && size != null) listOf(price, size) else {
+                println("⚠️ 解析失败数据: $askEntry")
+                null
+            }
+        } ?: emptyList()
 
         // 按照现货或者合约 拿到支撑位的list 如果拿到了就清空旧的 并添加新的元素到集合里去
         depthCache[dtype]?.get("bids")?.apply {
