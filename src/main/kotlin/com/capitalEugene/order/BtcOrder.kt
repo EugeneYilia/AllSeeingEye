@@ -19,7 +19,7 @@ val depthCache = mutableMapOf(
 )
 
 // 当前现货和合约的实时价格
-val priceCache = mutableMapOf<String, String?>(
+val priceCache = mutableMapOf<String, Double?>(
     "spot" to null,
     "swap" to null
 )
@@ -59,7 +59,7 @@ fun printAggregatedDepth() {
         println("$label（$side，单位：USDT）:")
 
         listOf("spot", "swap").forEach { source ->
-            val price = priceCache[source] ?: "N/A"
+            val price = priceCache[source]?.takeIf { !it.isNaN() }?.let { "%.2f".format(it) } ?: "N/A"
             println("  来源: ${source.uppercase()} | 实时价格: $price")
 
             val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<String>>)?.toList() ?: emptyList()
@@ -141,7 +141,7 @@ fun handleMessage(message: String) {
             addAll(asks)
         }
     } else if (channel == "tickers") {
-        val last = first["last"]?.jsonPrimitive?.content
+        val last = first["last"]?.jsonPrimitive?.doubleOrNull
         priceCache[dtype] = last
     }
 }
