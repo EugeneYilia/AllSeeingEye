@@ -84,6 +84,7 @@ suspend fun startWs(client: HttpClient) {
         try {
             println("🚀 尝试建立 WebSocket 连接...")
             client.webSocket(url) {
+                retryInterval = 5000L
                 subscribeChannels(this)
                 incoming.consumeEach { frame ->
                     if (frame is Frame.Text) {
@@ -142,6 +143,6 @@ fun handleMessage(message: String) {
         }
     } else if (channel == "tickers") {
         val last = first["last"]?.jsonPrimitive?.doubleOrNull
-        priceCache[dtype] = last
+        priceCache[dtype] = last?.takeIf { !it.isNaN() }
     }
 }
