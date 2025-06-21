@@ -133,11 +133,12 @@ fun handleMessage(message: String) {
         val bids = first["bids"]?.jsonArray?.map { it.jsonArray.map { e -> e.jsonPrimitive.content } } ?: emptyList()
         val asks = first["asks"]?.jsonArray?.map { it.jsonArray.map { e -> e.jsonPrimitive.content } } ?: emptyList()
 
-        (depthCache[dtype]?.get("bids") as? MutableList<List<String>>)?.apply {
+        // 按照现货或者合约 拿到阻力位的list 如果拿到了就清空旧的 并添加新的元素到集合里去
+        depthCache[dtype]?.get("bids")?.apply {
             clear()
             addAll(bids)
         }
-        (depthCache[dtype]?.get("asks") as? MutableList<List<String>>)?.apply {
+        depthCache[dtype]?.get("asks")?.apply {
             clear()
             addAll(asks)
         }
