@@ -42,7 +42,7 @@ val json = Json { ignoreUnknownKeys = true }
 
 fun aggregateToUsdt(
     depthList: List<List<Double>>,
-    precision: Int = 5,
+    precision: Int = 2,
     multiplier: BigDecimal = BigDecimal.ONE
 ): List<Pair<BigDecimal, BigDecimal>> {
     val depthMap = mutableMapOf<BigDecimal, BigDecimal>()
@@ -52,6 +52,7 @@ fun aggregateToUsdt(
         val size = entry.getOrNull(1)?.toBigDecimal() ?: continue
         val factor = BigDecimal.TEN.pow(precision)
         val roundedPrice = price.divide(factor).setScale(0, RoundingMode.HALF_UP).multiply(factor)
+        // swap 104000 * 30 * 0.01        spot   104000 * 30 * 1
         val usdtValue = price.multiply(size).multiply(multiplier)
         depthMap[roundedPrice] = depthMap.getOrDefault(roundedPrice, BigDecimal.ZERO) + usdtValue
     }
@@ -69,6 +70,7 @@ fun printAggregatedDepth() {
             println("  来源: ${source.uppercase()} | 实时价格: $price")
 
             val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<Double>>)?.toList() ?: emptyList()
+            // 按照百位数进行聚合
             val agg = aggregateToUsdt(
                 depthListSnapshot,
                 precision = 2,
