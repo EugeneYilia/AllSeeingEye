@@ -28,6 +28,7 @@ dependencies {
     implementation("io.ktor:ktor-client-websockets")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
     implementation("io.ktor:ktor-server-config-yaml")
+    implementation("io.lettuce:lettuce-core:6.7.1.RELEASE")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
