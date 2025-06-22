@@ -1,8 +1,6 @@
 package com.capitalEugene.order
 
-import com.capitalEugene.common.constants.BTC_SPOT
-import com.capitalEugene.common.constants.BTC_SWAP
-import com.capitalEugene.common.constants.CONTRACT_VALUE
+import com.capitalEugene.common.constants.OrderConstants
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.websocket.*
@@ -32,10 +30,10 @@ val priceCache = mutableMapOf<String, Double?>(
 
 // 订阅的频道  订单簿和实时价格   分别有btc现货和合约
 val CHANNELS = listOf(
-    mapOf("channel" to "books", "instId" to BTC_SPOT),
-    mapOf("channel" to "books", "instId" to BTC_SWAP),
-    mapOf("channel" to "tickers", "instId" to BTC_SPOT),
-    mapOf("channel" to "tickers", "instId" to BTC_SWAP)
+    mapOf("channel" to "books", "instId" to OrderConstants.BTC_SPOT),
+    mapOf("channel" to "books", "instId" to OrderConstants.BTC_SWAP),
+    mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SPOT),
+    mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SWAP)
 )
 
 val json = Json { ignoreUnknownKeys = true }
@@ -82,7 +80,7 @@ fun printAggregatedDepth() {
             val agg = aggregateToUsdt(
                 depthListSnapshot,
                 precision = 2,
-                multiplier = if (source == "spot") BigDecimal.ONE else CONTRACT_VALUE,
+                multiplier = if (source == "spot") BigDecimal.ONE else OrderConstants.CONTRACT_VALUE,
                 ascending = (side == "asks") // asks 卖单 升序， bids 买单 降序
             )
 
@@ -141,7 +139,7 @@ fun handleMessage(message: String) {
     val arg = data.jsonObject["arg"]?.jsonObject ?: return
     val channel = arg["channel"]?.jsonPrimitive?.content ?: return
     val instId = arg["instId"]?.jsonPrimitive?.content ?: return
-    val dtype = if (instId == BTC_SPOT) "spot" else "swap"
+    val dtype = if (instId == OrderConstants.BTC_SPOT) "spot" else "swap"
 
     val dataArray = data.jsonObject["data"]?.jsonArray ?: return
     val first = dataArray.firstOrNull()?.jsonObject ?: return
