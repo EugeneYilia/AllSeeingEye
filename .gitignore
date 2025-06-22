@@ -37,4 +37,4 @@ out/
 
 *.log
 
-*/ApiSecret.kt
+**/ApiSecret.kt
