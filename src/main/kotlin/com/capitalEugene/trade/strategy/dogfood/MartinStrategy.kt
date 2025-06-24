@@ -5,16 +5,18 @@ import com.capitalEugene.agent.exchange.okx.TradeAgent.openLong
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openShort
 import com.capitalEugene.agent.exchange.okx.TradeAgent.setCrossLeverage
 import com.capitalEugene.agent.redis.RedisAgent.coroutineSaveToRedis
+import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.common.utils.TradeUtils.generateTransactionId
 import com.capitalEugene.model.TradingData
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.depthCache
 import com.capitalEugene.order.priceCache
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -23,9 +25,8 @@ import kotlin.math.pow
 
 class MartinStrategy(
     private val configs: List<MartinConfig>,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("martin_strategy"))
 ) {
-    private val CONTRACT_VALUE = 0.01
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     private val logger = LoggerFactory.getLogger("martin_strategy")
 
@@ -36,7 +37,9 @@ class MartinStrategy(
         var shortEntryPrice: Double? = null,
         var longAddCount: Int = 1,
         var shortAddCount: Int = 1,
-        var capital: Double = 100.0
+        var capital: Double = 100.0,
+        var longTransactionId : String? = null,
+        var shortTransactionId: String? = null,
     )
 
     private val stateMap = mutableMapOf<String, PositionState>()
@@ -51,27 +54,29 @@ class MartinStrategy(
 
         while (true) {
             try {
-                configs.forEach { config ->
-                    val price = priceCache[config.symbol] ?: return@forEach
-                    val bids = depthCache[config.symbol]?.get("bids") ?: return@forEach
-                    val asks = depthCache[config.symbol]?.get("asks") ?: return@forEach
+                // 确保当前轮的所有子任务都完成后再进行下一轮
+                coroutineScope {
+                    configs.forEach { config ->
+                        val price = priceCache[config.symbol] ?: return@forEach
+                        val bids = depthCache[config.symbol]?.get("bids") ?: return@forEach
+                        val asks = depthCache[config.symbol]?.get("asks") ?: return@forEach
 
-                    if (bids.isEmpty() || asks.isEmpty() || price == 0.0) return@forEach
+                        if (bids.isEmpty() || asks.isEmpty() || price == 0.0) return@forEach
 
-                    val buyPower = getTotalUsdt(bids)
-                    val sellPower = getTotalUsdt(asks)
+                        val buyPower = getTotalPower(bids)
+                        val sellPower = getTotalPower(asks)
 
-                    val state = stateMap[config.symbol]!!
+                        val state = stateMap[config.symbol]!!
 
-                    val longSignal = buyPower > sellPower * 2
-                    val shortSignal = sellPower > buyPower * 2
+                        val longSignal = buyPower > sellPower * 2
+                        val shortSignal = sellPower > buyPower * 2
 
-                    coroutineScope.launch {
-                        handleLong(config, state, price, longSignal)
-                        handleShort(config, state, price, shortSignal)
+                        coroutineScope.launch {
+                            handleLong(config, state, price, longSignal)
+                            handleShort(config, state, price, shortSignal)
+                        }
                     }
                 }
-                delay(200)
             } catch (e: Exception) {
                 logger.error("策略运行异常: ${e.message}", e)
             }
@@ -83,7 +88,8 @@ class MartinStrategy(
             operateOpen(config, state, price, true)
         } else if (state.longPosition != 0.0) {
             val change = (price - state.longEntryPrice!!) / state.longEntryPrice!!
-            val pnl = state.longPosition * CONTRACT_VALUE * state.longEntryPrice!! * change
+            // 持仓收益(usdt) = 张数 * 0.01(每张为0.01BTC) * 开仓均价 * 变化率
+            val pnl = state.longPosition * OrderConstants.CONTRACT_VALUE * state.longEntryPrice!! * change
             logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * 100)}%")
             processPosition(config, state, price, pnl, change, true)
         }
@@ -94,7 +100,7 @@ class MartinStrategy(
             operateOpen(config, state, price, false)
         } else if (state.shortPosition != 0.0) {
             val change = (state.shortEntryPrice!! - price) / state.shortEntryPrice!!
-            val pnl = state.shortPosition * CONTRACT_VALUE * state.shortEntryPrice!! * change
+            val pnl = state.shortPosition * OrderConstants.CONTRACT_VALUE * state.shortEntryPrice!! * change
             logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * 100)}%")
             processPosition(config, state, price, pnl, change, false)
         }
@@ -106,28 +112,33 @@ class MartinStrategy(
             if (isLong) openLong(config.symbol, price, config.positionSize, it)
             else openShort(config.symbol, price, config.positionSize, it)
         }
+        var transactionId = generateTransactionId()
         if (isLong) {
             state.longPosition = config.positionSize
             state.longEntryPrice = price
             state.longAddCount = 1
+            state.longTransactionId = transactionId
         } else {
             state.shortPosition = config.positionSize
             state.shortEntryPrice = price
             state.shortAddCount = 1
+            state.shortTransactionId = transactionId
         }
         logger.info("📈 开$side @ $price 仓位: ${config.positionSize}")
-        saveToRedis(config, "open", config.positionSize, 0.0, LocalDateTime.now().format(dateFormatter))
+        saveToRedis(config, "open", config.positionSize, 0.0, LocalDateTime.now().format(dateFormatter), transactionId)
     }
 
     private suspend fun processPosition(config: MartinConfig, state: PositionState, price: Double, pnl: Double, change: Double, isLong: Boolean) {
         if (change >= config.tpRatio) {
             val side = if (isLong) "sell" else "buy"
             val position = if (isLong) state.longPosition else state.shortPosition
+            // 同一批次config的accounts，持仓情况是一样的
             config.accounts.forEach { closePosition(config.symbol, side, price, abs(position), it) }
             state.capital += pnl
             logger.info("✅ 平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
             if (isLong) resetLong(state) else resetShort(state)
-            saveToRedis(config, "close", 0.0, config.tpRatio, LocalDateTime.now().format(dateFormatter))
+            val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
+            saveToRedis(config, "close", 0.0, config.tpRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
         } else if (change < 0 && abs(change) > config.addPositionRatio) {
             val addCount = if (isLong) state.longAddCount else state.shortAddCount
             if (change < -config.slRatio && addCount >= 8) {
@@ -137,8 +148,9 @@ class MartinStrategy(
                 state.capital += pnl
                 logger.info("❌ 止损平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
                 if (isLong) resetLong(state) else resetShort(state)
-                saveToRedis(config, "close", 0.0, -config.slRatio, LocalDateTime.now().format(dateFormatter))
-            } else if (addCount < 8) {
+                val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
+                saveToRedis(config, "close", 0.0, -config.slRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
+            } else if (addCount < 6) {
                 val addSize = config.positionSize * 2.0.pow(addCount)
                 if (isLong) {
                     state.longAddCount++
@@ -152,18 +164,19 @@ class MartinStrategy(
                     state.shortEntryPrice = (state.shortEntryPrice!! * (state.shortPosition - addSize) + price * addSize) / state.shortPosition
                 }
                 logger.info("➕ 加仓 @ $price 当前持仓: ${if (isLong) state.longPosition else state.shortPosition}")
-                saveToRedis(config, "add", addSize, 0.0, "")
+                val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
+                saveToRedis(config, "add", addSize, 0.0, "", transactionId!!)
             }
         }
     }
 
-    private fun getTotalUsdt(depth: List<List<Double>>): Double {
+    private fun getTotalPower(depth: List<List<Double>>): Double {
         var total = 0.0
         depth.take(3).forEach {
             try {
                 val price = it[0]
                 val size = it[1]
-                total += price * size * CONTRACT_VALUE
+                total += price * size
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")
             }
@@ -171,20 +184,17 @@ class MartinStrategy(
         return total
     }
 
-    private fun saveToRedis(config: MartinConfig, op: String, size: Double, result: Double, time: String) {
+    private fun saveToRedis(config: MartinConfig, op: String, holdingAmount: Double, result: Double, time: String, transactionId: String) {
         val data = TradingData(
-            transactionId = generateTransactionId(),
-            strategyName = "martin_multi",
+            transactionId = transactionId,
+            strategyName = "martin_" + config.symbol,
             returnPerformance = result,
             openTime = if (op == "open") time else "",
             closeTime = if (op == "close") time else "",
-            holdingAmount = size
+            holdingAmount = holdingAmount
         )
-        coroutineScope.launch {
-            withContext(Dispatchers.IO) {
-                coroutineSaveToRedis(data, op)
-            }
-        }
+
+        coroutineSaveToRedis(data, op)
     }
 
     private fun resetLong(state: PositionState) {

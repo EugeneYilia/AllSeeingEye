@@ -76,7 +76,7 @@ object TradeAgent {
             put("posSide", posSide) // long/short
             put("side", side)       // buy/sell
             put("ordType", "market")// market
-            put("px", price.toString())   // price
+            put("px", price.toString())   // price   市价单，价格无所谓，走的对手盘
             put("sz", size.toString())    // size
         }
 

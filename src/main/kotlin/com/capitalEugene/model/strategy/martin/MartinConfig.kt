@@ -14,5 +14,5 @@ data class MartinConfig(
     // 加仓触发条件
     val addPositionRatio: Double = 0.0089,
     // 操作账户列表
-    val accounts: List<ApiSecret>
+    val accounts: List<ApiSecret>,
 )
