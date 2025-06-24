@@ -1,6 +1,10 @@
 package com.capitalEugene.trade.strategy.dogfood
 
-import com.capitalEugene.agent.exchange.okx.TradeAgent.*
+import com.capitalEugene.agent.exchange.okx.TradeAgent.closePosition
+import com.capitalEugene.agent.exchange.okx.TradeAgent.openLong
+import com.capitalEugene.agent.exchange.okx.TradeAgent.openShort
+import com.capitalEugene.agent.exchange.okx.TradeAgent.setCrossLeverage
+import com.capitalEugene.agent.redis.RedisAgent.coroutineSaveToRedis
 import com.capitalEugene.common.utils.TradeUtils.generateTransactionId
 import com.capitalEugene.model.TradingData
 import com.capitalEugene.model.strategy.martin.MartinConfig
@@ -62,17 +66,19 @@ class MartinStrategy(
                     val longSignal = buyPower > sellPower * 2
                     val shortSignal = sellPower > buyPower * 2
 
-                    handleLong(config, state, price, longSignal)
-                    handleShort(config, state, price, shortSignal)
+                    coroutineScope.launch {
+                        handleLong(config, state, price, longSignal)
+                        handleShort(config, state, price, shortSignal)
+                    }
                 }
-                delay(200) // 防止空转占满CPU
+                delay(200)
             } catch (e: Exception) {
                 logger.error("策略运行异常: ${e.message}", e)
             }
         }
     }
 
-    private fun handleLong(config: MartinConfig, state: PositionState, price: Double, signal: Boolean) {
+    private suspend fun handleLong(config: MartinConfig, state: PositionState, price: Double, signal: Boolean) {
         if (state.longPosition == 0.0 && signal) {
             operateOpen(config, state, price, true)
         } else if (state.longPosition != 0.0) {
@@ -83,7 +89,7 @@ class MartinStrategy(
         }
     }
 
-    private fun handleShort(config: MartinConfig, state: PositionState, price: Double, signal: Boolean) {
+    private suspend fun handleShort(config: MartinConfig, state: PositionState, price: Double, signal: Boolean) {
         if (state.shortPosition == 0.0 && signal) {
             operateOpen(config, state, price, false)
         } else if (state.shortPosition != 0.0) {
@@ -94,7 +100,7 @@ class MartinStrategy(
         }
     }
 
-    private fun operateOpen(config: MartinConfig, state: PositionState, price: Double, isLong: Boolean) {
+    private suspend fun operateOpen(config: MartinConfig, state: PositionState, price: Double, isLong: Boolean) {
         val side = if (isLong) "LONG" else "SHORT"
         config.accounts.forEach {
             if (isLong) openLong(config.symbol, price, config.positionSize, it)
@@ -113,7 +119,7 @@ class MartinStrategy(
         saveToRedis(config, "open", config.positionSize, 0.0, LocalDateTime.now().format(dateFormatter))
     }
 
-    private fun processPosition(config: MartinConfig, state: PositionState, price: Double, pnl: Double, change: Double, isLong: Boolean) {
+    private suspend fun processPosition(config: MartinConfig, state: PositionState, price: Double, pnl: Double, change: Double, isLong: Boolean) {
         if (change >= config.tpRatio) {
             val side = if (isLong) "sell" else "buy"
             val position = if (isLong) state.longPosition else state.shortPosition
@@ -151,12 +157,12 @@ class MartinStrategy(
         }
     }
 
-    private fun getTotalUsdt(depth: List<List<String>>): Double {
+    private fun getTotalUsdt(depth: List<List<Double>>): Double {
         var total = 0.0
         depth.take(3).forEach {
             try {
-                val price = it[0].toDouble()
-                val size = it[1].toDouble()
+                val price = it[0]
+                val size = it[1]
                 total += price * size * CONTRACT_VALUE
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")
@@ -169,14 +175,14 @@ class MartinStrategy(
         val data = TradingData(
             transactionId = generateTransactionId(),
             strategyName = "martin_multi",
-            resultRatio = result,
+            returnPerformance = result,
             openTime = if (op == "open") time else "",
             closeTime = if (op == "close") time else "",
             holdingAmount = size
         )
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
-                threadSaveToRedis(data, op)
+                coroutineSaveToRedis(data, op)
             }
         }
     }
