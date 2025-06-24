@@ -152,7 +152,7 @@ class MartinStrategy(
                 if (isLong) resetLong(state) else resetShort(state)
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
                 saveToRedis(config, "close", 0.0, abs(position) * OrderConstants.CONTRACT_VALUE * entryPrice!! * -config.slRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
-            } else if (addCount < 6) {
+            } else if (addCount < config.maxAddPositionCount) {
                 val addSize = config.positionSize * 2.0.pow(addCount)
                 if (isLong) {
                     state.longAddCount++

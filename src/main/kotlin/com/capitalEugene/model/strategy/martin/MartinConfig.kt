@@ -15,4 +15,6 @@ data class MartinConfig(
     val addPositionRatio: Double = 0.0089,
     // 操作账户列表
     val accounts: List<ApiSecret>,
+    // 最大加仓次数
+    val maxAddPositionCount : Int = 6,
 )
