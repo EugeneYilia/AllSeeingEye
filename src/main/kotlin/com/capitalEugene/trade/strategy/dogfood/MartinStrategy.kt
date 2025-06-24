@@ -184,14 +184,14 @@ class MartinStrategy(
         return total
     }
 
-    private fun saveToRedis(config: MartinConfig, op: String, holdingAmount: Double, result: Double, time: String, transactionId: String) {
+    private fun saveToRedis(config: MartinConfig, op: String, addPositionAmount: Double, result: Double, time: String, transactionId: String) {
         val data = TradingData(
             transactionId = transactionId,
             strategyName = "martin_" + config.symbol,
             returnPerformance = result,
             openTime = if (op == "open") time else "",
             closeTime = if (op == "close") time else "",
-            holdingAmount = holdingAmount
+            holdingAmount = addPositionAmount
         )
 
         coroutineSaveToRedis(data, op)

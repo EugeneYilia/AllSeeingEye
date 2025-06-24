@@ -37,6 +37,7 @@ object RedisAgent {
         try {
             val tradeKey = "trading:${data.transactionId}"
 
+            // data in db
             val existing = mutableMapOf<String, String>()
             connection.hgetall(tradeKey).collect { kv ->
                 existing[kv.key] = kv.value
