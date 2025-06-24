@@ -56,7 +56,7 @@ class MartinStrategy(
 
         configs.forEach { config ->
             config.accounts.forEach { setCrossLeverage(config.symbol, 100, it) }
-            stateMap[config.symbol + "_" + config.configName] = PositionState()
+            stateMap["martin_${config.symbol}_${config.configName}"] = PositionState()
         }
 
         while (true) {
@@ -73,10 +73,11 @@ class MartinStrategy(
                         val buyPower = getTotalPower(bids)
                         val sellPower = getTotalPower(asks)
 
-                        val state = stateMap[config.symbol + "_" + config.configName]!!
+                        // 每一个对应的state已在前面做过初始化
+                        val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
 
-                        val longSignal = buyPower > sellPower * 2
-                        val shortSignal = sellPower > buyPower * 2
+                        val longSignal = buyPower > sellPower * OrderConstants.LUCKY_MAGIC_NUMBER
+                        val shortSignal = sellPower > buyPower * OrderConstants.LUCKY_MAGIC_NUMBER
 
                         coroutineScope.launch {
                             handleLong(config, state, price, longSignal)
@@ -200,9 +201,10 @@ class MartinStrategy(
     }
 
     private fun saveToRedis(config: MartinConfig, op: String, addPositionAmount: Double, result: Double, time: String, transactionId: String) {
+        // 不同name的策略分开存储，因为其配置项各不相同
         val data = TradingData(
             transactionId = transactionId,
-            strategyName = "martin_" + config.symbol,
+            strategyName = "martin_${config.symbol}_${config.configName}",
             returnPerformance = result,
             openTime = if (op == "open") time else "",
             closeTime = if (op == "close") time else "",

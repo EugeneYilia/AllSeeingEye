@@ -1,6 +1,8 @@
 package com.capitalEugene.common.constants
 
 object TradeConstants {
-    const val RETRY_DELAY_SECONDS = 2
-    const val MAX_DELAY_SECONDS = 10
+    // 初始重试前停顿时间
+    const val INIT_RETRY_DELAY_SECONDS = 2
+    // 最长重试前停顿时间
+    const val MAX_RETRY_DELAY_SECONDS = 10
 }

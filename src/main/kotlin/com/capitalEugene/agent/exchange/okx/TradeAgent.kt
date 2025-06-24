@@ -85,7 +85,7 @@ object TradeAgent {
         val sign = TradeUtils.hmacSha256Base64(apiSecret.okxApiSecret, msg)
 
         var attempt = 0
-        var delayMs : Long = TradeConstants.RETRY_DELAY_SECONDS * 1000L
+        var delayMs : Long = TradeConstants.INIT_RETRY_DELAY_SECONDS * 1000L
         while (true) {
             try {
                 val response = client.post(url) {
@@ -102,7 +102,7 @@ object TradeAgent {
                 if (response.status != HttpStatusCode.OK) {
                     logger.error("[Attempt $attempt] 非 200 响应: ${response.status}, 内容: ${response.bodyAsText()}")
                     delay(delayMs)
-                    delayMs = (delayMs * 2).coerceAtMost(TradeConstants.MAX_DELAY_SECONDS * 1000L)
+                    delayMs = (delayMs * 2).coerceAtMost(TradeConstants.MAX_RETRY_DELAY_SECONDS * 1000L)
                     attempt++
                     continue
                 }
@@ -111,7 +111,7 @@ object TradeAgent {
             } catch (ex: Exception) {
                 logger.error("[Attempt $attempt] 请求异常: ${ex.message}")
                 delay(delayMs)
-                delayMs = (delayMs * 2).coerceAtMost(TradeConstants.MAX_DELAY_SECONDS * 1000L)
+                delayMs = (delayMs * 2).coerceAtMost(TradeConstants.MAX_RETRY_DELAY_SECONDS * 1000L)
                 attempt++
             }
         }
