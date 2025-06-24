@@ -132,24 +132,26 @@ class MartinStrategy(
         if (change >= config.tpRatio) {
             val side = if (isLong) "sell" else "buy"
             val position = if (isLong) state.longPosition else state.shortPosition
+            val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
             // 同一批次config的accounts，持仓情况是一样的
             config.accounts.forEach { closePosition(config.symbol, side, price, abs(position), it) }
             state.capital += pnl
             logger.info("✅ 平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
             if (isLong) resetLong(state) else resetShort(state)
             val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-            saveToRedis(config, "close", 0.0, config.tpRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
+            saveToRedis(config, "close", 0.0, abs(position) * OrderConstants.CONTRACT_VALUE * entryPrice!! * config.tpRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
         } else if (change < 0 && abs(change) > config.addPositionRatio) {
             val addCount = if (isLong) state.longAddCount else state.shortAddCount
             if (change < -config.slRatio && addCount >= 8) {
                 val side = if (isLong) "sell" else "buy"
                 val position = if (isLong) state.longPosition else state.shortPosition
+                val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
                 config.accounts.forEach { closePosition(config.symbol, side, price, abs(position), it) }
                 state.capital += pnl
                 logger.info("❌ 止损平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
                 if (isLong) resetLong(state) else resetShort(state)
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-                saveToRedis(config, "close", 0.0, -config.slRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
+                saveToRedis(config, "close", 0.0, abs(position) * OrderConstants.CONTRACT_VALUE * entryPrice!! * -config.slRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
             } else if (addCount < 6) {
                 val addSize = config.positionSize * 2.0.pow(addCount)
                 if (isLong) {
