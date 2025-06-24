@@ -17,4 +17,6 @@ data class MartinConfig(
     val accounts: List<ApiSecret>,
     // 最大加仓次数
     val maxAddPositionCount : Int = 6,
+    // 策略名称
+    val configName: String = "DefaultMartin"
 )

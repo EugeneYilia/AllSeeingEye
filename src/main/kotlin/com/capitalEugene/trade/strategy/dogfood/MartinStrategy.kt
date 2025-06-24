@@ -49,7 +49,7 @@ class MartinStrategy(
 
         configs.forEach { config ->
             config.accounts.forEach { setCrossLeverage(config.symbol, 100, it) }
-            stateMap[config.symbol] = PositionState()
+            stateMap[config.symbol + "_" + config.configName] = PositionState()
         }
 
         while (true) {
@@ -66,7 +66,7 @@ class MartinStrategy(
                         val buyPower = getTotalPower(bids)
                         val sellPower = getTotalPower(asks)
 
-                        val state = stateMap[config.symbol]!!
+                        val state = stateMap[config.symbol + "_" + config.configName]!!
 
                         val longSignal = buyPower > sellPower * 2
                         val shortSignal = sellPower > buyPower * 2
