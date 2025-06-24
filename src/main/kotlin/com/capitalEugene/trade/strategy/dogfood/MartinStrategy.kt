@@ -44,6 +44,13 @@ class MartinStrategy(
 
     private val stateMap = mutableMapOf<String, PositionState>()
 
+    // 如果都是开btc，其中一批账户想要加仓次数为6次，一批账户想要加仓次数为5次
+    // 那么可以定义两份策略，每份的symbol都是BTC-USDT-SWAP
+    // 其中一份的maxAddPositionCount是5次另外一份是6次
+    // 同理，也可以分别设置自己的初始开仓数
+    //
+    // 每一批config对应的账户可以有自己独立的MartinConfig 开平仓方式
+    // 也有一份自己对应的运行时数据记录 持仓情况
     suspend fun start() {
         logger.info("🚀 启动多策略马丁循环...")
 
@@ -112,7 +119,8 @@ class MartinStrategy(
             if (isLong) openLong(config.symbol, price, config.positionSize, it)
             else openShort(config.symbol, price, config.positionSize, it)
         }
-        var transactionId = generateTransactionId()
+        val transactionId = generateTransactionId()
+        // 只有在开仓的时候会更新对应的transactionId
         if (isLong) {
             state.longPosition = config.positionSize
             state.longEntryPrice = price
@@ -138,11 +146,13 @@ class MartinStrategy(
             state.capital += pnl
             logger.info("✅ 平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
             if (isLong) resetLong(state) else resetShort(state)
+            // 止盈的时候用运行时的对应的transactionId
             val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
             saveToRedis(config, "close", 0.0, abs(position) * OrderConstants.CONTRACT_VALUE * entryPrice!! * config.tpRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
         } else if (change < 0 && abs(change) > config.addPositionRatio) {
             val addCount = if (isLong) state.longAddCount else state.shortAddCount
-            if (change < -config.slRatio && addCount >= 8) {
+            // 只有加仓到对应的阈值的时候且亏损率达到预设值才会涉及到止损
+            if (change < -config.slRatio && addCount >= config.maxAddPositionCount) {
                 val side = if (isLong) "sell" else "buy"
                 val position = if (isLong) state.longPosition else state.shortPosition
                 val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
@@ -150,9 +160,11 @@ class MartinStrategy(
                 state.capital += pnl
                 logger.info("❌ 止损平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
                 if (isLong) resetLong(state) else resetShort(state)
+                // 止损的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
                 saveToRedis(config, "close", 0.0, abs(position) * OrderConstants.CONTRACT_VALUE * entryPrice!! * -config.slRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
             } else if (addCount < config.maxAddPositionCount) {
+                // 未达阈值，到达加仓触发点时可以继续加仓
                 val addSize = config.positionSize * 2.0.pow(addCount)
                 if (isLong) {
                     state.longAddCount++
@@ -166,6 +178,7 @@ class MartinStrategy(
                     state.shortEntryPrice = (state.shortEntryPrice!! * (state.shortPosition - addSize) + price * addSize) / state.shortPosition
                 }
                 logger.info("➕ 加仓 @ $price 当前持仓: ${if (isLong) state.longPosition else state.shortPosition}")
+                // 加仓的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
                 saveToRedis(config, "add", addSize, 0.0, "", transactionId!!)
             }
