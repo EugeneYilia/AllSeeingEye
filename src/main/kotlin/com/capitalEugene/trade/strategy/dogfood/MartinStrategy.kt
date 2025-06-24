@@ -8,7 +8,7 @@ import com.capitalEugene.order.depthCache
 import com.capitalEugene.order.priceCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
@@ -19,7 +19,7 @@ import kotlin.math.pow
 
 class MartinStrategy(
     private val configs: List<MartinConfig>,
-    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) {
     private val CONTRACT_VALUE = 0.01
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -48,7 +48,7 @@ class MartinStrategy(
         while (true) {
             try {
                 configs.forEach { config ->
-                    val price = priceCache[config.symbol]?.toDoubleOrNull() ?: return@forEach
+                    val price = priceCache[config.symbol] ?: return@forEach
                     val bids = depthCache[config.symbol]?.get("bids") ?: return@forEach
                     val asks = depthCache[config.symbol]?.get("asks") ?: return@forEach
 
@@ -65,6 +65,7 @@ class MartinStrategy(
                     handleLong(config, state, price, longSignal)
                     handleShort(config, state, price, shortSignal)
                 }
+                delay(200) // 防止空转占满CPU
             } catch (e: Exception) {
                 logger.error("策略运行异常: ${e.message}", e)
             }
@@ -174,7 +175,9 @@ class MartinStrategy(
             holdingAmount = size
         )
         coroutineScope.launch {
-            withContext(Dispatchers.IO) { threadSaveToRedis(data, op) }
+            withContext(Dispatchers.IO) {
+                threadSaveToRedis(data, op)
+            }
         }
     }
 
