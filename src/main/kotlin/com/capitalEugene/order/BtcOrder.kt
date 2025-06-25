@@ -23,7 +23,7 @@ val depthCache: MutableMap<String, MutableMap<String, MutableList<List<Double>>>
 )
 
 // 当前现货和合约的实时价格
-val priceCache = mutableMapOf<String, Double?>(
+val priceCache = mutableMapOf<String, BigDecimal?>(
     "spot" to null,
     "swap" to null
 )
@@ -42,7 +42,7 @@ val json = Json { ignoreUnknownKeys = true }
 fun aggregateToUsdt(
     depthList: List<List<Double>>,
     precision: Int = 2,
-    multiplier: BigDecimal = BigDecimal.ONE,
+    multiplier: BigDecimal = OrderConstants.CONTRACT_VALUE,
     ascending: Boolean = false
 ): List<Pair<BigDecimal, BigDecimal>> {
     val depthMap = mutableMapOf<BigDecimal, BigDecimal>()
@@ -72,7 +72,7 @@ fun printAggregatedDepth() {
         println("$label（$side，单位：USDT）:")
 
         listOf("spot", "swap").forEach { source ->
-            val price = priceCache[source]?.takeIf { !it.isNaN() }?.let { "%.2f".format(it) } ?: "N/A"
+            val price = priceCache[source]?.let { "%.2f".format(it) } ?: "N/A"
             println("  来源: ${source.uppercase()} | 实时价格: $price")
 
             val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<Double>>)?.toList() ?: emptyList()
@@ -80,7 +80,7 @@ fun printAggregatedDepth() {
             val agg = aggregateToUsdt(
                 depthListSnapshot,
                 precision = 2,
-                multiplier = if (source == "spot") BigDecimal.ONE else OrderConstants.CONTRACT_VALUE,
+                multiplier = if (source == "spot") OrderConstants.DEFAULT_SPOT_VALUE else OrderConstants.CONTRACT_VALUE,
                 ascending = (side == "asks") // asks 卖单 升序， bids 买单 降序
             )
 
@@ -173,7 +173,8 @@ fun handleMessage(message: String) {
             addAll(asks)
         }
     } else if (channel == "tickers") {
-        val last = first["last"]?.jsonPrimitive?.doubleOrNull
-        priceCache[dtype] = last?.takeIf { !it.isNaN() }
+        val last = first["last"]?.jsonPrimitive?.doubleOrNull?.takeIf { !it.isNaN() }  // 过滤掉 NaN（Double 才有 NaN）
+            ?.toBigDecimal()
+        priceCache[dtype] = last
     }
 }

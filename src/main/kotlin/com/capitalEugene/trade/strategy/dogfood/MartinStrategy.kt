@@ -18,6 +18,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
@@ -31,13 +32,13 @@ class MartinStrategy(
     private val logger = LoggerFactory.getLogger("martin_strategy")
 
     private data class PositionState(
-        var longPosition: Double = 0.0,
-        var shortPosition: Double = 0.0,
-        var longEntryPrice: Double? = null,
-        var shortEntryPrice: Double? = null,
+        var longPosition: BigDecimal = BigDecimal.ZERO,
+        var shortPosition: BigDecimal = BigDecimal.ZERO,
+        var longEntryPrice: BigDecimal? = null,
+        var shortEntryPrice: BigDecimal? = null,
         var longAddCount: Int = 1,
         var shortAddCount: Int = 1,
-        var capital: Double = 100.0,
+        var capital: BigDecimal = BigDecimal(100.0),
         var longTransactionId : String? = null,
         var shortTransactionId: String? = null,
     )
@@ -91,30 +92,30 @@ class MartinStrategy(
         }
     }
 
-    private suspend fun handleLong(config: MartinConfig, state: PositionState, price: Double, signal: Boolean) {
-        if (state.longPosition == 0.0 && signal) {
+    private suspend fun handleLong(config: MartinConfig, state: PositionState, price: BigDecimal, signal: Boolean) {
+        if (state.longPosition == BigDecimal.ZERO && signal) {
             operateOpen(config, state, price, true)
-        } else if (state.longPosition != 0.0) {
+        } else if (state.longPosition != BigDecimal.ZERO) {
             val change = (price - state.longEntryPrice!!) / state.longEntryPrice!!
             // 持仓收益(usdt) = 张数 * 0.01(每张为0.01BTC) * 开仓均价 * 变化率
             val pnl = state.longPosition * OrderConstants.CONTRACT_VALUE * state.longEntryPrice!! * change
-            logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * 100)}%")
+            logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal(100))}%")
             processPosition(config, state, price, pnl, change, true)
         }
     }
 
-    private suspend fun handleShort(config: MartinConfig, state: PositionState, price: Double, signal: Boolean) {
-        if (state.shortPosition == 0.0 && signal) {
+    private suspend fun handleShort(config: MartinConfig, state: PositionState, price: BigDecimal, signal: Boolean) {
+        if (state.shortPosition == BigDecimal.ZERO && signal) {
             operateOpen(config, state, price, false)
-        } else if (state.shortPosition != 0.0) {
+        } else if (state.shortPosition != BigDecimal.ZERO) {
             val change = (state.shortEntryPrice!! - price) / state.shortEntryPrice!!
             val pnl = state.shortPosition * OrderConstants.CONTRACT_VALUE * state.shortEntryPrice!! * change
-            logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * 100)}%")
+            logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal(100))}%")
             processPosition(config, state, price, pnl, change, false)
         }
     }
 
-    private suspend fun operateOpen(config: MartinConfig, state: PositionState, price: Double, isLong: Boolean) {
+    private suspend fun operateOpen(config: MartinConfig, state: PositionState, price: BigDecimal, isLong: Boolean) {
         val side = if (isLong) "LONG" else "SHORT"
         config.accounts.forEach {
             if (isLong) openLong(config.symbol, price, config.positionSize, it)
@@ -186,12 +187,12 @@ class MartinStrategy(
         }
     }
 
-    private fun getTotalPower(depth: List<List<Double>>): Double {
-        var total = 0.0
+    private fun getTotalPower(depth: List<List<Double>>): BigDecimal {
+        var total = BigDecimal.ZERO
         depth.take(3).forEach {
             try {
-                val price = it[0]
-                val size = it[1]
+                val price = it[0].toBigDecimal()
+                val size = it[1].toBigDecimal()
                 total += price * size
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")
@@ -215,13 +216,13 @@ class MartinStrategy(
     }
 
     private fun resetLong(state: PositionState) {
-        state.longPosition = 0.0
+        state.longPosition = BigDecimal.ZERO
         state.longEntryPrice = null
         state.longAddCount = 1
     }
 
     private fun resetShort(state: PositionState) {
-        state.shortPosition = 0.0
+        state.shortPosition = BigDecimal.ZERO
         state.shortEntryPrice = null
         state.shortAddCount = 1
     }
