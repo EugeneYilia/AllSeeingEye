@@ -18,6 +18,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 
 object TradeAgent {
     private const val BASE_URL = "https://www.okx.com"
@@ -64,8 +65,8 @@ object TradeAgent {
         instId: String,
         side: String,
         posSide: String,
-        price: Double,
-        size: Double,
+        price: BigDecimal,
+        size: BigDecimal,
         apiSecret: ApiSecret): JsonObject?
     {
         val path = "/api/v5/trade/order"
@@ -117,15 +118,15 @@ object TradeAgent {
         }
     }
 
-    suspend fun openLong(symbol: String, price: Double, size: Double, apiSecret: ApiSecret): JsonObject? {
+    suspend fun openLong(symbol: String, price: BigDecimal, size: BigDecimal, apiSecret: ApiSecret): JsonObject? {
         return placeOrder(symbol, "buy", "long", price, size, apiSecret)
     }
 
-    suspend fun openShort(symbol: String, price: Double, size: Double, apiSecret: ApiSecret): JsonObject? {
+    suspend fun openShort(symbol: String, price: BigDecimal, size: BigDecimal, apiSecret: ApiSecret): JsonObject? {
         return placeOrder(symbol, "sell", "short", price, size, apiSecret)
     }
 
-    suspend fun closePosition(symbol: String, side: String, price: Double, size: Double, apiSecret: ApiSecret): JsonObject? {
+    suspend fun closePosition(symbol: String, side: String, price: BigDecimal, size: BigDecimal, apiSecret: ApiSecret): JsonObject? {
         val posSide = if (side == "buy") "short" else "long"
         return placeOrder(symbol, side, posSide, price, size, apiSecret)
     }

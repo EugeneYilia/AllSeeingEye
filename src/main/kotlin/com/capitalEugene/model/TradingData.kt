@@ -1,10 +1,12 @@
 package com.capitalEugene.model
 
+import java.math.BigDecimal
+
 data class TradingData(
     val transactionId: String,
     val strategyName: String,
-    val holdingAmount: Double,
+    val holdingAmount: BigDecimal,
     val openTime: String,
     val closeTime: String = "",
-    val returnPerformance: Double = 0.0
+    val returnPerformance: BigDecimal = BigDecimal.ZERO
 )

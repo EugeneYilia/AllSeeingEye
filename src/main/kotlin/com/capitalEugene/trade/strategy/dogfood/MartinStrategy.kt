@@ -69,7 +69,7 @@ class MartinStrategy(
                         val bids = depthCache[config.symbol]?.get("bids") ?: return@forEach
                         val asks = depthCache[config.symbol]?.get("asks") ?: return@forEach
 
-                        if (bids.isEmpty() || asks.isEmpty() || price == 0.0) return@forEach
+                        if (bids.isEmpty() || asks.isEmpty() || price == BigDecimal.ZERO) return@forEach
 
                         val buyPower = getTotalPower(bids)
                         val sellPower = getTotalPower(asks)
@@ -138,7 +138,7 @@ class MartinStrategy(
         saveToRedis(config, "open", config.positionSize, 0.0, LocalDateTime.now().format(dateFormatter), transactionId)
     }
 
-    private suspend fun processPosition(config: MartinConfig, state: PositionState, price: Double, pnl: Double, change: Double, isLong: Boolean) {
+    private suspend fun processPosition(config: MartinConfig, state: PositionState, price: BigDecimal, pnl: BigDecimal, change: BigDecimal, isLong: Boolean) {
         if (change >= config.tpRatio) {
             val side = if (isLong) "sell" else "buy"
             val position = if (isLong) state.longPosition else state.shortPosition
@@ -187,12 +187,12 @@ class MartinStrategy(
         }
     }
 
-    private fun getTotalPower(depth: List<List<Double>>): BigDecimal {
+    private fun getTotalPower(depth: List<List<BigDecimal>>): BigDecimal {
         var total = BigDecimal.ZERO
         depth.take(3).forEach {
             try {
-                val price = it[0].toBigDecimal()
-                val size = it[1].toBigDecimal()
+                val price = it[0]
+                val size = it[1]
                 total += price * size
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")

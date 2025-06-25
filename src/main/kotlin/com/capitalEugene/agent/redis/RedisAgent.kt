@@ -62,7 +62,7 @@ object RedisAgent {
                 "add" -> {
                     if (existing.isNotEmpty()) {
                         val holdingStr = existing["holding_amount"]
-                        val currentHolding = holdingStr?.toDoubleOrNull()
+                        val currentHolding = holdingStr?.toBigDecimalOrNull()
 
                         if (currentHolding == null) {
                             logger.error("❌ 加仓失败，持仓金额无效或缺失: $holdingStr")
