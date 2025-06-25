@@ -33,7 +33,7 @@ fun Application.configureRouting() {
             call.respondRedirect("/static/capital.html")
         }
 
-        get("/position/state") {
+        get("v1/strategy/position/state") {
             val strategyName = call.request.queryParameters["strategy"]
             if (strategyName.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "缺少 strategy 参数"))
@@ -60,7 +60,11 @@ fun Application.configureRouting() {
             ))
         }
 
-        get("/api/aggregate/{strategyName}") {
+        get("v1/strategy/all") {
+            call.respond(stateMap.keys.toList())
+        }
+
+        get("v1/strategy/aggregate/{strategyName}") {
             val strategyName = call.parameters["strategyName"] ?: return@get call.respondText("Missing strategy name", status = io.ktor.http.HttpStatusCode.BadRequest)
             call.respond(RedisAgent.aggregateTradingData(strategyName))
         }
