@@ -1,11 +1,60 @@
 <configuration>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS, Asia/Shanghai} [%thread] %-5level %logger{36} - %msg%n"/>
+    <property name="LOG_PATH" value="./logs"/> <!-- 日志文件保存目录 -->
+    <property name="LOG_FILE" value="application.log"/> <!-- 主日志文件名 -->
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
+
+    <!-- 写入文件 + 每天滚动一次 -->
+    <!--
+        不是两份日志同时写，而是滚动切换保存，不会重复写入
+        1.当前日志始终写入application.log,就是file指定的文件
+        2.当日期变更，或其它条件触发(如大小超过),logback会：
+            1.把旧的application.log命名为archived/application.2025-06-26.log转存到新目录
+            2.重新创建一个新的空的application.log继续写入
+        3.因此，每条日志只会写一次，不会同时存在于两个文件中
+
+        实际目录结构举例
+        假设你今天是 2025-06-26：
+        ./logs/
+        ├── application.log             ✅ 当前写入中
+        └── archived/
+            ├── application.2025-06-25.log ✅ 昨天的日志
+            ├── application.2025-06-24.log ✅ 前天的日志
+
+        application.log  当前活跃写入的日志
+        application.2025-06-25.log   滚动后归档的旧日志文件
+        同一日志是否重复写入   不会，滚动前写入的是application.log,滚动后才转存为归档
+
+        会不会写两份一样的日志？	❌ 不会，日志只写一次，按日期滚动归档
+        只在“滚动发生的那一刻”短暂同时存在
+        是否可以删除 <file> 行？	❌ 不建议，否则日志将直接写到归档文件，失去“当前日志”的能力
+    -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${LOG_FILE}</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 日志滚动路径：每天一个文件，带时间戳 -->
+            <fileNamePattern>${LOG_PATH}/archived/application.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 保留最近 3 天的日志 -->
+            <maxHistory>3</maxHistory>
+            <!-- 可选：设置总大小上限（比如1GB），超出就删最旧的 -->
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
+
     <logger name="io.netty" level="INFO"/>
 </configuration>
