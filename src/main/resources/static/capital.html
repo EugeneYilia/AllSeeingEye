@@ -2,23 +2,22 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>BTC 策略状态面板</title>
+    <title>策略状态面板</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/static/imgs/favicon.ico" type="image/x-icon">
     <style>
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f6f8;
-            margin: 0;
-            padding: 0;
             background: #f4f6f8 url("/static/imgs/CapitalEugene.png") no-repeat center center fixed;
             background-size: cover;
+            margin: 0;
+            padding: 0;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 30px auto;
-            background: rgba(255, 255, 255, 0.7); /* 改成半透明白色 */
+            background: rgba(255, 255, 255, 0.85);
             padding: 20px 30px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -30,21 +29,13 @@
             margin-bottom: 10px;
         }
 
-        .strategy-name {
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #0066cc;
-            margin-bottom: 10px;
-        }
-
         .input-group {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
         }
 
-        .input-group input {
+        .input-group select {
             padding: 6px 10px;
             font-size: 1em;
             border: 1px solid #ccc;
@@ -53,7 +44,7 @@
         }
 
         .input-group button {
-            padding: 6px 10px;
+            padding: 6px 12px;
             font-size: 1em;
             border: 1px solid #ccc;
             border-left: none;
@@ -63,10 +54,18 @@
             cursor: pointer;
         }
 
+        .section-title {
+            font-size: 1.1em;
+            color: #666;
+            margin-top: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
         .item {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
 
@@ -83,145 +82,109 @@
             color: #111;
             font-weight: 500;
         }
-
-        .section-title {
-            font-size: 1.1em;
-            color: #666;
-            margin-top: 20px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>📈 BTC 策略状态面板</h1>
+    <h1>📊 策略状态面板</h1>
     <div class="input-group">
-        <input type="text" id="strategy_input" placeholder="请输入策略名称">
+        <select id="strategy_select">
+            <option value="">加载中...</option>
+        </select>
         <button onclick="loadStrategy()">加载</button>
     </div>
-    <div class="strategy-name" id="strategy_display">策略: 未选择</div>
 
-    <div class="item">
-        <span class="label">当前价格</span>
-        <span class="value" id="price">-</span>
-    </div>
+    <div class="section-title">📈 实时持仓信息</div>
+    <div class="item"><span class="label">策略名称</span><span class="value" id="strategy_name">-</span></div>
+    <div class="item"><span class="label">多头持仓</span><span class="value" id="long_pos">-</span></div>
+    <div class="item"><span class="label">空头持仓</span><span class="value" id="short_pos">-</span></div>
+    <div class="item"><span class="label">多头入场价</span><span class="value" id="long_entry">-</span></div>
+    <div class="item"><span class="label">空头入场价</span><span class="value" id="short_entry">-</span></div>
+    <div class="item"><span class="label">多头加仓次数</span><span class="value" id="long_count">-</span></div>
+    <div class="item"><span class="label">空头加仓次数</span><span class="value" id="short_count">-</span></div>
+    <div class="item"><span class="label">总资金</span><span class="value" id="capital">-</span></div>
+    <div class="item"><span class="label">多头交易ID</span><span class="value" id="long_id">-</span></div>
+    <div class="item"><span class="label">空头交易ID</span><span class="value" id="short_id">-</span></div>
 
-    <div class="item">
-        <span class="label">持仓</span>
-        <span class="value"><span id="position">-</span> 张 @ <span id="entry">-</span></span>
-    </div>
-
-    <div class="item">
-        <span class="label">总资金</span>
-        <span class="value" id="capital">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">当前持仓收益</span>
-        <span class="value" id="current_pnl">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">实际有效资金量</span>
-        <span class="value" id="effective_capital">-</span>
-    </div>
-
-    <div class="section-title">📊 静态策略数据</div>
-
-    <div class="item">
-        <span class="label">止盈次数</span>
-        <span class="value" id="take_profit_count">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">止损次数</span>
-        <span class="value" id="stop_loss_count">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">总止盈金额</span>
-        <span class="value" id="total_take_profit_amount">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">总止损金额</span>
-        <span class="value" id="total_stop_loss_amount">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">平均每笔盈利</span>
-        <span class="value" id="avg_profit_per_trade">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">平均每笔亏损</span>
-        <span class="value" id="avg_loss_per_trade">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">资金变化比例</span>
-        <span class="value" id="capital_change_ratio">-</span>
-    </div>
-
-    <div class="item">
-        <span class="label">平均持仓时长（分钟）</span>
-        <span class="value" id="avg_holding_duration">-</span>
-    </div>
+    <div class="section-title">📑 最新交易信息</div>
+    <div class="item"><span class="label">交易ID</span><span class="value" id="agg_id">-</span></div>
+    <div class="item"><span class="label">持仓量</span><span class="value" id="agg_holding">-</span></div>
+    <div class="item"><span class="label">开仓时间</span><span class="value" id="agg_open">-</span></div>
+    <div class="item"><span class="label">平仓时间</span><span class="value" id="agg_close">-</span></div>
+    <div class="item"><span class="label">收益率</span><span class="value" id="agg_return">-</span></div>
 </div>
 
 <script>
     let strategyName = "";
 
-    async function fetchStatus() {
-        if (!strategyName) return;
+    async function fetchAllStrategies() {
         try {
-            const res = await fetch(`/api/status`);
-            const data = await res.json();
-
-            document.getElementById("price").innerText = parseFloat(data.price).toFixed(2);
-            document.getElementById("position").innerText = data.position;
-            document.getElementById("entry").innerText = data.entry || "-";
-            document.getElementById("capital").innerText = data.capital.toFixed(5) + " USDT";
-            document.getElementById("current_pnl").innerText = data.current_pnl.toFixed(5) + " USDT";
-            document.getElementById("effective_capital").innerText = data.effective_capital.toFixed(5) + " USDT";
+            const res = await fetch("/v1/strategy/all");
+            const strategies = await res.json();
+            const select = document.getElementById("strategy_select");
+            select.innerHTML = `<option value="">请选择策略</option>`;
+            strategies.forEach(name => {
+                const option = document.createElement("option");
+                option.value = name;
+                option.text = name;
+                select.appendChild(option);
+            });
         } catch (err) {
-            console.error("实时数据获取失败:", err);
+            console.error("策略列表加载失败:", err);
         }
     }
 
-    async function fetchStaticData() {
+    async function fetchPosition() {
         if (!strategyName) return;
         try {
-            const res = await fetch(`/api/aggregate/${strategyName}`);
+            const res = await fetch(`/v1/strategy/position/state/${strategyName}`);
             const data = await res.json();
 
-            document.getElementById("take_profit_count").innerText = data.take_profit_count;
-            document.getElementById("stop_loss_count").innerText = data.stop_loss_count;
-            document.getElementById("total_take_profit_amount").innerText = data.total_take_profit_amount.toFixed(5) + " USDT";
-            document.getElementById("total_stop_loss_amount").innerText = data.total_stop_loss_amount.toFixed(5) + " USDT";
-            document.getElementById("avg_profit_per_trade").innerText = data.avg_profit_per_trade.toFixed(5) + " USDT";
-            document.getElementById("avg_loss_per_trade").innerText = data.avg_loss_per_trade.toFixed(5) + " USDT";
-            document.getElementById("capital_change_ratio").innerText = (data.capital_change_ratio * 100).toFixed(2) + "%";
-            document.getElementById("avg_holding_duration").innerText = data.avg_holding_duration.toFixed(2);
+            document.getElementById("strategy_name").innerText = data.strategy;
+            document.getElementById("long_pos").innerText = data.longPosition;
+            document.getElementById("short_pos").innerText = data.shortPosition;
+            document.getElementById("long_entry").innerText = data.longEntryPrice || "-";
+            document.getElementById("short_entry").innerText = data.shortEntryPrice || "-";
+            document.getElementById("long_count").innerText = data.longAddCount;
+            document.getElementById("short_count").innerText = data.shortAddCount;
+            document.getElementById("capital").innerText = data.capital + " USDT";
+            document.getElementById("long_id").innerText = data.longTransactionId || "-";
+            document.getElementById("short_id").innerText = data.shortTransactionId || "-";
         } catch (err) {
-            console.error("静态数据获取失败:", err);
+            console.error("实时持仓信息获取失败:", err);
+        }
+    }
+
+    async function fetchAggregate() {
+        if (!strategyName) return;
+        try {
+            const res = await fetch(`/v1/strategy/aggregate/${strategyName}`);
+            const data = await res.json();
+
+            document.getElementById("agg_id").innerText = data.transactionId;
+            document.getElementById("agg_holding").innerText = data.holdingAmount;
+            document.getElementById("agg_open").innerText = data.openTime;
+            document.getElementById("agg_close").innerText = data.closeTime || "-";
+            document.getElementById("agg_return").innerText = (parseFloat(data.returnPerformance) * 100).toFixed(2) + "%";
+        } catch (err) {
+            console.error("聚合交易信息获取失败:", err);
         }
     }
 
     function loadStrategy() {
-        const input = document.getElementById("strategy_input").value.trim();
-        if (!input) {
-            alert("请输入策略名称");
+        const select = document.getElementById("strategy_select");
+        const selected = select.value;
+        if (!selected) {
+            alert("请选择策略");
             return;
         }
-        strategyName = input;
-        document.getElementById("strategy_display").innerText = `策略: ${strategyName}`;
-        fetchStatus();
-        fetchStaticData();
+        strategyName = selected;
+        fetchPosition();
+        fetchAggregate();
     }
 
-    setInterval(fetchStatus, 2000);
+    fetchAllStrategies();
+    setInterval(fetchPosition, 1000); // 实时刷新持仓状态
 </script>
 </body>
 </html>
