@@ -11,7 +11,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 // 现货和合约的支撑位挂单和阻力位挂单列表
-val depthCache: MutableMap<String, MutableMap<String, MutableList<List<Double>>>> = mutableMapOf(
+val depthCache: MutableMap<String, MutableMap<String, MutableList<List<BigDecimal>>>> = mutableMapOf(
     "spot" to mutableMapOf(
         "bids" to mutableListOf(),
         "asks" to mutableListOf()
@@ -40,7 +40,7 @@ val json = Json { ignoreUnknownKeys = true }
 
 // 默认降序
 fun aggregateToUsdt(
-    depthList: List<List<Double>>,
+    depthList: List<List<BigDecimal>>,
     precision: Int = 2,
     multiplier: BigDecimal = OrderConstants.CONTRACT_VALUE,
     ascending: Boolean = false
@@ -48,8 +48,8 @@ fun aggregateToUsdt(
     val depthMap = mutableMapOf<BigDecimal, BigDecimal>()
     val safeDepthList = depthList.toList()  // ✅ 快照副本，防止并发修改
     for (entry in safeDepthList) {
-        val price = entry.getOrNull(0)?.toBigDecimal() ?: continue
-        val size = entry.getOrNull(1)?.toBigDecimal() ?: continue
+        val price = entry.getOrNull(0) ?: continue
+        val size = entry.getOrNull(1) ?: continue
         val factor = BigDecimal.TEN.pow(precision)
         val roundedPrice = price.divide(factor).setScale(0, RoundingMode.HALF_UP).multiply(factor)
         // swap 104000 * 30 * 0.01        spot   104000 * 30 * 1
@@ -69,13 +69,13 @@ fun printAggregatedDepth() {
     println("\n================= 📊 挂单聚合 =================")
     listOf("bids", "asks").forEach { side ->
         val label = if (side == "bids") "🔵 支撑位" else "🔴 压力位"
-        println("$label（$side，单位：USDT）:")
+        println("$label（$side，单位：USDT）：")
 
         listOf("spot", "swap").forEach { source ->
             val price = priceCache[source]?.let { "%.2f".format(it) } ?: "N/A"
             println("  来源: ${source.uppercase()} | 实时价格: $price")
 
-            val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<Double>>)?.toList() ?: emptyList()
+            val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<BigDecimal>>)?.toList() ?: emptyList()
             // 按照百位数进行聚合
             val agg = aggregateToUsdt(
                 depthListSnapshot,
@@ -146,8 +146,8 @@ fun handleMessage(message: String) {
 
     if (channel == "books") {
         val bids = first["bids"]?.jsonArray?.mapNotNull { bidEntry ->
-            val price = bidEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.doubleOrNull
-            val size = bidEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.doubleOrNull
+            val price = bidEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
+            val size = bidEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
             if (price != null && size != null) listOf(price, size) else {
                 println("⚠️ 解析失败数据: $bidEntry")
                 null
@@ -155,8 +155,8 @@ fun handleMessage(message: String) {
         } ?: emptyList()
 
         val asks = first["asks"]?.jsonArray?.mapNotNull { askEntry ->
-            val price = askEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.doubleOrNull
-            val size = askEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.doubleOrNull
+            val price = askEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
+            val size = askEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
             if (price != null && size != null) listOf(price, size) else {
                 println("⚠️ 解析失败数据: $askEntry")
                 null
@@ -173,8 +173,9 @@ fun handleMessage(message: String) {
             addAll(asks)
         }
     } else if (channel == "tickers") {
-        val last = first["last"]?.jsonPrimitive?.doubleOrNull?.takeIf { !it.isNaN() }  // 过滤掉 NaN（Double 才有 NaN）
-            ?.toBigDecimal()
+        // contentOrNull会返回一个字符串"10500.12",第二步将字符串安全转换为BigDecimal，第三步如果是非法格式"NaN","abc",""都将会返回null
+        // 已经避免了Double.NaN的问题
+        val last = first["last"]?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
         priceCache[dtype] = last
     }
 }
