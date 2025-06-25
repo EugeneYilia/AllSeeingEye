@@ -11,18 +11,27 @@ import com.capitalEugene.model.TradingData
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.depthCache
 import com.capitalEugene.order.priceCache
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.math.abs
 import kotlin.math.pow
+
+data class PositionState(
+    var longPosition: BigDecimal = BigDecimal.ZERO,
+    var shortPosition: BigDecimal = BigDecimal.ZERO,
+    var longEntryPrice: BigDecimal? = null,
+    var shortEntryPrice: BigDecimal? = null,
+    var longAddCount: Int = 1,
+    var shortAddCount: Int = 1,
+    var capital: BigDecimal = BigDecimal(100.0),
+    var longTransactionId : String? = null,
+    var shortTransactionId: String? = null,
+)
+
+// key: "martin_${config.symbol}_${config.configName}"   value: positionState
+val stateMap = mutableMapOf<String, PositionState>()
 
 class MartinStrategy(
     private val configs: List<MartinConfig>,
@@ -30,20 +39,6 @@ class MartinStrategy(
 ) {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     private val logger = LoggerFactory.getLogger("martin_strategy")
-
-    private data class PositionState(
-        var longPosition: BigDecimal = BigDecimal.ZERO,
-        var shortPosition: BigDecimal = BigDecimal.ZERO,
-        var longEntryPrice: BigDecimal? = null,
-        var shortEntryPrice: BigDecimal? = null,
-        var longAddCount: Int = 1,
-        var shortAddCount: Int = 1,
-        var capital: BigDecimal = BigDecimal(100.0),
-        var longTransactionId : String? = null,
-        var shortTransactionId: String? = null,
-    )
-
-    private val stateMap = mutableMapOf<String, PositionState>()
 
     // 如果都是开btc，其中一批账户想要加仓次数为6次，一批账户想要加仓次数为5次
     // 那么可以定义两份策略，每份的symbol都是BTC-USDT-SWAP

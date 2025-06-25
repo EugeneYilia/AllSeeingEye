@@ -1,6 +1,8 @@
 package com.capitalEugene
 
 import com.capitalEugene.agent.redis.RedisAgent
+import com.capitalEugene.trade.strategy.dogfood.stateMap
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.*
@@ -9,9 +11,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.slf4j.LoggerFactory
-
-import com.capitalEugene.order.depthCache
-import com.capitalEugene.order.priceCache
 
 fun Application.configureRouting() {
     val logger = LoggerFactory.getLogger("api")
@@ -34,22 +33,31 @@ fun Application.configureRouting() {
             call.respondRedirect("/static/capital.html")
         }
 
-        get("/api/status") {
-            val response = mapOf(
-                "price" to order_all_btc.priceCache["swap"],
-                "position" to martin_strategy.position,
-                "capital" to martin_strategy.capital,
-                "entry" to martin_strategy.averagePrice,
-                "current_pnl" to martin_strategy.currentPnl,
-                "effective_capital" to martin_strategy.effectiveCapital,
-                "depth" to mapOf(
-                    "spot_bids" to order_all_btc.depthCache["spot"]?.get("bids")?.take(5),
-                    "spot_asks" to order_all_btc.depthCache["spot"]?.get("asks")?.take(5),
-                    "swap_bids" to order_all_btc.depthCache["swap"]?.get("bids")?.take(5),
-                    "swap_asks" to order_all_btc.depthCache["swap"]?.get("asks")?.take(5),
-                )
-            )
-            call.respond(response)
+        get("/position/state") {
+            val strategyName = call.request.queryParameters["strategy"]
+            if (strategyName.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "缺少 strategy 参数"))
+                return@get
+            }
+
+            val state = stateMap[strategyName]
+            if (state == null) {
+                call.respond(HttpStatusCode.NotFound, mapOf("error" to "未找到该策略的持仓信息"))
+                return@get
+            }
+
+            call.respond(mapOf(
+                "strategy" to strategyName,
+                "longPosition" to state.longPosition.toPlainString(),
+                "shortPosition" to state.shortPosition.toPlainString(),
+                "longEntryPrice" to state.longEntryPrice?.toPlainString(),
+                "shortEntryPrice" to state.shortEntryPrice?.toPlainString(),
+                "longAddCount" to state.longAddCount,
+                "shortAddCount" to state.shortAddCount,
+                "capital" to state.capital.toPlainString(),
+                "longTransactionId" to state.longTransactionId,
+                "shortTransactionId" to state.shortTransactionId
+            ))
         }
 
         get("/api/aggregate/{strategyName}") {
