@@ -100,10 +100,14 @@ object RedisAgent {
         }
     }
 
-    suspend fun aggregateTradingData(strategyName: String): TradingAggregateResult {
+    suspend fun aggregateTradingData(strategyName: String): TradingAggregateResult? {
         val keys = mutableSetOf<String>()
         connection.smembers("strategy:$strategyName").collect { key ->
             keys.add(key)
+        }
+
+        if(keys.isEmpty()){
+            return null
         }
 
         val formatter = DateTimeFormatter.ISO_DATE_TIME

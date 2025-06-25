@@ -33,12 +33,8 @@ fun Application.configureRouting() {
             call.respondRedirect("/static/capital.html")
         }
 
-        get("v1/strategy/position/state") {
-            val strategyName = call.request.queryParameters["strategy"]
-            if (strategyName.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "缺少 strategy 参数"))
-                return@get
-            }
+        get("v1/strategy/position/state/{strategyName}") {
+            val strategyName = call.parameters["strategyName"] ?: return@get call.respondText("Missing strategy name", status = io.ktor.http.HttpStatusCode.BadRequest)
 
             val state = stateMap[strategyName]
             if (state == null) {
@@ -66,7 +62,14 @@ fun Application.configureRouting() {
 
         get("v1/strategy/aggregate/{strategyName}") {
             val strategyName = call.parameters["strategyName"] ?: return@get call.respondText("Missing strategy name", status = io.ktor.http.HttpStatusCode.BadRequest)
-            call.respond(RedisAgent.aggregateTradingData(strategyName))
+
+            val tradingData = RedisAgent.aggregateTradingData(strategyName)
+            if(tradingData == null){
+                call.respond(HttpStatusCode.NotFound, mapOf("error" to "未找到该策略的交易信息"))
+                return@get
+            }
+
+            call.respond(tradingData)
         }
     }
 }
