@@ -135,7 +135,7 @@ class MartinStrategy(
             state.shortTransactionId = transactionId
         }
         logger.info("📈 开$side @ $price 仓位: ${config.positionSize}")
-        saveToRedis(config, "open", config.positionSize, 0.0, LocalDateTime.now().format(dateFormatter), transactionId)
+        saveToRedis(config, "open", config.positionSize, BigDecimal.ZERO, LocalDateTime.now().format(dateFormatter), transactionId)
     }
 
     private suspend fun processPosition(config: MartinConfig, state: PositionState, price: BigDecimal, pnl: BigDecimal, change: BigDecimal, isLong: Boolean) {
@@ -144,30 +144,32 @@ class MartinStrategy(
             val position = if (isLong) state.longPosition else state.shortPosition
             val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
             // 同一批次config的accounts，持仓情况是一样的
-            config.accounts.forEach { closePosition(config.symbol, side, price, abs(position), it) }
+            config.accounts.forEach { closePosition(config.symbol, side, price, position.abs(), it) }
             state.capital += pnl
             logger.info("✅ 平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
             if (isLong) resetLong(state) else resetShort(state)
             // 止盈的时候用运行时的对应的transactionId
             val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-            saveToRedis(config, "close", 0.0, abs(position) * OrderConstants.CONTRACT_VALUE * entryPrice!! * config.tpRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
-        } else if (change < 0 && abs(change) > config.addPositionRatio) {
+            saveToRedis(config, "close", BigDecimal.ZERO, position.abs() * OrderConstants.CONTRACT_VALUE * entryPrice!! * config.tpRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
+        } else if (change < BigDecimal.ZERO && change.abs() > config.addPositionRatio) {
             val addCount = if (isLong) state.longAddCount else state.shortAddCount
             // 只有加仓到对应的阈值的时候且亏损率达到预设值才会涉及到止损
             if (change < -config.slRatio && addCount >= config.maxAddPositionCount) {
                 val side = if (isLong) "sell" else "buy"
                 val position = if (isLong) state.longPosition else state.shortPosition
                 val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
-                config.accounts.forEach { closePosition(config.symbol, side, price, abs(position), it) }
+                config.accounts.forEach { closePosition(config.symbol, side, price, position.abs(), it) }
                 state.capital += pnl
                 logger.info("❌ 止损平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
                 if (isLong) resetLong(state) else resetShort(state)
                 // 止损的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-                saveToRedis(config, "close", 0.0, abs(position) * OrderConstants.CONTRACT_VALUE * entryPrice!! * -config.slRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
+                saveToRedis(config, "close", BigDecimal.ZERO, position.abs() * OrderConstants.CONTRACT_VALUE * entryPrice!! * -config.slRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
             } else if (addCount < config.maxAddPositionCount) {
                 // 未达阈值，到达加仓触发点时可以继续加仓
-                val addSize = config.positionSize * 2.0.pow(addCount)
+                // 1 2       2 4       3 8
+                // 4 16      5 32      6 64
+                val addSize = config.positionSize * (2.0.pow(addCount).toBigDecimal())
                 if (isLong) {
                     state.longAddCount++
                     config.accounts.forEach { openLong(config.symbol, price, addSize, it) }
@@ -182,7 +184,7 @@ class MartinStrategy(
                 logger.info("➕ 加仓 @ $price 当前持仓: ${if (isLong) state.longPosition else state.shortPosition}")
                 // 加仓的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-                saveToRedis(config, "add", addSize, 0.0, "", transactionId!!)
+                saveToRedis(config, "add", addSize, BigDecimal.ZERO, "", transactionId!!)
             }
         }
     }
@@ -201,7 +203,7 @@ class MartinStrategy(
         return total
     }
 
-    private fun saveToRedis(config: MartinConfig, op: String, addPositionAmount: Double, result: Double, time: String, transactionId: String) {
+    private fun saveToRedis(config: MartinConfig, op: String, addPositionAmount: BigDecimal, result: BigDecimal, time: String, transactionId: String) {
         // 不同name的策略分开存储，因为其配置项各不相同
         val data = TradingData(
             transactionId = transactionId,
