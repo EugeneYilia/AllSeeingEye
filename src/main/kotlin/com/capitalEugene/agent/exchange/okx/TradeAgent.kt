@@ -87,6 +87,7 @@ object TradeAgent {
 
         var attempt = 0
         var delayMs : Long = TradeConstants.INIT_RETRY_DELAY_SECONDS * 1000L
+        // 会一直下单，就算失败了，也会一直重试
         while (true) {
             try {
                 val response = client.post(url) {

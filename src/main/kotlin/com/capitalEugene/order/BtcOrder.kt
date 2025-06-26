@@ -92,6 +92,7 @@ fun printAggregatedDepth() {
     println("==================================================\n")
 }
 
+// 连接断开之后，也会一直重连
 suspend fun startWs(client: HttpClient) {
     val url = "wss://ws.okx.com:8443/ws/v5/public"
     var retryInterval = 5000L
