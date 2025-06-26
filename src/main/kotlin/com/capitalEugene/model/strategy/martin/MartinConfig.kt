@@ -7,7 +7,7 @@ data class MartinConfig(
     // 操作币种   BTC-USDT-SWAP/ETH-USDT-SWAP
     val symbol: String,
     // 止盈比例
-    val tpRatio: BigDecimal = BigDecimal(0.00176),
+    val tpRatio: BigDecimal = BigDecimal(0.00186),
     // 止损比例
     val slRatio: BigDecimal = BigDecimal(0.01),
     // 开仓大小(张)
