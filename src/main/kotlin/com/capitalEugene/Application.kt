@@ -2,7 +2,7 @@ package com.capitalEugene
 
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.model.strategy.martin.MartinConfig
-import com.capitalEugene.order.startWs
+import com.capitalEugene.order.BtcOrder
 import com.capitalEugene.secrets.dogFoodAccounts
 import com.capitalEugene.secrets.selfHostAccounts
 import com.capitalEugene.trade.strategy.dogfood.MartinStrategy
@@ -44,7 +44,7 @@ fun Application.module() {
     monitor.subscribe(ApplicationStarted) {
         priceAgentScope.launch {
             // 订单簿和实时价格ws获取
-            startWs(client)
+            BtcOrder.startWs(client)
         }
 
         strategyScope.launch {
