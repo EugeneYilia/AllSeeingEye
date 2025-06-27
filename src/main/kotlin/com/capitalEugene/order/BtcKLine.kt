@@ -11,9 +11,9 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
 
-val klineCache = mutableMapOf(
-    "spot" to mutableListOf<KlineBar>(),
-    "swap" to mutableListOf<KlineBar>()
+val klineCache : MutableMap<String, MutableList<KlineBar>> = mutableMapOf(
+    "spot" to mutableListOf(),
+    "swap" to mutableListOf()
 )
 
 object BtcKLine {
