@@ -2,6 +2,7 @@ package com.capitalEugene
 
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.model.strategy.martin.MartinConfig
+import com.capitalEugene.order.BtcKLine
 import com.capitalEugene.order.BtcOrder
 import com.capitalEugene.secrets.dogFoodAccounts
 import com.capitalEugene.secrets.selfHostAccounts
@@ -34,20 +35,24 @@ fun Application.module() {
 
     // Dispatchers.IO是为I/O密集型任务(网络，文件，数据库)优化的，会自动扩容线程池数量以避免阻塞，不适合用于CPU密集任务
     // CPU密集场景用IO，如果在CPU密集型场景用IO Dispatcher，会导致线程切换过多(切换到这个后发现仍在使用，一直用着线程)，调度开销变大，反而性能更差
-    val priceAgentScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("priceAgent"))
+    val ioSchedulerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("priceAgent"))
     // cpu密集型任务的协程应该用Dispatchers.Default
     // Dispatchers.Default使用的是共享的、基于cpu核心数的线程池(默认是cpu核心数 或 cpu核心数 * 2)
     // 其专门为高计算量，低I/O操作的任务设计的，比如数学计算，加解密，排序，搜索，图算法，大量数据处理
-    val strategyScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineName("strategyAgent"))
+    val cpuSchedulerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineName("strategyAgent"))
 
     // 直接用 application.monitor.subscribe
     monitor.subscribe(ApplicationStarted) {
-        priceAgentScope.launch {
+        ioSchedulerScope.launch {
             // 订单簿和实时价格ws获取
             BtcOrder.startWs(client)
         }
 
-        strategyScope.launch {
+        ioSchedulerScope.launch {
+            BtcKLine.startWs(client)
+        }
+
+        cpuSchedulerScope.launch {
             // 交易策略配置启动
             val dogfoodMartinConfig = MartinConfig(
                 symbol = OrderConstants.BTC_SWAP,
