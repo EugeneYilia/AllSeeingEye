@@ -1,6 +1,7 @@
 package com.capitalEugene
 
 import com.capitalEugene.agent.redis.RedisAgent
+import com.capitalEugene.order.klineCache
 import com.capitalEugene.trade.strategy.dogfood.stateMap
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -70,6 +71,17 @@ fun Application.configureRouting() {
             }
 
             call.respond(tradingData)
+        }
+
+        get("v1/kline/{type}") {
+            val type = call.parameters["type"]
+            val list = klineCache[type]
+
+            if (list == null) {
+                call.respond(HttpStatusCode.NotFound, "Kline data not found for type: $type")
+            } else {
+                call.respond(list)
+            }
         }
     }
 }
