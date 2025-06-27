@@ -30,10 +30,15 @@ val priceCache = mutableMapOf<String, BigDecimal?>(
 
 // 订阅的频道  订单簿和实时价格   分别有btc现货和合约
 val CHANNELS = listOf(
+    // 订单簿
     mapOf("channel" to "books", "instId" to OrderConstants.BTC_SPOT),
     mapOf("channel" to "books", "instId" to OrderConstants.BTC_SWAP),
+    // 实时价格
     mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SPOT),
-    mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SWAP)
+    mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SWAP),
+    // 1分钟级别K线数据
+    mapOf("channel" to "candle1m", "instId" to OrderConstants.BTC_SPOT),
+    mapOf("channel" to "candle1m", "instId" to OrderConstants.BTC_SWAP)
 )
 
 val json = Json { ignoreUnknownKeys = true }
@@ -179,4 +184,22 @@ fun handleMessage(message: String) {
         val last = first["last"]?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
         priceCache[dtype] = last
     }
+     else if(channel.startsWith("candle1m")){
+        val candle = first["candle"]?.jsonArray ?: return
+        val time = candle.getOrNull(0)?.jsonPrimitive?.content
+        val open = candle.getOrNull(1)?.jsonPrimitive?.content
+        val high = candle.getOrNull(2)?.jsonPrimitive?.content
+        val low = candle.getOrNull(3)?.jsonPrimitive?.content
+        val close = candle.getOrNull(4)?.jsonPrimitive?.content
+        val volume = candle.getOrNull(5)?.jsonPrimitive?.content
+
+        // 区分现货和合约
+        val dtype = when (instId) {
+            OrderConstants.BTC_SPOT -> "spot"
+            OrderConstants.BTC_SWAP -> "swap"
+            else -> "unknown"
+        }
+
+        println("🕐 [$dtype | ${channel.uppercase()}] 时间: $time 开: $open 高: $high 低: $low 收: $close 量: $volume")
+     }
 }
