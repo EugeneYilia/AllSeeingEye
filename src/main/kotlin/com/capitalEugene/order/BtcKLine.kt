@@ -8,8 +8,12 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.*
+import org.slf4j.LoggerFactory
+import kotlin.math.log
 
 object BtcKLine {
+    private val logger = LoggerFactory.getLogger("btc_kline")
+
     val CANDLE_CHANNELS = listOf(
         // 1分钟级别K线数据
         mapOf("channel" to "candle1m", "instId" to OrderConstants.BTC_SPOT),
@@ -22,7 +26,7 @@ object BtcKLine {
         var retryInterval = 5000L
         while (true) {
             try {
-                println("🚀 尝试建立 WebSocket 连接...")
+                logger.info("🚀 尝试建立 WebSocket 连接...")
                 client.webSocket(url) {
                     retryInterval = 5000L
                     subscribeChannels(this)
@@ -33,9 +37,9 @@ object BtcKLine {
                     }
                 }
             } catch (e: Exception) {
-                println("⚠️ WebSocket 运行异常: ${e.message}")
+                logger.error("⚠️ WebSocket 运行异常: ${e.message}")
             }
-            println("🌐 连接断开，${retryInterval / 1000} 秒后重试...")
+            logger.warn("🌐 连接断开，${retryInterval / 1000} 秒后重试...")
             delay(retryInterval)
             retryInterval = (retryInterval * 2).coerceAtMost(60 * 1000L)
         }
@@ -53,13 +57,13 @@ object BtcKLine {
             }
         }
         session.send(subMsg.toString())
-        println("✅ 已发送订阅请求: $subMsg")
+        logger.info("✅ 已发送订阅请求: $subMsg")
     }
 
     fun handleMessage(message: String) {
         val data = ApplicationConstants.httpJson.parseToJsonElement(message)
         if (data.jsonObject["event"]?.jsonPrimitive?.content == "subscribe") {
-            println("✅ 成功订阅: ${data.jsonObject}")
+            logger.info("✅ 成功订阅: ${data.jsonObject}")
             return
         }
         val arg = data.jsonObject["arg"]?.jsonObject ?: return
@@ -86,7 +90,7 @@ object BtcKLine {
                 else -> "unknown"
             }
 
-            println("🕐 [$dtype | ${channel.uppercase()}] 时间: $time 开: $open 高: $high 低: $low 收: $close 量: $volume")
+            logger.info("🕐 [$dtype | ${channel.uppercase()}] 时间: $time 开: $open 高: $high 低: $low 收: $close 量: $volume")
         }
     }
 }
