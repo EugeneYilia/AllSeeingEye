@@ -19,8 +19,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import java.io.InputStreamReader
 import java.math.BigDecimal
+
+private val logger = LoggerFactory.getLogger("application")
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
@@ -49,16 +52,19 @@ fun Application.module() {
     // 直接用 application.monitor.subscribe
     monitor.subscribe(ApplicationStarted) {
         ioSchedulerScope.launch {
+            logger.info("开始启动btc订单和实时价格订阅")
             // 订单簿和实时价格ws获取
             BtcOrder.startWs(client)
         }
 
         ioSchedulerScope.launch {
+            logger.info("开始启动btc k线订阅")
             BtcKLine.startWs(client)
         }
 
         if(!serverConfig.isLocalDebug) {
             cpuSchedulerScope.launch {
+                logger.info("开始启动策略服务")
                 // 交易策略配置启动
                 val dogfoodMartinConfig = MartinConfig(
                     symbol = OrderConstants.BTC_SWAP,
@@ -102,7 +108,7 @@ fun Application.module() {
     // 应用停止时关闭掉WebSocket
     monitor.subscribe(ApplicationStopping) {
         client.close()
-        println("🛑 WebSocket 客户端已关闭")
+        logger.info("🛑 WebSocket 客户端已关闭")
     }
 }
 

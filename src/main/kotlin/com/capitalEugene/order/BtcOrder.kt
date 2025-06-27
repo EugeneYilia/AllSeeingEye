@@ -8,6 +8,7 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.*
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -30,6 +31,8 @@ val priceCache = mutableMapOf<String, BigDecimal?>(
 )
 
 object BtcOrder {
+    private val logger = LoggerFactory.getLogger("btc_order")
+
     // 订阅的频道  订单簿和实时价格   分别有btc现货和合约
     val CHANNELS = listOf(
         // 订单簿
@@ -68,14 +71,14 @@ object BtcOrder {
     }
 
     fun printAggregatedDepth() {
-        println("\n================= 📊 挂单聚合 =================")
+        logger.info("\n================= 📊 挂单聚合 =================")
         listOf("bids", "asks").forEach { side ->
             val label = if (side == "bids") "🔵 支撑位" else "🔴 压力位"
-            println("$label（$side，单位：USDT）：")
+            logger.info("$label（$side，单位：USDT）：")
 
             listOf("spot", "swap").forEach { source ->
                 val price = priceCache[source]?.let { "%.2f".format(it) } ?: "N/A"
-                println("  来源: ${source.uppercase()} | 实时价格: $price")
+                logger.info("  来源: ${source.uppercase()} | 实时价格: $price")
 
                 val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<BigDecimal>>)?.toList() ?: emptyList()
                 // 按照百位数进行聚合
@@ -87,11 +90,11 @@ object BtcOrder {
                 )
 
                 agg.take(5).forEach { (priceVal, usdt) ->
-                    println("    $priceVal USDT - 挂单金额: ${usdt.setScale(2, RoundingMode.HALF_UP)} USDT")
+                    logger.info("    $priceVal USDT - 挂单金额: ${usdt.setScale(2, RoundingMode.HALF_UP)} USDT")
                 }
             }
         }
-        println("==================================================\n")
+        logger.info("==================================================\n")
     }
 
     // 连接断开之后，也会一直重连
@@ -100,7 +103,7 @@ object BtcOrder {
         var retryInterval = 5000L
         while (true) {
             try {
-                println("🚀 尝试建立 WebSocket 连接...")
+                logger.info("🚀 尝试建立 WebSocket 连接...")
                 client.webSocket(url) {
                     retryInterval = 5000L
                     subscribeChannels(this)
@@ -111,9 +114,9 @@ object BtcOrder {
                     }
                 }
             } catch (e: Exception) {
-                println("⚠️ WebSocket 运行异常: ${e.message}")
+                logger.error("⚠️ WebSocket 运行异常: ${e.message}")
             }
-            println("🌐 连接断开，${retryInterval / 1000} 秒后重试...")
+            logger.warn("🌐 连接断开，${retryInterval / 1000} 秒后重试...")
             delay(retryInterval)
             retryInterval = (retryInterval * 2).coerceAtMost(60 * 1000L)
         }
@@ -131,13 +134,13 @@ object BtcOrder {
             }
         }
         session.send(subMsg.toString())
-        println("✅ 已发送订阅请求: $subMsg")
+        logger.info("✅ 已发送订阅请求: $subMsg")
     }
 
     fun handleMessage(message: String) {
         val data = ApplicationConstants.httpJson.parseToJsonElement(message)
         if (data.jsonObject["event"]?.jsonPrimitive?.content == "subscribe") {
-            println("✅ 成功订阅: ${data.jsonObject}")
+            logger.info("✅ 成功订阅: ${data.jsonObject}")
             return
         }
         val arg = data.jsonObject["arg"]?.jsonObject ?: return
@@ -153,7 +156,7 @@ object BtcOrder {
                 val price = bidEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                 val size = bidEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                 if (price != null && size != null) listOf(price, size) else {
-                    println("⚠️ 解析失败数据: $bidEntry")
+                    logger.error("⚠️ 解析失败数据: $bidEntry")
                     null
                 }
             } ?: emptyList()
@@ -162,7 +165,7 @@ object BtcOrder {
                 val price = askEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                 val size = askEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                 if (price != null && size != null) listOf(price, size) else {
-                    println("⚠️ 解析失败数据: $askEntry")
+                    logger.error("⚠️ 解析失败数据: $askEntry")
                     null
                 }
             } ?: emptyList()
