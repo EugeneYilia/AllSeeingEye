@@ -1,6 +1,8 @@
 package com.capitalEugene
 
+import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.common.constants.OrderConstants
+import com.capitalEugene.model.config.ServerConfig
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.BtcKLine
 import com.capitalEugene.order.BtcOrder
@@ -17,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.io.InputStreamReader
 import java.math.BigDecimal
 
 fun main(args: Array<String>) {
@@ -25,6 +28,8 @@ fun main(args: Array<String>) {
 
 // 应用模块：既启动 API，也启动 WebSocket 与定时任务
 fun Application.module() {
+    val serverConfig = loadServerConfig()
+
     // 配置Api服务
     configureRouting()
 
@@ -52,23 +57,25 @@ fun Application.module() {
             BtcKLine.startWs(client)
         }
 
-        cpuSchedulerScope.launch {
-            // 交易策略配置启动
-            val dogfoodMartinConfig = MartinConfig(
-                symbol = OrderConstants.BTC_SWAP,
-                positionSize = BigDecimal(0.05),
-                accounts = dogFoodAccounts
-            )
+        if(!serverConfig.isLocalDebug) {
+            cpuSchedulerScope.launch {
+                // 交易策略配置启动
+                val dogfoodMartinConfig = MartinConfig(
+                    symbol = OrderConstants.BTC_SWAP,
+                    positionSize = BigDecimal(0.05),
+                    accounts = dogFoodAccounts
+                )
 
-            val selfHostMartinConfig = MartinConfig(
-                symbol = OrderConstants.BTC_SWAP,
-                positionSize = BigDecimal(0.04),
-                tpRatio = BigDecimal(0.0048),
-                maxAddPositionCount = 4,
-                accounts = selfHostAccounts,
-                configName = "ZhaoShuai-Martin"
-            )
-            MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
+                val selfHostMartinConfig = MartinConfig(
+                    symbol = OrderConstants.BTC_SWAP,
+                    positionSize = BigDecimal(0.04),
+                    tpRatio = BigDecimal(0.0048),
+                    maxAddPositionCount = 4,
+                    accounts = selfHostAccounts,
+                    configName = "ZhaoShuai-Martin"
+                )
+                MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
+            }
         }
 
 //        launch {
@@ -97,4 +104,12 @@ fun Application.module() {
         client.close()
         println("🛑 WebSocket 客户端已关闭")
     }
+}
+
+fun Application.loadServerConfig(): ServerConfig {
+    val inputStream = environment.classLoader.getResourceAsStream("config.json")
+        ?: throw IllegalStateException("❌ config.json not found in resources")
+    val text = InputStreamReader(inputStream).readText()
+
+    return ApplicationConstants.configJson.decodeFromString(ServerConfig.serializer(), text)
 }

@@ -1,5 +1,6 @@
 package com.capitalEugene.order
 
+import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.common.constants.OrderConstants
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
@@ -14,8 +15,6 @@ object BtcKLine {
         mapOf("channel" to "candle1m", "instId" to OrderConstants.BTC_SPOT),
         mapOf("channel" to "candle1m", "instId" to OrderConstants.BTC_SWAP)
     )
-
-    val json = Json { ignoreUnknownKeys = true }
 
     // 连接断开之后，也会一直重连
     suspend fun startWs(client: HttpClient) {
@@ -58,7 +57,7 @@ object BtcKLine {
     }
 
     fun handleMessage(message: String) {
-        val data = json.parseToJsonElement(message)
+        val data = ApplicationConstants.httpJson.parseToJsonElement(message)
         if (data.jsonObject["event"]?.jsonPrimitive?.content == "subscribe") {
             println("✅ 成功订阅: ${data.jsonObject}")
             return
