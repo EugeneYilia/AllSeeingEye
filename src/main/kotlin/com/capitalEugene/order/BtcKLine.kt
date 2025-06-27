@@ -2,6 +2,7 @@ package com.capitalEugene.order
 
 import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.common.constants.OrderConstants
+import com.capitalEugene.model.kline.KlineBar
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.websocket.*
@@ -9,7 +10,11 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
-import kotlin.math.log
+
+val klineCache = mutableMapOf(
+    "spot" to mutableListOf<KlineBar>(),
+    "swap" to mutableListOf<KlineBar>()
+)
 
 object BtcKLine {
     private val logger = LoggerFactory.getLogger("btc_kline")
@@ -38,6 +43,7 @@ object BtcKLine {
                 }
             } catch (e: Exception) {
                 logger.error("⚠️ WebSocket 运行异常: ${e.message}")
+                e.printStackTrace()
             }
             logger.warn("🌐 连接断开，${retryInterval / 1000} 秒后重试...")
             delay(retryInterval)
@@ -62,35 +68,71 @@ object BtcKLine {
 
     fun handleMessage(message: String) {
         val data = ApplicationConstants.httpJson.parseToJsonElement(message)
-        if (data.jsonObject["event"]?.jsonPrimitive?.content == "subscribe") {
-            logger.info("✅ 成功订阅: ${data.jsonObject}")
+
+        val obj = data as? JsonObject ?: run {
+            logger.warn("⚠️ 非 JsonObject 消息: $message")
             return
         }
-        val arg = data.jsonObject["arg"]?.jsonObject ?: return
+
+        if (obj["event"]?.jsonPrimitive?.content == "subscribe") {
+            logger.info("✅ 成功订阅: $obj")
+            return
+        }
+
+        val arg = obj["arg"] as? JsonObject ?: run {
+            logger.warn("⚠️ 非法 arg 类型: ${obj["arg"]?.javaClass?.simpleName}, 内容: ${obj["arg"]}")
+            return
+        }
+
         val channel = arg["channel"]?.jsonPrimitive?.content ?: return
         val instId = arg["instId"]?.jsonPrimitive?.content ?: return
-        val dtype = if (instId == OrderConstants.BTC_SPOT) "spot" else "swap"
+        val dtype = when (instId) {
+            OrderConstants.BTC_SPOT -> "spot"
+            OrderConstants.BTC_SWAP -> "swap"
+            else -> "unknown"
+        }
 
-        val dataArray = data.jsonObject["data"]?.jsonArray ?: return
-        val first = dataArray.firstOrNull()?.jsonObject ?: return
+        val dataArray = obj["data"] as? JsonArray ?: run {
+            logger.warn("⚠️ data 不是 JsonArray，内容: ${obj["data"]}")
+            return
+        }
 
+        val first = dataArray.firstOrNull() as? JsonArray ?: run {
+            logger.warn("⚠️ data[0] 不是 JsonArray，内容: ${dataArray.firstOrNull()}")
+            return
+        }
+
+        // 0  ts   开始时间
+        // 1  o    开盘价格
+        // 2  h    最高价格
+        // 3  l    最低价格
+        // 4  c    收盘价格
+        // 5  vol  交易量，以张为单位
+        // 6  volCcy   交易量，以交易币种为单位  BTC/USDT  就是BTC
+        // 7  volCcyQuote    交易量，以计价货币为单位   BTC/USDT   就是USDT
+        // 8  confirm  K线状态，0表示K线未完结，1表示K线已完结
         if (channel.startsWith("candle1m")) {
-            val candle = first["candle"]?.jsonArray ?: return
-            val time = candle.getOrNull(0)?.jsonPrimitive?.content
-            val open = candle.getOrNull(1)?.jsonPrimitive?.content
-            val high = candle.getOrNull(2)?.jsonPrimitive?.content
-            val low = candle.getOrNull(3)?.jsonPrimitive?.content
-            val close = candle.getOrNull(4)?.jsonPrimitive?.content
-            val volume = candle.getOrNull(5)?.jsonPrimitive?.content
+            val timestamp = first.getOrNull(0)?.jsonPrimitive?.longOrNull ?: return
+            val open = first.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull() ?: return
+            val high = first.getOrNull(2)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull() ?: return
+            val low = first.getOrNull(3)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull() ?: return
+            val close = first.getOrNull(4)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull() ?: return
+            val volume = first.getOrNull(7)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull() ?: return
+            val isEnd = first.getOrNull(8)?.jsonPrimitive?.contentOrNull ?: return
 
-            // 区分现货和合约
-            val dtype = when (instId) {
-                OrderConstants.BTC_SPOT -> "spot"
-                OrderConstants.BTC_SWAP -> "swap"
-                else -> "unknown"
+            if(isEnd == "1") {
+                logger.info("🕐 [$dtype | ${channel.uppercase()}] 时间: $timestamp 开: $open 高: $high 低: $low 收: $close 量: $volume")
+
+                val kLineBar = KlineBar(
+                    timestamp = timestamp,
+                    open = open,
+                    high = high,
+                    low = low,
+                    close = close,
+                    volume = volume
+                )
+                klineCache.getOrPut(dtype){mutableListOf()}.add(kLineBar)
             }
-
-            logger.info("🕐 [$dtype | ${channel.uppercase()}] 时间: $time 开: $open 高: $high 低: $low 收: $close 量: $volume")
         }
     }
 }
