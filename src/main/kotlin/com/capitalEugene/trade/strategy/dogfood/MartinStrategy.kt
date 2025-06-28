@@ -34,8 +34,7 @@ data class PositionState(
 val stateMap = mutableMapOf<String, PositionState>()
 
 class MartinStrategy(
-    private val configs: List<MartinConfig>,
-    private val coroutineScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("martin_strategy"))
+    private val configs: List<MartinConfig>
 ) {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     private val logger = LoggerFactory.getLogger("martin_strategy")
@@ -58,28 +57,24 @@ class MartinStrategy(
         while (true) {
             try {
                 // 确保当前轮的所有子任务都完成后再进行下一轮
-                coroutineScope {
-                    configs.forEach { config ->
-                        val price = priceCache[config.symbol] ?: return@forEach
-                        val bids = depthCache[config.symbol]?.get("bids") ?: return@forEach
-                        val asks = depthCache[config.symbol]?.get("asks") ?: return@forEach
+                configs.forEach { config ->
+                    val price = priceCache[config.symbol] ?: return@forEach
+                    val bids = depthCache[config.symbol]?.get("bids") ?: return@forEach
+                    val asks = depthCache[config.symbol]?.get("asks") ?: return@forEach
 
-                        if (bids.isEmpty() || asks.isEmpty() || price == BigDecimal.ZERO) return@forEach
+                    if (bids.isEmpty() || asks.isEmpty() || price == BigDecimal.ZERO) return@forEach
 
-                        val buyPower = getTotalPower(bids)
-                        val sellPower = getTotalPower(asks)
+                    val buyPower = getTotalPower(bids)
+                    val sellPower = getTotalPower(asks)
 
-                        // 每一个对应的state已在前面做过初始化
-                        val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
+                    // 每一个对应的state已在前面做过初始化
+                    val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
 
-                        val longSignal = buyPower > sellPower * OrderConstants.LUCKY_MAGIC_NUMBER
-                        val shortSignal = sellPower > buyPower * OrderConstants.LUCKY_MAGIC_NUMBER
+                    val longSignal = buyPower > sellPower * OrderConstants.LUCKY_MAGIC_NUMBER
+                    val shortSignal = sellPower > buyPower * OrderConstants.LUCKY_MAGIC_NUMBER
 
-                        coroutineScope.launch {
-                            handleLong(config, state, price, longSignal)
-                            handleShort(config, state, price, shortSignal)
-                        }
-                    }
+                    handleLong(config, state, price, longSignal)
+                    handleShort(config, state, price, shortSignal)
                 }
             } catch (e: Exception) {
                 logger.error("策略运行异常: ${e.message}", e)
