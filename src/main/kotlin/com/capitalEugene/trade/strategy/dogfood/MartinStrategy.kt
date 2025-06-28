@@ -64,8 +64,8 @@ class MartinStrategy(
 
                     if (bids.isEmpty() || asks.isEmpty() || price == BigDecimal.ZERO) return@forEach
 
-                    val buyPower = getTotalPower(bids)
-                    val sellPower = getTotalPower(asks)
+                    val buyPower = getTotalPower(price, bids)
+                    val sellPower = getTotalPower(price, asks)
 
                     // 每一个对应的state已在前面做过初始化
                     val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
@@ -180,12 +180,31 @@ class MartinStrategy(
         }
     }
 
-    private fun getTotalPower(depth: SortedMap<BigDecimal, BigDecimal>): BigDecimal {
+    // 与当前价格相差200以内的实际挂单对应的usdt量总额
+    private fun getTotalPower(
+        price: BigDecimal,
+        depth: SortedMap<BigDecimal, BigDecimal>
+    ): BigDecimal {
         var total = BigDecimal.ZERO
-        depth.entries.take(3).forEach { (price, sizeRaw) ->
+        val range = BigDecimal(200)
+        val lowerBound = price.subtract(range)
+        val upperBound = price.add(range)
+
+        val isAscending = depth.comparator() == null
+
+        for ((price, sizeRaw) in depth.entries) {
             try {
-                val size = sizeRaw * BigDecimal.valueOf(0.01)
-                total += price * size
+                if (isAscending) {
+                    if (price > upperBound) break
+                } else {
+                    if (price < lowerBound) break
+                }
+
+                // 1张 = 0.01BTC
+                // 张数 * 0.01 = btc实际数量
+                // 实际价格 * btc实际数量 = 此价格的实际usdt挂单量
+                // 实时价格 * 张数 * 0.01
+                total += price * sizeRaw * BigDecimal.valueOf(0.01)
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")
             }
