@@ -109,6 +109,7 @@ object TradeAgent {
                     continue
                 }
 
+                logger.info("place order response: ${response.bodyAsText()}")
                 return response.body()
             } catch (ex: Exception) {
                 logger.error("[Attempt $attempt] 请求异常: ${ex.message}")
