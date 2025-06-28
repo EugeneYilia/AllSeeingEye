@@ -24,7 +24,7 @@ data class PositionState(
     var shortEntryPrice: BigDecimal? = null,
     var longAddCount: Int = 1,
     var shortAddCount: Int = 1,
-    var capital: BigDecimal = BigDecimal(100.0),
+    var capital: BigDecimal = BigDecimal.valueOf(100.0),
     var longTransactionId : String? = null,
     var shortTransactionId: String? = null,
 )
@@ -89,7 +89,7 @@ class MartinStrategy(
             val change = (price - state.longEntryPrice!!) / state.longEntryPrice!!
             // 持仓收益(usdt) = 张数 * 0.01(每张为0.01BTC) * 开仓均价 * 变化率
             val pnl = state.longPosition * OrderConstants.CONTRACT_VALUE * state.longEntryPrice!! * change
-            logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal(100))}%")
+            logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal.valueOf(100))}%")
             processPosition(config, state, price, pnl, change, true)
         }
     }
@@ -100,7 +100,7 @@ class MartinStrategy(
         } else if (state.shortPosition != BigDecimal.ZERO) {
             val change = (state.shortEntryPrice!! - price) / state.shortEntryPrice!!
             val pnl = state.shortPosition * OrderConstants.CONTRACT_VALUE * state.shortEntryPrice!! * change
-            logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal(100))}%")
+            logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal.valueOf(100))}%")
             processPosition(config, state, price, pnl, change, false)
         }
     }
@@ -159,7 +159,7 @@ class MartinStrategy(
                 // 未达阈值，到达加仓触发点时可以继续加仓
                 // 1 2       2 4       3 8
                 // 4 16      5 32      6 64
-                val addSize = config.positionSize * (2.0.pow(addCount).toBigDecimal())
+                val addSize = config.positionSize * (BigDecimal.valueOf(2.0.pow(addCount)))
                 if (isLong) {
                     state.longAddCount++
                     config.accounts.forEach { openLong(config.symbol, price, addSize, it) }

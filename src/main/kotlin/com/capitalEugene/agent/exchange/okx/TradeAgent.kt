@@ -90,6 +90,7 @@ object TradeAgent {
                 val msg = "${ts}POST$path${Json.encodeToString(body)}"
                 val sign = TradeUtils.hmacSha256Base64(apiSecret.okxApiSecret, msg)
 
+                logger.info("place order request: ${body}")
                 val response = client.post(url) {
                     contentType(ContentType.Application.Json)
                     headers {

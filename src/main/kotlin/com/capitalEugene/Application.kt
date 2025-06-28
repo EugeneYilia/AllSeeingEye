@@ -74,19 +74,19 @@ fun Application.module() {
                     // 交易策略配置启动
                     val dogfoodMartinConfig = MartinConfig(
                         symbol = OrderConstants.BTC_SWAP,
-                        positionSize = BigDecimal(0.05),
+                        positionSize = BigDecimal.valueOf(0.05),
                         accounts = dogFoodAccounts,
-                        multiplesOfTheGap = BigDecimal(1.08),
+                        multiplesOfTheGap = BigDecimal.valueOf(1.08),
                     )
 
                     val selfHostMartinConfig = MartinConfig(
                         symbol = OrderConstants.BTC_SWAP,
-                        positionSize = BigDecimal(0.04),
-                        tpRatio = BigDecimal(0.0048),
+                        positionSize = BigDecimal.valueOf(0.04),
+                        tpRatio = BigDecimal.valueOf(0.0048),
                         maxAddPositionCount = 4,
                         accounts = selfHostAccounts,
                         configName = "handsome_dog_0.5",
-                        multiplesOfTheGap = BigDecimal(1.5),
+                        multiplesOfTheGap = BigDecimal.valueOf(1.5),
                     )
                     MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
                 } catch (e: Exception) {
