@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.SortedMap
 import kotlin.math.pow
 
 data class PositionState(
@@ -179,14 +180,11 @@ class MartinStrategy(
         }
     }
 
-    private fun getTotalPower(depth: List<List<BigDecimal>>): BigDecimal {
+    private fun getTotalPower(depth: SortedMap<BigDecimal, BigDecimal>): BigDecimal {
         var total = BigDecimal.ZERO
-        depth.take(3).forEach {
+        depth.entries.take(3).forEach { (price, sizeRaw) ->
             try {
-                // btc价格
-                val price = it[0]
-                // 张数 * 0.01 = btc数量
-                val size = it[1] * BigDecimal.valueOf(0.01)
+                val size = sizeRaw * BigDecimal.valueOf(0.01)
                 total += price * size
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")

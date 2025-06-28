@@ -11,16 +11,18 @@ import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.SortedMap
+import java.util.TreeMap
 
-// 现货和合约的支撑位挂单和阻力位挂单列表
-val depthCache: MutableMap<String, MutableMap<String, MutableList<List<BigDecimal>>>> = mutableMapOf(
+// 使用 TreeMap 保证价格自动排序
+val depthCache: MutableMap<String, MutableMap<String, SortedMap<BigDecimal, BigDecimal>>> = mutableMapOf(
     OrderConstants.BTC_SPOT to mutableMapOf(
-        "bids" to mutableListOf(),
-        "asks" to mutableListOf()
+        "bids" to TreeMap(reverseOrder()),
+        "asks" to TreeMap()
     ),
     OrderConstants.BTC_SWAP to mutableMapOf(
-        "bids" to mutableListOf(),
-        "asks" to mutableListOf()
+        "bids" to TreeMap(reverseOrder()),
+        "asks" to TreeMap()
     )
 )
 
@@ -45,29 +47,21 @@ object BtcOrder {
 
     // 默认降序
     fun aggregateToUsdt(
-        depthList: List<List<BigDecimal>>,
+        depthMap: SortedMap<BigDecimal, BigDecimal>,
         precision: Int = 2,
         multiplier: BigDecimal = OrderConstants.CONTRACT_VALUE,
         ascending: Boolean = false
     ): List<Pair<BigDecimal, BigDecimal>> {
-        val depthMap = mutableMapOf<BigDecimal, BigDecimal>()
-        val safeDepthList = depthList.toList()  // ✅ 快照副本，防止并发修改
-        for (entry in safeDepthList) {
-            val price = entry.getOrNull(0) ?: continue
-            val size = entry.getOrNull(1) ?: continue
+        val aggMap = mutableMapOf<BigDecimal, BigDecimal>()
+        val entries = if (ascending) depthMap.entries else depthMap.entries.reversed()
+        for ((price, size) in entries) {
             val factor = BigDecimal.TEN.pow(precision)
             val roundedPrice = price.divide(factor).setScale(0, RoundingMode.HALF_UP).multiply(factor)
             // btc-usdt-swap 104000 * 30 * 0.01        btc-usdt   104000 * 30 * 1
             val usdtValue = price.multiply(size).multiply(multiplier)
-            depthMap[roundedPrice] = depthMap.getOrDefault(roundedPrice, BigDecimal.ZERO) + usdtValue
+            aggMap[roundedPrice] = aggMap.getOrDefault(roundedPrice, BigDecimal.ZERO) + usdtValue
         }
-
-        val sorted = if (ascending) {
-            depthMap.entries.sortedBy { it.key }
-        } else {
-            depthMap.entries.sortedByDescending { it.key }
-        }
-        return sorted.map { it.toPair() }
+        return aggMap.entries.sortedByDescending { it.key }.map { it.toPair() }
     }
 
     fun printAggregatedDepth() {
@@ -80,10 +74,10 @@ object BtcOrder {
                 val price = priceCache[source]?.let { "%.2f".format(it) } ?: "N/A"
                 logger.info("  来源: ${source.uppercase()} | 实时价格: $price")
 
-                val depthListSnapshot = (depthCache[source]?.get(side) as? List<List<BigDecimal>>)?.toList() ?: emptyList()
+                val map = depthCache[source]?.get(side) ?: sortedMapOf()
                 // 按照百位数进行聚合
                 val agg = aggregateToUsdt(
-                    depthListSnapshot,
+                    map,
                     precision = 2,
                     multiplier = if (source == OrderConstants.BTC_SPOT) OrderConstants.DEFAULT_SPOT_VALUE else OrderConstants.CONTRACT_VALUE,
                     ascending = (side == "asks") // asks 卖单 升序， bids 买单 降序
@@ -151,32 +145,23 @@ object BtcOrder {
         val first = dataArray.firstOrNull()?.jsonObject ?: return
 
         if (channel == "books") {
-            val bids = first["bids"]?.jsonArray?.mapNotNull { bidEntry ->
+            val bidsMap = depthCache[instId]?.get("bids") ?: TreeMap(reverseOrder())
+            val asksMap = depthCache[instId]?.get("asks") ?: TreeMap()
+
+            bidsMap.clear()
+            asksMap.clear()
+
+            first["bids"]?.jsonArray?.forEach { bidEntry ->
                 val price = bidEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                 val size = bidEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
-                if (price != null && size != null) listOf(price, size) else {
-                    logger.error("⚠️ 解析失败数据: $bidEntry")
-                    null
-                }
-            } ?: emptyList()
-
-            val asks = first["asks"]?.jsonArray?.mapNotNull { askEntry ->
+                if (price != null && size != null) bidsMap[price] = size
+                else logger.error("⚠️ 解析失败数据: $bidEntry")
+            }
+            first["asks"]?.jsonArray?.forEach { askEntry ->
                 val price = askEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                 val size = askEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
-                if (price != null && size != null) listOf(price, size) else {
-                    logger.error("⚠️ 解析失败数据: $askEntry")
-                    null
-                }
-            } ?: emptyList()
-
-            // 按照现货或者合约 拿到支撑位的list 如果拿到了就清空旧的 并添加新的元素到集合里去
-            depthCache[instId]?.get("bids")?.apply {
-                clear()
-                addAll(bids)
-            }
-            depthCache[instId]?.get("asks")?.apply {
-                clear()
-                addAll(asks)
+                if (price != null && size != null) asksMap[price] = size
+                else logger.error("⚠️ 解析失败数据: $askEntry")
             }
         } else if (channel == "tickers") {
             // contentOrNull会返回一个字符串"10500.12",第二步将字符串安全转换为BigDecimal，第三步如果是非法格式"NaN","abc",""都将会返回null
