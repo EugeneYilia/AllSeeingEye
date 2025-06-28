@@ -45,52 +45,6 @@ object BtcOrder {
         mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SWAP),
     )
 
-    // 默认降序
-    fun aggregateToUsdt(
-        depthMap: SortedMap<BigDecimal, BigDecimal>,
-        precision: Int = 2,
-        multiplier: BigDecimal = OrderConstants.CONTRACT_VALUE,
-        ascending: Boolean = false
-    ): List<Pair<BigDecimal, BigDecimal>> {
-        val aggMap = mutableMapOf<BigDecimal, BigDecimal>()
-        val entries = if (ascending) depthMap.entries else depthMap.entries.reversed()
-        for ((price, size) in entries) {
-            val factor = BigDecimal.TEN.pow(precision)
-            val roundedPrice = price.divide(factor).setScale(0, RoundingMode.HALF_UP).multiply(factor)
-            // btc-usdt-swap 104000 * 30 * 0.01        btc-usdt   104000 * 30 * 1
-            val usdtValue = price.multiply(size).multiply(multiplier)
-            aggMap[roundedPrice] = aggMap.getOrDefault(roundedPrice, BigDecimal.ZERO) + usdtValue
-        }
-        return aggMap.entries.sortedByDescending { it.key }.map { it.toPair() }
-    }
-
-    fun printAggregatedDepth() {
-        logger.info("\n================= 📊 挂单聚合 =================")
-        listOf("bids", "asks").forEach { side ->
-            val label = if (side == "bids") "🔵 支撑位" else "🔴 压力位"
-            logger.info("$label（$side，单位：USDT）：")
-
-            listOf(OrderConstants.BTC_SPOT, OrderConstants.BTC_SWAP).forEach { source ->
-                val price = priceCache[source]?.let { "%.2f".format(it) } ?: "N/A"
-                logger.info("  来源: ${source.uppercase()} | 实时价格: $price")
-
-                val map = depthCache[source]?.get(side) ?: sortedMapOf()
-                // 按照百位数进行聚合
-                val agg = aggregateToUsdt(
-                    map,
-                    precision = 2,
-                    multiplier = if (source == OrderConstants.BTC_SPOT) OrderConstants.DEFAULT_SPOT_VALUE else OrderConstants.CONTRACT_VALUE,
-                    ascending = (side == "asks") // asks 卖单 升序， bids 买单 降序
-                )
-
-                agg.take(5).forEach { (priceVal, usdt) ->
-                    logger.info("    $priceVal USDT - 挂单金额: ${usdt.setScale(2, RoundingMode.HALF_UP)} USDT")
-                }
-            }
-        }
-        logger.info("==================================================\n")
-    }
-
     // 连接断开之后，也会一直重连
     suspend fun startWs(client: HttpClient) {
         val url = "wss://ws.okx.com:8443/ws/v5/public"
