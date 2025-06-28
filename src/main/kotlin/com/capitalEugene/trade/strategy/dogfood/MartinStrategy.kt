@@ -69,7 +69,7 @@ class MartinStrategy(
                     // 每一个对应的state已在前面做过初始化
                     val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
 
-                    logger.info("buy_power: $buyPower     sell_power: $sellPower")
+                    logger.info("buy_power: $buyPower       sell_power: $sellPower")
                     val longSignal = buyPower > sellPower * config.multiplesOfTheGap
                     val shortSignal = sellPower > buyPower * config.multiplesOfTheGap
 
@@ -183,8 +183,10 @@ class MartinStrategy(
         var total = BigDecimal.ZERO
         depth.take(3).forEach {
             try {
+                // btc价格
                 val price = it[0]
-                val size = it[1]
+                // 张数 * 0.01 = btc数量
+                val size = it[1] * BigDecimal.valueOf(0.01)
                 total += price * size
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")
