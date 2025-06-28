@@ -7,6 +7,7 @@ import com.capitalEugene.agent.exchange.okx.TradeAgent.setCrossLeverage
 import com.capitalEugene.agent.redis.RedisAgent.coroutineSaveToRedis
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.common.utils.TradeUtils.generateTransactionId
+import com.capitalEugene.common.utils.safeSnapshot
 import com.capitalEugene.model.TradingData
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.depthCache
@@ -61,8 +62,8 @@ class MartinStrategy(
                     val price = priceCache[config.symbol] ?: return@forEach
 
                     // Deep copy to deal with concurrent modification problems
-                    val bids = depthCache[config.symbol]?.get("bids")?.toSortedMap() ?: return@forEach
-                    val asks = depthCache[config.symbol]?.get("asks")?.toSortedMap() ?: return@forEach
+                    val bids = depthCache[config.symbol]?.get("bids")?.safeSnapshot() ?: return@forEach
+                    val asks = depthCache[config.symbol]?.get("asks")?.safeSnapshot() ?: return@forEach
 
                     if (bids.isEmpty() || asks.isEmpty() || price == BigDecimal.ZERO) return@forEach
 
