@@ -114,6 +114,13 @@
     <div class="item"><span class="label">收益率</span><span class="value" id="agg_return">-</span></div>
 
     <div class="section-title">📉 实时K线图（BTC-SWAP）</div>
+    <div class="input-group">
+        <label style="margin-right: 10px; font-weight: bold;">时区:</label>
+        <select id="timezone_select" onchange="updateTimeFormatter()">
+            <option value="0">UTC</option>
+            <option value="8" selected>UTC+8</option>
+        </select>
+    </div>
     <div id="kline_chart" style="height: 400px;"></div>
 </div>
 
@@ -218,10 +225,18 @@
             timeScale: {
                 timeVisible: true,
                 secondsVisible: false,
+                // ✅ 加入 tickMarkFormatter 来显示北京时间
+                tickMarkFormatter: (unixTime) => {
+                    const date = new Date((unixTime + 8 * 3600) * 1000); // UTC+8
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                }
             }
         });
 
-        // ✅ v4 专用写法
+        updateTimeFormatter();
+
         candleSeries = chart.addCandlestickSeries();
     }
 
@@ -257,10 +272,28 @@
         }
     }
 
+    let timezoneOffsetHours = 8;
+
+    function updateTimeFormatter() {
+        const select = document.getElementById("timezone_select");
+        timezoneOffsetHours = parseInt(select.value);
+
+        chart.applyOptions({
+            timeScale: {
+                tickMarkFormatter: (unixTime) => {
+                    const date = new Date((unixTime + timezoneOffsetHours * 3600) * 1000);
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                }
+            }
+        });
+    }
+
     window.addEventListener("load", () => {
         initKlineChart();
         fetchKlineUpdate();
-        setInterval(fetchKlineUpdate, 1000);  // 每3秒增量更新
+        setInterval(fetchKlineUpdate, 1000);  // 每1秒增量更新
     });
 </script>
 
