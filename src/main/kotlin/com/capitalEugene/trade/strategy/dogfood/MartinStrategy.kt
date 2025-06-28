@@ -60,6 +60,7 @@ class MartinStrategy(
                 configs.forEach { config ->
                     val price = priceCache[config.symbol] ?: return@forEach
 
+                    // Deep copy to deal with concurrent modification problems
                     val bids = depthCache[config.symbol]?.get("bids")?.toSortedMap() ?: return@forEach
                     val asks = depthCache[config.symbol]?.get("asks")?.toSortedMap() ?: return@forEach
 
