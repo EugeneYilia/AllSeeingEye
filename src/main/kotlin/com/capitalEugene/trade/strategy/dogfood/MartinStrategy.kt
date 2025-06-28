@@ -69,8 +69,9 @@ class MartinStrategy(
                     // 每一个对应的state已在前面做过初始化
                     val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
 
-                    val longSignal = buyPower > sellPower * OrderConstants.LUCKY_MAGIC_NUMBER
-                    val shortSignal = sellPower > buyPower * OrderConstants.LUCKY_MAGIC_NUMBER
+                    logger.info("buy_power: $buyPower     sell_power: $sellPower")
+                    val longSignal = buyPower > sellPower * config.multiplesOfTheGap
+                    val shortSignal = sellPower > buyPower * config.multiplesOfTheGap
 
                     handleLong(config, state, price, longSignal)
                     handleShort(config, state, price, shortSignal)

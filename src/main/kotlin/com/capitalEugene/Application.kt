@@ -75,7 +75,8 @@ fun Application.module() {
                     val dogfoodMartinConfig = MartinConfig(
                         symbol = OrderConstants.BTC_SWAP,
                         positionSize = BigDecimal(0.05),
-                        accounts = dogFoodAccounts
+                        accounts = dogFoodAccounts,
+                        multiplesOfTheGap = BigDecimal(1.333),
                     )
 
                     val selfHostMartinConfig = MartinConfig(

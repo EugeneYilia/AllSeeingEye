@@ -19,5 +19,7 @@ data class MartinConfig(
     // 最大加仓次数
     val maxAddPositionCount : Int = 6,
     // 策略名称
-    val configName: String = "Default"
+    val configName: String = "Default",
+    // 买卖方订单量差距倍数，会触发开仓的倍数阈值
+    val multiplesOfTheGap : BigDecimal = BigDecimal(3.333),
 )
