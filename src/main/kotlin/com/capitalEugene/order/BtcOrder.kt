@@ -102,20 +102,28 @@ object BtcOrder {
             val bidsMap = depthCache[instId]?.get("bids") ?: TreeMap(reverseOrder())
             val asksMap = depthCache[instId]?.get("asks") ?: TreeMap()
 
-            bidsMap.clear()
-            asksMap.clear()
-
             first["bids"]?.jsonArray?.forEach { bidEntry ->
                 val price = bidEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                 val size = bidEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
-                if (price != null && size != null) bidsMap[price] = size
-                else logger.error("⚠️ 解析失败数据: $bidEntry")
+                if (price != null && size != null) {
+                    if (size.compareTo(BigDecimal.ZERO) == 0) {
+                        bidsMap.remove(price)
+                    } else {
+                        // upsert操作   过去有就update  没有就创建出来新的
+                        bidsMap[price] = size
+                    }
+                } else logger.error("⚠️ 解析失败数据: $bidEntry")
             }
             first["asks"]?.jsonArray?.forEach { askEntry ->
                 val price = askEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                 val size = askEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
-                if (price != null && size != null) asksMap[price] = size
-                else logger.error("⚠️ 解析失败数据: $askEntry")
+                if (price != null && size != null) {
+                    if (size.compareTo(BigDecimal.ZERO) == 0) {
+                        asksMap.remove(price)
+                    } else {
+                        asksMap[price] = size
+                    }
+                } else logger.error("⚠️ 解析失败数据: $askEntry")
             }
         } else if (channel == "tickers") {
             // contentOrNull会返回一个字符串"10500.12",第二步将字符串安全转换为BigDecimal，第三步如果是非法格式"NaN","abc",""都将会返回null
