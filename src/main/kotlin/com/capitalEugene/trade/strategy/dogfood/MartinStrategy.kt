@@ -59,8 +59,9 @@ class MartinStrategy(
                 // 确保当前轮的所有子任务都完成后再进行下一轮
                 configs.forEach { config ->
                     val price = priceCache[config.symbol] ?: return@forEach
-                    val bids = depthCache[config.symbol]?.get("bids") ?: return@forEach
-                    val asks = depthCache[config.symbol]?.get("asks") ?: return@forEach
+
+                    val bids = depthCache[config.symbol]?.get("bids")?.toSortedMap() ?: return@forEach
+                    val asks = depthCache[config.symbol]?.get("asks")?.toSortedMap() ?: return@forEach
 
                     if (bids.isEmpty() || asks.isEmpty() || price == BigDecimal.ZERO) return@forEach
 
