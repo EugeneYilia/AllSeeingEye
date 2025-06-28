@@ -14,11 +14,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.io.InputStreamReader
 import java.math.BigDecimal
@@ -83,26 +79,6 @@ fun Application.module() {
                 MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
             }
         }
-
-//        launch {
-//            // isActive绑定的是当前协程的上下文
-//            // 每个协程都有自己的job    每个协程体内的isActive检查的就是自己的job的状态
-//            // isActive等同于 this.coroutineContext[Job]?.isActive
-//            // 每个协程体内的isActive判断的是自己的状态
-//            // jobA.cancel() 不影响 jobB.isActive
-//            //
-//            // 协程体内部isActive检查当前协程的状态    协程体外部用job对象的isActive判断具体协程状态
-//            // 多个协程每个协程的isActive独立，互不干扰
-//            //
-//            // 调用job.cancel() 主动取消时
-//            // 协程正常完成时
-//            // 协程出现异常被取消时
-//            // 父协程或作用域被取消
-//            while (isActive) {
-//                delay(1000)
-//                printAggregatedDepth()
-//            }
-//        }
     }
 
     // 应用停止时关闭掉WebSocket
