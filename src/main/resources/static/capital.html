@@ -112,6 +112,9 @@
     <div class="item"><span class="label">开仓时间</span><span class="value" id="agg_open">-</span></div>
     <div class="item"><span class="label">平仓时间</span><span class="value" id="agg_close">-</span></div>
     <div class="item"><span class="label">收益率</span><span class="value" id="agg_return">-</span></div>
+
+    <div class="section-title">📉 实时K线图（BTC-SWAP）</div>
+    <div id="kline_chart" style="height: 400px;"></div>
 </div>
 
 <script>
@@ -190,5 +193,76 @@
     fetchAllStrategies();
     setInterval(fetchPosition, 1000); // 实时刷新持仓状态
 </script>
+
+<!-- K Line -->
+<script src="/static/js/kline.js"></script>
+<script>
+    let chart, candleSeries;
+    let lastTimestamp = 0;
+    let klineType = "BTC-USDT-SWAP";  // 与后端 OrderConstants 保持一致
+
+    function initKlineChart() {
+        const chartContainer = document.getElementById("kline_chart");
+
+        chart = LightweightCharts.createChart(chartContainer, {
+            width: chartContainer.clientWidth,
+            height: 400,
+            layout: {
+                background: { color: '#ffffff' },
+                textColor: '#000',
+            },
+            grid: {
+                vertLines: { color: '#eee' },
+                horzLines: { color: '#eee' },
+            },
+            timeScale: {
+                timeVisible: true,
+                secondsVisible: false,
+            }
+        });
+
+        // ✅ v4 专用写法
+        candleSeries = chart.addCandlestickSeries();
+    }
+
+    async function fetchKlineUpdate() {
+        try {
+            const res = await fetch(`/v1/kline/${klineType}`);
+            if (!res.ok) throw new Error("K线数据加载失败");
+            const data = await res.json();
+
+            const formatted = data.map(d => ({
+                time: Math.floor(d.timestamp / 1000),
+                open: parseFloat(d.open),
+                high: parseFloat(d.high),
+                low: parseFloat(d.low),
+                close: parseFloat(d.close),
+            }));
+
+            // 第一次加载
+            if (lastTimestamp === 0 && formatted.length > 0) {
+                candleSeries.setData(formatted);
+                lastTimestamp = formatted[formatted.length - 1].time;
+                return;
+            }
+
+            // 增量加载新数据
+            const newBars = formatted.filter(bar => bar.time > lastTimestamp);
+            if (newBars.length > 0) {
+                newBars.forEach(bar => candleSeries.update(bar));
+                lastTimestamp = newBars[newBars.length - 1].time;
+            }
+        } catch (err) {
+            console.error("K线图更新失败:", err);
+        }
+    }
+
+    window.addEventListener("load", () => {
+        initKlineChart();
+        fetchKlineUpdate();
+        setInterval(fetchKlineUpdate, 1000);  // 每3秒增量更新
+    });
+</script>
+
 </body>
 </html>
