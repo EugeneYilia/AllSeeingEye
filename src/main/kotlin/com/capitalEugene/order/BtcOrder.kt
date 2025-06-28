@@ -14,11 +14,11 @@ import java.math.RoundingMode
 
 // 现货和合约的支撑位挂单和阻力位挂单列表
 val depthCache: MutableMap<String, MutableMap<String, MutableList<List<BigDecimal>>>> = mutableMapOf(
-    "spot" to mutableMapOf(
+    OrderConstants.BTC_SPOT to mutableMapOf(
         "bids" to mutableListOf(),
         "asks" to mutableListOf()
     ),
-    "swap" to mutableMapOf(
+    OrderConstants.BTC_SWAP to mutableMapOf(
         "bids" to mutableListOf(),
         "asks" to mutableListOf()
     )
@@ -26,8 +26,8 @@ val depthCache: MutableMap<String, MutableMap<String, MutableList<List<BigDecima
 
 // 当前现货和合约的实时价格
 val priceCache = mutableMapOf<String, BigDecimal?>(
-    "spot" to null,
-    "swap" to null
+    OrderConstants.BTC_SPOT to null,
+    OrderConstants.BTC_SWAP to null
 )
 
 object BtcOrder {
@@ -57,7 +57,7 @@ object BtcOrder {
             val size = entry.getOrNull(1) ?: continue
             val factor = BigDecimal.TEN.pow(precision)
             val roundedPrice = price.divide(factor).setScale(0, RoundingMode.HALF_UP).multiply(factor)
-            // swap 104000 * 30 * 0.01        spot   104000 * 30 * 1
+            // btc-usdt-swap 104000 * 30 * 0.01        btc-usdt   104000 * 30 * 1
             val usdtValue = price.multiply(size).multiply(multiplier)
             depthMap[roundedPrice] = depthMap.getOrDefault(roundedPrice, BigDecimal.ZERO) + usdtValue
         }
@@ -76,7 +76,7 @@ object BtcOrder {
             val label = if (side == "bids") "🔵 支撑位" else "🔴 压力位"
             logger.info("$label（$side，单位：USDT）：")
 
-            listOf("spot", "swap").forEach { source ->
+            listOf(OrderConstants.BTC_SPOT, OrderConstants.BTC_SWAP).forEach { source ->
                 val price = priceCache[source]?.let { "%.2f".format(it) } ?: "N/A"
                 logger.info("  来源: ${source.uppercase()} | 实时价格: $price")
 
@@ -85,7 +85,7 @@ object BtcOrder {
                 val agg = aggregateToUsdt(
                     depthListSnapshot,
                     precision = 2,
-                    multiplier = if (source == "spot") OrderConstants.DEFAULT_SPOT_VALUE else OrderConstants.CONTRACT_VALUE,
+                    multiplier = if (source == OrderConstants.BTC_SPOT) OrderConstants.DEFAULT_SPOT_VALUE else OrderConstants.CONTRACT_VALUE,
                     ascending = (side == "asks") // asks 卖单 升序， bids 买单 降序
                 )
 
@@ -146,7 +146,6 @@ object BtcOrder {
         val arg = data.jsonObject["arg"]?.jsonObject ?: return
         val channel = arg["channel"]?.jsonPrimitive?.content ?: return
         val instId = arg["instId"]?.jsonPrimitive?.content ?: return
-        val dtype = if (instId == OrderConstants.BTC_SPOT) "spot" else "swap"
 
         val dataArray = data.jsonObject["data"]?.jsonArray ?: return
         val first = dataArray.firstOrNull()?.jsonObject ?: return
@@ -171,11 +170,11 @@ object BtcOrder {
             } ?: emptyList()
 
             // 按照现货或者合约 拿到支撑位的list 如果拿到了就清空旧的 并添加新的元素到集合里去
-            depthCache[dtype]?.get("bids")?.apply {
+            depthCache[instId]?.get("bids")?.apply {
                 clear()
                 addAll(bids)
             }
-            depthCache[dtype]?.get("asks")?.apply {
+            depthCache[instId]?.get("asks")?.apply {
                 clear()
                 addAll(asks)
             }
@@ -183,7 +182,7 @@ object BtcOrder {
             // contentOrNull会返回一个字符串"10500.12",第二步将字符串安全转换为BigDecimal，第三步如果是非法格式"NaN","abc",""都将会返回null
             // 已经避免了Double.NaN的问题
             val last = first["last"]?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
-            priceCache[dtype] = last
+            priceCache[instId] = last
         }
     }
 }

@@ -12,8 +12,8 @@ import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
 
 val klineCache : MutableMap<String, MutableList<KlineBar>> = mutableMapOf(
-    "spot" to mutableListOf(),
-    "swap" to mutableListOf()
+    OrderConstants.BTC_SPOT to mutableListOf(),
+    OrderConstants.BTC_SWAP to mutableListOf()
 )
 
 object BtcKLine {
@@ -86,11 +86,6 @@ object BtcKLine {
 
         val channel = arg["channel"]?.jsonPrimitive?.content ?: return
         val instId = arg["instId"]?.jsonPrimitive?.content ?: return
-        val dtype = when (instId) {
-            OrderConstants.BTC_SPOT -> "spot"
-            OrderConstants.BTC_SWAP -> "swap"
-            else -> "unknown"
-        }
 
         val dataArray = obj["data"] as? JsonArray ?: run {
             logger.warn("⚠️ data 不是 JsonArray，内容: ${obj["data"]}")
@@ -121,7 +116,7 @@ object BtcKLine {
             val isEnd = first.getOrNull(8)?.jsonPrimitive?.contentOrNull ?: return
 
             if(isEnd == "1") {
-                logger.info("🕐 [$dtype | ${channel.uppercase()}] 时间: $timestamp 开: $open 高: $high 低: $low 收: $close 量: $volume")
+                logger.info("🕐 [$instId | ${channel.uppercase()}] 时间: $timestamp 开: $open 高: $high 低: $low 收: $close 量: $volume")
 
                 val kLineBar = KlineBar(
                     timestamp = timestamp,
@@ -131,7 +126,7 @@ object BtcKLine {
                     close = close,
                     volume = volume
                 )
-                klineCache.getOrPut(dtype){mutableListOf()}.add(kLineBar)
+                klineCache.getOrPut(instId){mutableListOf()}.add(kLineBar)
             }
         }
     }
