@@ -10,7 +10,6 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.util.SortedMap
 import java.util.TreeMap
 
@@ -128,8 +127,18 @@ object BtcOrder {
         } else if (channel == "tickers") {
             // contentOrNull会返回一个字符串"10500.12",第二步将字符串安全转换为BigDecimal，第三步如果是非法格式"NaN","abc",""都将会返回null
             // 已经避免了Double.NaN的问题
-            val last = first["last"]?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
-            priceCache[instId] = last
+            val realTimePrice = first["last"]?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
+            priceCache[instId] = realTimePrice
+
+            // 移除过时的 bids/asks 档位
+            val bidsMap = depthCache[instId]?.get("bids")
+            val asksMap = depthCache[instId]?.get("asks")
+            if (realTimePrice != null) {
+                // 移除所有价格高于当前价的 bids（买不到）
+                bidsMap?.entries?.removeIf { (price, _) -> price > realTimePrice }
+                // 移除所有价格低于当前价的 asks（已卖出）
+                asksMap?.entries?.removeIf { (price, _) -> price < realTimePrice }
+            }
         }
     }
 }
