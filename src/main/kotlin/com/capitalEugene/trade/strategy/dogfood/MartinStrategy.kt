@@ -59,6 +59,7 @@ class MartinStrategy(
             try {
                 // 确保当前轮的所有子任务都完成后再进行下一轮
                 configs.forEach { config ->
+                    // 不同config下用户想要去操作的币种可能都是不同的
                     val price = priceCache[config.symbol] ?: return@forEach
 
                     // Deep copy to deal with concurrent modification problems
@@ -67,6 +68,7 @@ class MartinStrategy(
 
                     if (bids.isEmpty() || asks.isEmpty() || price == BigDecimal.ZERO) return@forEach
 
+                    // 特定币种下的买方力量和卖方力量
                     val buyPower = getTotalPower(price, bids)
                     val sellPower = getTotalPower(price, asks)
 
