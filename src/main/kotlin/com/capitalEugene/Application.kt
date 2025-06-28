@@ -76,7 +76,7 @@ fun Application.module() {
                         symbol = OrderConstants.BTC_SWAP,
                         positionSize = BigDecimal.valueOf(0.05),
                         accounts = dogFoodAccounts,
-                        multiplesOfTheGap = BigDecimal.valueOf(1.08),
+                        multiplesOfTheGap = BigDecimal.valueOf(1.666),
                     )
 
                     val selfHostMartinConfig = MartinConfig(
@@ -86,7 +86,7 @@ fun Application.module() {
                         maxAddPositionCount = 4,
                         accounts = selfHostAccounts,
                         configName = "handsome_dog_0.5",
-                        multiplesOfTheGap = BigDecimal.valueOf(1.5),
+                        multiplesOfTheGap = BigDecimal.valueOf(1.888),
                     )
                     MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
                 } catch (e: Exception) {
