@@ -81,15 +81,15 @@ object TradeAgent {
             put("sz", size.toString())    // size
         }
 
-        val ts = TimeUtils.getTimestamp()
-        val msg = "${ts}POST$path${Json.encodeToString(body)}"
-        val sign = TradeUtils.hmacSha256Base64(apiSecret.okxApiSecret, msg)
-
         var attempt = 0
         var delayMs : Long = TradeConstants.INIT_RETRY_DELAY_SECONDS * 1000L
         // 会一直下单，就算失败了，也会一直重试
         while (true) {
             try {
+                val ts = TimeUtils.getTimestamp()
+                val msg = "${ts}POST$path${Json.encodeToString(body)}"
+                val sign = TradeUtils.hmacSha256Base64(apiSecret.okxApiSecret, msg)
+
                 val response = client.post(url) {
                     contentType(ContentType.Application.Json)
                     headers {
