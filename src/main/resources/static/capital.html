@@ -119,7 +119,11 @@
 
     async function fetchAllStrategies() {
         try {
-            const res = await fetch("/v1/strategy/all");
+            const res = await fetch("/v1/strategy/all", {
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
             const strategies = await res.json();
             const select = document.getElementById("strategy_select");
             select.innerHTML = `<option value="">请选择策略</option>`;

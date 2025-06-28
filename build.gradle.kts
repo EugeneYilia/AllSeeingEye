@@ -33,7 +33,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
     implementation("io.ktor:ktor-server-config-yaml")
     implementation("io.lettuce:lettuce-core:6.7.1.RELEASE")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation("io.ktor:ktor-server-content-negotiation") // ← 核心依赖
+    implementation("io.ktor:ktor-serialization-kotlinx-json")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
