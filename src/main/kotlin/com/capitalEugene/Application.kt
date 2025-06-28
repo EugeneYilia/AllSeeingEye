@@ -48,35 +48,48 @@ fun Application.module() {
     // 直接用 application.monitor.subscribe
     monitor.subscribe(ApplicationStarted) {
         ioSchedulerScope.launch {
-            logger.info("开始启动btc订单和实时价格订阅")
-            // 订单簿和实时价格ws获取
-            BtcOrder.startWs(client)
+            try {
+                logger.info("开始启动btc订单和实时价格订阅")
+                // 订单簿和实时价格ws获取
+                BtcOrder.startWs(client)
+            }
+            catch (e: Exception) {
+                logger.error("❌ 运行 BtcOrder 出错", e)
+            }
         }
 
         ioSchedulerScope.launch {
-            logger.info("开始启动btc k线订阅")
-            BtcKLine.startWs(client)
+            try {
+                logger.info("开始启动btc k线订阅")
+                BtcKLine.startWs(client)
+            } catch (e: Exception) {
+                logger.error("❌ 运行 BtcKLine 出错", e)
+            }
         }
 
         if(!serverConfig.isLocalDebug) {
             cpuSchedulerScope.launch {
-                logger.info("开始启动策略服务")
-                // 交易策略配置启动
-                val dogfoodMartinConfig = MartinConfig(
-                    symbol = OrderConstants.BTC_SWAP,
-                    positionSize = BigDecimal(0.05),
-                    accounts = dogFoodAccounts
-                )
+                try {
+                    logger.info("开始启动策略服务")
+                    // 交易策略配置启动
+                    val dogfoodMartinConfig = MartinConfig(
+                        symbol = OrderConstants.BTC_SWAP,
+                        positionSize = BigDecimal(0.05),
+                        accounts = dogFoodAccounts
+                    )
 
-                val selfHostMartinConfig = MartinConfig(
-                    symbol = OrderConstants.BTC_SWAP,
-                    positionSize = BigDecimal(0.04),
-                    tpRatio = BigDecimal(0.0048),
-                    maxAddPositionCount = 4,
-                    accounts = selfHostAccounts,
-                    configName = "handsome_dog_0.5"
-                )
-                MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
+                    val selfHostMartinConfig = MartinConfig(
+                        symbol = OrderConstants.BTC_SWAP,
+                        positionSize = BigDecimal(0.04),
+                        tpRatio = BigDecimal(0.0048),
+                        maxAddPositionCount = 4,
+                        accounts = selfHostAccounts,
+                        configName = "handsome_dog_0.5"
+                    )
+                    MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
+                } catch (e: Exception) {
+                    logger.error("❌ 运行 MartinStrategy 出错", e)
+                }
             }
         }
     }
