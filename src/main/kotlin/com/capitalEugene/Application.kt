@@ -78,7 +78,7 @@ fun Application.module() {
                     tpRatio = BigDecimal(0.0048),
                     maxAddPositionCount = 4,
                     accounts = selfHostAccounts,
-                    configName = "ZhaoShuai-Martin"
+                    configName = "handsome_dog_0.5"
                 )
                 MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
             }
