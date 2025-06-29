@@ -94,7 +94,7 @@ class MartinStrategy(
                 .safeMultiply(OrderConstants.CONTRACT_VALUE)
                 .safeMultiply(state.longEntryPrice!!)
                 .safeMultiply(change)
-            logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change.safeMultiply(BigDecimal.valueOf(100)))}%")
+//            logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change.safeMultiply(BigDecimal.valueOf(100)))}%")
             processPosition(config, state, price, pnl, change, true)
         }
     }
@@ -108,7 +108,7 @@ class MartinStrategy(
                 .safeMultiply(OrderConstants.CONTRACT_VALUE)
                 .safeMultiply(state.shortEntryPrice!!)
                 .safeMultiply(change)
-            logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change.safeMultiply(BigDecimal.valueOf(100)))}%")
+//            logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change.safeMultiply(BigDecimal.valueOf(100)))}%")
             processPosition(config, state, price, pnl, change, false)
         }
     }
@@ -132,7 +132,7 @@ class MartinStrategy(
             state.shortAddCount = 1
             state.shortTransactionId = transactionId
         }
-        logger.info("📈 开$side @ $price 仓位: ${config.positionSize}")
+//        logger.info("📈 开$side @ $price 仓位: ${config.positionSize}")
         buildRedisDataAndSave(config, "open", config.positionSize, BigDecimal.ZERO, LocalDateTime.now().format(dateFormatter), transactionId)
         savePositionToMongo(state)
     }
@@ -145,7 +145,7 @@ class MartinStrategy(
             // 同一批次config的accounts，持仓情况是一样的
             config.accounts.forEach { closePosition(config.symbol, side, price, position.abs(), it) }
             state.capital += pnl
-            logger.info("✅ 平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
+//            logger.info("✅ 平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
             if (isLong) resetLong(state) else resetShort(state)
             // 止盈的时候用运行时的对应的transactionId
             val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
@@ -160,7 +160,7 @@ class MartinStrategy(
                 val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
                 config.accounts.forEach { closePosition(config.symbol, side, price, position.abs(), it) }
                 state.capital += pnl
-                logger.info("❌ 止损平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
+//                logger.info("❌ 止损平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
                 if (isLong) resetLong(state) else resetShort(state)
                 // 止损的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
@@ -182,7 +182,7 @@ class MartinStrategy(
                     state.shortPosition += addSize
                     state.shortEntryPrice = (state.shortEntryPrice!!.safeMultiply(state.shortPosition - addSize) + price.safeMultiply(addSize)).safeDiv(state.shortPosition)
                 }
-                logger.info("➕ 加仓 @ $price 当前持仓: ${if (isLong) state.longPosition else state.shortPosition}")
+//                logger.info("➕ 加仓 @ $price 当前持仓: ${if (isLong) state.longPosition else state.shortPosition}")
                 // 加仓的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
                 buildRedisDataAndSave(config, "add", addSize, BigDecimal.ZERO, "", transactionId!!)

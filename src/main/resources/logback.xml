@@ -42,7 +42,7 @@
             <!-- 日志滚动路径：每天一个文件，带时间戳 -->
             <fileNamePattern>${LOG_PATH}/archived/application.%d{yyyy-MM-dd}.log</fileNamePattern>
             <!-- 保留最近 3 天的日志 -->
-            <maxHistory>3</maxHistory>
+            <maxHistory>2</maxHistory>
             <!-- 可选：设置总大小上限（比如1GB），超出就删最旧的 -->
             <totalSizeCap>5GB</totalSizeCap>
         </rollingPolicy>
