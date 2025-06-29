@@ -4,9 +4,10 @@ import com.capitalEugene.agent.exchange.okx.TradeAgent.closePosition
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openLong
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openShort
 import com.capitalEugene.agent.exchange.okx.TradeAgent.setCrossLeverage
-import com.capitalEugene.agent.redis.RedisAgent.coroutineSaveToRedis
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.common.utils.TradeUtils.generateTransactionId
+import com.capitalEugene.common.utils.safeDiv
+import com.capitalEugene.common.utils.safeMultiply
 import com.capitalEugene.common.utils.safeSnapshot
 import com.capitalEugene.model.TradingData
 import com.capitalEugene.model.strategy.martin.MartinConfig
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.SortedMap
+import java.util.*
 import kotlin.math.pow
 
 data class PositionState(
@@ -75,7 +76,7 @@ class MartinStrategy(
                     // 每一个对应的state已在前面做过初始化
                     val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
 
-                    logger.info("buy_power: $buyPower       sell_power: $sellPower")
+//                    logger.info("buy_power: $buyPower       sell_power: $sellPower")
                     val longSignal = buyPower > sellPower * config.multiplesOfTheGap
                     val shortSignal = sellPower > buyPower * config.multiplesOfTheGap
 
@@ -92,9 +93,12 @@ class MartinStrategy(
         if (state.longPosition == BigDecimal.ZERO && signal) {
             operateOpen(config, state, price, true)
         } else if (state.longPosition != BigDecimal.ZERO) {
-            val change = (price - state.longEntryPrice!!) / state.longEntryPrice!!
+            val change = (price - state.longEntryPrice!!) .safeDiv(state.longEntryPrice!!)
             // 持仓收益(usdt) = 张数 * 0.01(每张为0.01BTC) * 开仓均价 * 变化率
-            val pnl = state.longPosition * OrderConstants.CONTRACT_VALUE * state.longEntryPrice!! * change
+            val pnl = state.longPosition
+                .safeMultiply(OrderConstants.CONTRACT_VALUE)
+                .safeMultiply(state.longEntryPrice!!)
+                .safeMultiply(change)
             logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal.valueOf(100))}%")
             processPosition(config, state, price, pnl, change, true)
         }
@@ -104,8 +108,11 @@ class MartinStrategy(
         if (state.shortPosition == BigDecimal.ZERO && signal) {
             operateOpen(config, state, price, false)
         } else if (state.shortPosition != BigDecimal.ZERO) {
-            val change = (state.shortEntryPrice!! - price) / state.shortEntryPrice!!
-            val pnl = state.shortPosition * OrderConstants.CONTRACT_VALUE * state.shortEntryPrice!! * change
+            val change = (state.shortEntryPrice!! - price).safeDiv(state.shortEntryPrice!!)
+            val pnl = state.shortPosition
+                .safeMultiply(OrderConstants.CONTRACT_VALUE)
+                .safeMultiply(state.shortEntryPrice!!)
+                .safeMultiply(change)
             logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal.valueOf(100))}%")
             processPosition(config, state, price, pnl, change, false)
         }
