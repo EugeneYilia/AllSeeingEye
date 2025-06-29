@@ -52,20 +52,7 @@ fun Application.configureRouting() {
                 return@get
             }
 
-            call.respond(
-                mapOf(
-                    "strategy" to strategyName,
-                    "longPosition" to state.longPosition.toPlainString(),
-                    "shortPosition" to state.shortPosition.toPlainString(),
-                    "longEntryPrice" to state.longEntryPrice?.toPlainString(),
-                    "shortEntryPrice" to state.shortEntryPrice?.toPlainString(),
-                    "longAddCount" to state.longAddCount,
-                    "shortAddCount" to state.shortAddCount,
-                    "capital" to state.capital.toPlainString(),
-                    "longTransactionId" to state.longTransactionId,
-                    "shortTransactionId" to state.shortTransactionId
-                )
-            )
+            call.respond(state)
         }
 
         get("v1/strategy/all") {
