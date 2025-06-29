@@ -27,11 +27,6 @@ object RedisAgent {
 
     // 启动保存协程
     fun coroutineSaveToRedis(data: TradingData, operation: String) {
-        if(serverConfig!!.isLocalDebug) {
-            logger.debug("Local debug, skip save to redis")
-            return
-        }
-
         redisScope.launch {
             try {
                 saveToRedis(data, operation)

@@ -4,6 +4,7 @@ import com.capitalEugene.agent.exchange.okx.TradeAgent.closePosition
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openLong
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openShort
 import com.capitalEugene.agent.exchange.okx.TradeAgent.setCrossLeverage
+import com.capitalEugene.agent.redis.RedisAgent
 import com.capitalEugene.agent.redis.RedisAgent.coroutineSaveToRedis
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.common.utils.TradeUtils.generateTransactionId
@@ -14,6 +15,7 @@ import com.capitalEugene.model.TradingData
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.depthCache
 import com.capitalEugene.order.priceCache
+import com.capitalEugene.serverConfig
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -238,6 +240,10 @@ class MartinStrategy(
             holdingAmount = addPositionAmount
         )
 
+        if(serverConfig!!.isLocalDebug) {
+            logger.debug("Local debug, skip save to redis")
+            return
+        }
         coroutineSaveToRedis(data, op)
     }
 
