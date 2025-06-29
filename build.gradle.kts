@@ -1,6 +1,7 @@
 val kotlin_version: String by project
 val logback_version: String by project
 val serialization_version: String by project
+val kmongo_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -35,6 +36,9 @@ dependencies {
     implementation("io.lettuce:lettuce-core:6.7.1.RELEASE")
     implementation("io.ktor:ktor-server-content-negotiation") // ← 核心依赖
     implementation("io.ktor:ktor-serialization-kotlinx-json")
+
+    // KMongo
+    implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongo_version")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

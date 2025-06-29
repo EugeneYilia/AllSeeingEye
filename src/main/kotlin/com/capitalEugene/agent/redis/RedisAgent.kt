@@ -20,23 +20,6 @@ object RedisAgent {
     private val connection = redisClient.connect().coroutines()
     private val logger = LoggerFactory.getLogger("redis_agent")
 
-    // 创建协程作用域
-    // SupervisorJob(生命周期管理): 子协程失败时不会取消整个作用域或其他兄弟协程
-    // Dispatchers.IO  运行在IO线程池中，专门用于IO密集型任务的线程池
-    private val redisScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineName("redis-agent"))
-
-    // 启动保存协程
-    fun coroutineSaveToRedis(data: TradingData, operation: String) {
-        redisScope.launch {
-            try {
-                saveToRedis(data, operation)
-                logger.info("✅ 已写入 Redis，事务ID: ${data.transactionId}, 操作: $operation")
-            } catch (e: Exception) {
-                logger.error("❌ Redis 写入异常: ${e.message}", e)
-            }
-        }
-    }
-
     suspend fun saveToRedis(data: TradingData, operation: String) {
         try {
             val tradeKey = "trading:${data.transactionId}"

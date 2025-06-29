@@ -2,7 +2,7 @@ package com.capitalEugene
 
 import com.capitalEugene.agent.redis.RedisAgent
 import com.capitalEugene.order.klineCache
-import com.capitalEugene.trade.strategy.dogfood.stateMap
+import com.capitalEugene.trade.strategy.dogfood.martinDogFoodStateMap
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -46,7 +46,7 @@ fun Application.configureRouting() {
             val strategyName = call.parameters["strategyName"]
                 ?: return@get call.respondText("Missing strategy name", status = HttpStatusCode.BadRequest)
 
-            val state = stateMap[strategyName]
+            val state = martinDogFoodStateMap[strategyName]
             if (state == null) {
                 call.respond(HttpStatusCode.NotFound, mapOf("error" to "未找到该策略的持仓信息"))
                 return@get
@@ -70,7 +70,7 @@ fun Application.configureRouting() {
 
         get("v1/strategy/all") {
             // ✅ 显式设置响应 Content-Type 避免 406
-            val strategyList = stateMap.keys.toList()
+            val strategyList = martinDogFoodStateMap.keys.toList()
             logger.info("返回策略列表: $strategyList")
             call.respondText(
                 Json.encodeToString(strategyList),

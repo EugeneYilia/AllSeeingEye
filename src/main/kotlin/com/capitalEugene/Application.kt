@@ -1,8 +1,8 @@
 package com.capitalEugene
 
+import com.capitalEugene.agent.mongo.MongoAgent.getAllPositions
 import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.common.constants.OrderConstants
-import com.capitalEugene.loadServerConfig
 import com.capitalEugene.model.config.ServerConfig
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.BtcKLine
@@ -10,6 +10,7 @@ import com.capitalEugene.order.BtcOrder
 import com.capitalEugene.secrets.dogFoodAccounts
 import com.capitalEugene.secrets.selfHostAccounts
 import com.capitalEugene.trade.strategy.dogfood.MartinStrategy
+import com.capitalEugene.trade.strategy.dogfood.martinDogFoodStateMap
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
@@ -29,9 +30,12 @@ fun main(args: Array<String>) {
 var serverConfig : ServerConfig? = null
 
 // 应用模块：既启动 API，也启动 WebSocket 与定时任务
-fun Application.module() {
+suspend fun Application.module() {
 
     serverConfig = loadServerConfig()
+
+    logger.info("loading strategy states from mongo")
+    initStrategyStateMap()
 
     // 配置Api服务
     configureRouting()
@@ -102,6 +106,26 @@ fun Application.module() {
     monitor.subscribe(ApplicationStopping) {
         client.close()
         logger.info("🛑 WebSocket 客户端已关闭")
+    }
+}
+
+suspend fun initStrategyStateMap() {
+    val positions = getAllPositions()
+    if (positions != null) {
+        for (position in positions) {
+            val strategyShortName = position.strategyShortName
+            val strategyFullName = position.strategyFullName
+            if (!strategyShortName.isNullOrBlank() && !strategyFullName.isNullOrBlank()) {
+                if(strategyShortName == "martin"){
+                    martinDogFoodStateMap[strategyFullName] = position
+                }
+            } else {
+                logger.error("⚠️ 发现 strategy name 为空的 position: $position")
+            }
+        }
+        logger.info("✅ 已加载 ${positions.size} 条持仓信息进内存")
+    } else {
+        logger.warn("⚠️ 未能从 Mongo 中加载任何持仓信息")
     }
 }
 

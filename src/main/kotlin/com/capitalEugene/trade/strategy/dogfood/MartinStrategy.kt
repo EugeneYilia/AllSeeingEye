@@ -4,14 +4,15 @@ import com.capitalEugene.agent.exchange.okx.TradeAgent.closePosition
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openLong
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openShort
 import com.capitalEugene.agent.exchange.okx.TradeAgent.setCrossLeverage
-import com.capitalEugene.agent.redis.RedisAgent
-import com.capitalEugene.agent.redis.RedisAgent.coroutineSaveToRedis
+import com.capitalEugene.agent.mongo.MongoAgent.savePositionToMongo
+import com.capitalEugene.agent.redis.RedisAgent.saveToRedis
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.common.utils.TradeUtils.generateTransactionId
 import com.capitalEugene.common.utils.safeDiv
 import com.capitalEugene.common.utils.safeMultiply
 import com.capitalEugene.common.utils.safeSnapshot
 import com.capitalEugene.model.TradingData
+import com.capitalEugene.model.position.PositionState
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.depthCache
 import com.capitalEugene.order.priceCache
@@ -23,20 +24,8 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.math.pow
 
-data class PositionState(
-    var longPosition: BigDecimal = BigDecimal.ZERO,
-    var shortPosition: BigDecimal = BigDecimal.ZERO,
-    var longEntryPrice: BigDecimal? = null,
-    var shortEntryPrice: BigDecimal? = null,
-    var longAddCount: Int = 1,
-    var shortAddCount: Int = 1,
-    var capital: BigDecimal = BigDecimal.valueOf(100.0),
-    var longTransactionId : String? = null,
-    var shortTransactionId: String? = null,
-)
-
 // key: "martin_${config.symbol}_${config.configName}"   value: positionState
-val stateMap = mutableMapOf<String, PositionState>()
+val martinDogFoodStateMap = mutableMapOf<String, PositionState>()
 
 class MartinStrategy(
     private val configs: List<MartinConfig>
@@ -56,7 +45,10 @@ class MartinStrategy(
 
         configs.forEach { config ->
             config.accounts.forEach { setCrossLeverage(config.symbol, 100, it) }
-            stateMap["martin_${config.symbol}_${config.configName}"] = PositionState()
+            val positionState = PositionState()
+            positionState.strategyShortName = "martin"
+            positionState.strategyFullName = "martin_${config.symbol}_${config.configName}"
+            martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"] = positionState
         }
 
         while (true) {
@@ -77,7 +69,7 @@ class MartinStrategy(
                     val sellPower = getTotalPower(price, asks)
 
                     // 每一个对应的state已在前面做过初始化
-                    val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
+                    val state = martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"]!!
 
 //                    logger.info("buy_power: $buyPower       sell_power: $sellPower")
                     val longSignal = buyPower > sellPower.safeMultiply(config.multiplesOfTheGap)
@@ -141,7 +133,8 @@ class MartinStrategy(
             state.shortTransactionId = transactionId
         }
         logger.info("📈 开$side @ $price 仓位: ${config.positionSize}")
-        saveToRedis(config, "open", config.positionSize, BigDecimal.ZERO, LocalDateTime.now().format(dateFormatter), transactionId)
+        buildRedisDataAndSave(config, "open", config.positionSize, BigDecimal.ZERO, LocalDateTime.now().format(dateFormatter), transactionId)
+        savePositionToMongo(state)
     }
 
     private suspend fun processPosition(config: MartinConfig, state: PositionState, price: BigDecimal, pnl: BigDecimal, change: BigDecimal, isLong: Boolean) {
@@ -156,7 +149,8 @@ class MartinStrategy(
             if (isLong) resetLong(state) else resetShort(state)
             // 止盈的时候用运行时的对应的transactionId
             val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-            saveToRedis(config, "close", BigDecimal.ZERO, position.abs().safeMultiply(OrderConstants.CONTRACT_VALUE).safeMultiply(entryPrice!!).safeMultiply(config.tpRatio), LocalDateTime.now().format(dateFormatter), transactionId!!)
+            buildRedisDataAndSave(config, "close", BigDecimal.ZERO, position.abs().safeMultiply(OrderConstants.CONTRACT_VALUE).safeMultiply(entryPrice!!).safeMultiply(config.tpRatio), LocalDateTime.now().format(dateFormatter), transactionId!!)
+            savePositionToMongo(state)
         } else if (change < BigDecimal.ZERO && change.abs() > config.addPositionRatio) {
             val addCount = if (isLong) state.longAddCount else state.shortAddCount
             // 只有加仓到对应的阈值的时候且亏损率达到预设值才会涉及到止损
@@ -170,7 +164,8 @@ class MartinStrategy(
                 if (isLong) resetLong(state) else resetShort(state)
                 // 止损的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-                saveToRedis(config, "close", BigDecimal.ZERO, position.abs().safeMultiply(OrderConstants.CONTRACT_VALUE).safeMultiply(entryPrice!!).safeMultiply(config.slRatio.negate()), LocalDateTime.now().format(dateFormatter), transactionId!!)
+                buildRedisDataAndSave(config, "close", BigDecimal.ZERO, position.abs().safeMultiply(OrderConstants.CONTRACT_VALUE).safeMultiply(entryPrice!!).safeMultiply(config.slRatio.negate()), LocalDateTime.now().format(dateFormatter), transactionId!!)
+                savePositionToMongo(state)
             } else if (addCount < config.maxAddPositionCount) {
                 // 未达阈值，到达加仓触发点时可以继续加仓
                 // 1 2       2 4       3 8
@@ -190,7 +185,8 @@ class MartinStrategy(
                 logger.info("➕ 加仓 @ $price 当前持仓: ${if (isLong) state.longPosition else state.shortPosition}")
                 // 加仓的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-                saveToRedis(config, "add", addSize, BigDecimal.ZERO, "", transactionId!!)
+                buildRedisDataAndSave(config, "add", addSize, BigDecimal.ZERO, "", transactionId!!)
+                savePositionToMongo(state)
             }
         }
     }
@@ -229,7 +225,7 @@ class MartinStrategy(
         return total
     }
 
-    private fun saveToRedis(config: MartinConfig, op: String, addPositionAmount: BigDecimal, result: BigDecimal, time: String, transactionId: String) {
+    private suspend fun buildRedisDataAndSave(config: MartinConfig, op: String, addPositionAmount: BigDecimal, result: BigDecimal, time: String, transactionId: String) {
         // 不同name的策略分开存储，因为其配置项各不相同
         val data = TradingData(
             transactionId = transactionId,
@@ -244,7 +240,7 @@ class MartinStrategy(
             logger.debug("Local debug, skip save to redis")
             return
         }
-        coroutineSaveToRedis(data, op)
+        saveToRedis(data, op)
     }
 
     private fun resetLong(state: PositionState) {
