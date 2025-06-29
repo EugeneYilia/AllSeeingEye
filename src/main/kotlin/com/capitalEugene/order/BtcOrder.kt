@@ -52,6 +52,7 @@ object BtcOrder {
             try {
                 logger.info("🚀 尝试建立 WebSocket 连接...")
                 client.webSocket(url) {
+                    // 连接成功时，重置retryInterval为默认值5000L
                     retryInterval = 5000L
                     subscribeChannels(this)
                     incoming.consumeEach { frame ->
@@ -106,7 +107,7 @@ object BtcOrder {
                     val price = bidEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                     val size = bidEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                     if (price != null && size != null) {
-                        if (size.compareTo(BigDecimal.ZERO) == 0) {
+                        if (size == BigDecimal.ZERO) {
                             bidsMap.remove(price)
                         } else {
                             // upsert操作   过去有就update  没有就创建出来新的
@@ -120,7 +121,7 @@ object BtcOrder {
                     val price = askEntry.jsonArray.getOrNull(0)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                     val size = askEntry.jsonArray.getOrNull(1)?.jsonPrimitive?.contentOrNull?.toBigDecimalOrNull()
                     if (price != null && size != null) {
-                        if (size.compareTo(BigDecimal.ZERO) == 0) {
+                        if (size == BigDecimal.ZERO) {
                             asksMap.remove(price)
                         } else {
                             asksMap[price] = size

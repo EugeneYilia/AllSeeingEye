@@ -33,6 +33,7 @@ object BtcKLine {
             try {
                 logger.info("🚀 尝试建立 WebSocket 连接...")
                 client.webSocket(url) {
+                    // 连接成功时，重置retryInterval为默认值5000L
                     retryInterval = 5000L
                     subscribeChannels(this)
                     incoming.consumeEach { frame ->
