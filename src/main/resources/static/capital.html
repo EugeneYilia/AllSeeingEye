@@ -13,7 +13,6 @@
             margin: 0;
             padding: 0;
         }
-
         .container {
             max-width: 650px;
             margin: 30px auto;
@@ -22,38 +21,32 @@
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 10px;
         }
-
         .input-group {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
         }
-
-        .input-group select {
+        .input-group select,
+        .input-group button {
             padding: 6px 10px;
             font-size: 1em;
             border: 1px solid #ccc;
+        }
+        .input-group select {
             border-radius: 4px 0 0 4px;
             outline: none;
         }
-
         .input-group button {
-            padding: 6px 12px;
-            font-size: 1em;
-            border: 1px solid #ccc;
             border-left: none;
             background: #0066cc;
             color: #fff;
             border-radius: 0 4px 4px 0;
             cursor: pointer;
         }
-
         .section-title {
             font-size: 1.1em;
             color: #666;
@@ -61,23 +54,16 @@
             border-bottom: 1px solid #ddd;
             padding-bottom: 5px;
         }
-
         .item {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
-
-        .item:last-child {
-            border-bottom: none;
-        }
-
         .label {
             font-weight: bold;
             color: #555;
         }
-
         .value {
             color: #111;
             font-weight: 500;
@@ -88,9 +74,7 @@
 <div class="container">
     <h1>📊 策略状态面板</h1>
     <div class="input-group">
-        <select id="strategy_select">
-            <option value="">加载中...</option>
-        </select>
+        <select id="strategy_select"><option value="">加载中...</option></select>
         <button onclick="loadStrategy()">加载</button>
     </div>
 
@@ -124,177 +108,121 @@
     <div id="kline_chart" style="height: 400px;"></div>
 </div>
 
+<script src="/static/js/kline.js"></script>
 <script>
     let strategyName = "";
+    let chart, candleSeries;
+    let lastTimestamp = 0;
+    let klineType = "BTC-USDT-SWAP";
+    let timezoneOffsetHours = 8;
 
     async function fetchAllStrategies() {
-        try {
-            const res = await fetch("/v1/strategy/all", {
-                headers: {
-                    "Accept": "application/json"
-                }
-            });
-            const strategies = await res.json();
-            const select = document.getElementById("strategy_select");
-            select.innerHTML = `<option value="">请选择策略</option>`;
-            strategies.forEach(name => {
-                const option = document.createElement("option");
-                option.value = name;
-                option.text = name;
-                select.appendChild(option);
-            });
-        } catch (err) {
-            console.error("策略列表加载失败:", err);
-        }
+        const res = await fetch("/v1/strategy/all");
+        const strategies = await res.json();
+        const select = document.getElementById("strategy_select");
+        select.innerHTML = `<option value="">请选择策略</option>`;
+        strategies.forEach(name => {
+            const option = document.createElement("option");
+            option.value = name;
+            option.text = name;
+            select.appendChild(option);
+        });
     }
 
     async function fetchPosition() {
         if (!strategyName) return;
-        try {
-            const res = await fetch(`/v1/strategy/position/state/${strategyName}`);
-            const data = await res.json();
-
-            document.getElementById("strategy_name").innerText = data.strategy;
-            document.getElementById("long_pos").innerText = data.longPosition;
-            document.getElementById("short_pos").innerText = data.shortPosition;
-            document.getElementById("long_entry").innerText = data.longEntryPrice || "-";
-            document.getElementById("short_entry").innerText = data.shortEntryPrice || "-";
-            document.getElementById("long_count").innerText = data.longAddCount;
-            document.getElementById("short_count").innerText = data.shortAddCount;
-            document.getElementById("capital").innerText = data.capital + " USDT";
-            document.getElementById("long_id").innerText = data.longTransactionId || "-";
-            document.getElementById("short_id").innerText = data.shortTransactionId || "-";
-        } catch (err) {
-            console.error("实时持仓信息获取失败:", err);
-        }
+        const res = await fetch(`/v1/strategy/position/state/${strategyName}`);
+        const data = await res.json();
+        document.getElementById("strategy_name").innerText = data.strategy;
+        document.getElementById("long_pos").innerText = data.longPosition;
+        document.getElementById("short_pos").innerText = data.shortPosition;
+        document.getElementById("long_entry").innerText = data.longEntryPrice || "-";
+        document.getElementById("short_entry").innerText = data.shortEntryPrice || "-";
+        document.getElementById("long_count").innerText = data.longAddCount;
+        document.getElementById("short_count").innerText = data.shortAddCount;
+        document.getElementById("capital").innerText = data.capital + " USDT";
+        document.getElementById("long_id").innerText = data.longTransactionId || "-";
+        document.getElementById("short_id").innerText = data.shortTransactionId || "-";
     }
 
     async function fetchAggregate() {
         if (!strategyName) return;
-        try {
-            const res = await fetch(`/v1/strategy/aggregate/${strategyName}`);
-            const data = await res.json();
-
-            document.getElementById("agg_id").innerText = data.transactionId;
-            document.getElementById("agg_holding").innerText = data.holdingAmount;
-            document.getElementById("agg_open").innerText = data.openTime;
-            document.getElementById("agg_close").innerText = data.closeTime || "-";
-            document.getElementById("agg_return").innerText = (parseFloat(data.returnPerformance) * 100).toFixed(2) + "%";
-        } catch (err) {
-            console.error("聚合交易信息获取失败:", err);
-        }
+        const res = await fetch(`/v1/strategy/aggregate/${strategyName}`);
+        const data = await res.json();
+        document.getElementById("agg_id").innerText = data.transactionId;
+        document.getElementById("agg_holding").innerText = data.holdingAmount;
+        document.getElementById("agg_open").innerText = data.openTime;
+        document.getElementById("agg_close").innerText = data.closeTime || "-";
+        document.getElementById("agg_return").innerText = (parseFloat(data.returnPerformance) * 100).toFixed(2) + "%";
     }
 
     function loadStrategy() {
-        const select = document.getElementById("strategy_select");
-        const selected = select.value;
-        if (!selected) {
-            alert("请选择策略");
-            return;
-        }
-        strategyName = selected;
+        strategyName = document.getElementById("strategy_select").value;
+        if (!strategyName) return alert("请选择策略");
         fetchPosition();
         fetchAggregate();
     }
 
-    fetchAllStrategies();
-    setInterval(fetchPosition, 1000); // 实时刷新持仓状态
-</script>
-
-<!-- K Line -->
-<script src="/static/js/kline.js"></script>
-<script>
-    let chart, candleSeries;
-    let lastTimestamp = 0;
-    let klineType = "BTC-USDT-SWAP";// 与后端 OrderConstants 保持一致
-    let timezoneOffsetHours = 8;
-
     function initKlineChart() {
-        const chartContainer = document.getElementById("kline_chart");
-
-        chart = LightweightCharts.createChart(chartContainer, {
-            width: chartContainer.clientWidth,
+        const container = document.getElementById("kline_chart");
+        chart = LightweightCharts.createChart(container, {
+            width: container.clientWidth,
             height: 400,
-            layout: {
-                background: { color: '#ffffff' },
-                textColor: '#000',
-            },
-            grid: {
-                vertLines: { color: '#eee' },
-                horzLines: { color: '#eee' },
-            },
+            layout: { background: { color: '#fff' }, textColor: '#000' },
+            grid: { vertLines: { color: '#eee' }, horzLines: { color: '#eee' } },
             timeScale: {
                 timeVisible: true,
                 secondsVisible: false,
                 tickMarkFormatter: (unixTime) => {
                     const date = new Date(unixTime * 1000);
                     return date.toLocaleTimeString('zh-CN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
+                        hour: '2-digit', minute: '2-digit',
                         hour12: false,
                         timeZone: timezoneOffsetHours === 0 ? 'UTC' : 'Asia/Shanghai'
                     });
                 }
             }
         });
-
         candleSeries = chart.addCandlestickSeries();
 
-        // ✅ 订阅鼠标悬浮事件并格式化时间
-        chart.subscribeCrosshairMove(function (param) {
-            if (!param || !param.time || !param.seriesData) return;
-
-            const unixTime = param.time;
-            const date = new Date(unixTime * 1000);
-            const adjustedTime = date.toLocaleTimeString('zh-CN', {
-                hour: '2-digit',
-                minute: '2-digit',
+        chart.subscribeCrosshairMove(param => {
+            if (!param?.time) return;
+            const date = new Date(param.time * 1000);
+            const label = date.toLocaleTimeString('zh-CN', {
+                hour: '2-digit', minute: '2-digit',
                 hour12: false,
                 timeZone: timezoneOffsetHours === 0 ? 'UTC' : 'Asia/Shanghai'
             });
-
-            console.log(`🕒 鼠标悬浮时间点: ${adjustedTime}`);
+            console.log(`🕒 鼠标悬浮时间: ${label}`);
         });
 
         updateTimeFormatter();
     }
 
     async function fetchKlineUpdate() {
-        try {
-            const res = await fetch(`/v1/kline/${klineType}`);
-            if (!res.ok) throw new Error("K线数据加载失败");
-            const data = await res.json();
+        const res = await fetch(`/v1/kline/${klineType}`);
+        const data = await res.json();
+        const offsetSec = timezoneOffsetHours * 3600;
+        const formatted = data.map(d => ({
+            time: Math.floor(d.timestamp / 1000) + offsetSec,
+            open: parseFloat(d.open),
+            high: parseFloat(d.high),
+            low: parseFloat(d.low),
+            close: parseFloat(d.close),
+        }));
 
-            const formatted = data.map(d => ({
-                time: Math.floor(d.timestamp / 1000),
-                open: parseFloat(d.open),
-                high: parseFloat(d.high),
-                low: parseFloat(d.low),
-                close: parseFloat(d.close),
-            }));
-
-            // 第一次加载
-            if (lastTimestamp === 0 && formatted.length > 0) {
-                candleSeries.setData(formatted);
-                lastTimestamp = formatted[formatted.length - 1].time;
-                return;
-            }
-
-            // 增量加载新数据
-            const newBars = formatted.filter(bar => bar.time > lastTimestamp);
-            if (newBars.length > 0) {
-                newBars.forEach(bar => candleSeries.update(bar));
-                lastTimestamp = newBars[newBars.length - 1].time;
-            }
-        } catch (err) {
-            console.error("K线图更新失败:", err);
+        if (lastTimestamp === 0 && formatted.length) {
+            candleSeries.setData(formatted);
+            lastTimestamp = formatted.at(-1).time;
+        } else {
+            const newBars = formatted.filter(b => b.time > lastTimestamp);
+            newBars.forEach(bar => candleSeries.update(bar));
+            if (newBars.length) lastTimestamp = newBars.at(-1).time;
         }
     }
 
     function updateTimeFormatter() {
-        const select = document.getElementById("timezone_select");
-        timezoneOffsetHours = parseInt(select.value);
-
+        timezoneOffsetHours = parseInt(document.getElementById("timezone_select").value);
         const timeZone = timezoneOffsetHours === 0 ? 'UTC' : 'Asia/Shanghai';
 
         chart.applyOptions({
@@ -313,11 +241,12 @@
     }
 
     window.addEventListener("load", () => {
+        fetchAllStrategies();
         initKlineChart();
         fetchKlineUpdate();
-        setInterval(fetchKlineUpdate, 1000);  // 每1秒增量更新
+        setInterval(fetchKlineUpdate, 1000);
+        setInterval(fetchPosition, 1000);
     });
 </script>
-
 </body>
 </html>
