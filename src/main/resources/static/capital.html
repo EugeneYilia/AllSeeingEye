@@ -206,7 +206,8 @@
 <script>
     let chart, candleSeries;
     let lastTimestamp = 0;
-    let klineType = "BTC-USDT-SWAP";  // 与后端 OrderConstants 保持一致
+    let klineType = "BTC-USDT-SWAP";// 与后端 OrderConstants 保持一致
+    let timezoneOffsetHours = 8;
 
     function initKlineChart() {
         const chartContainer = document.getElementById("kline_chart");
@@ -225,19 +226,37 @@
             timeScale: {
                 timeVisible: true,
                 secondsVisible: false,
-                // ✅ 加入 tickMarkFormatter 来显示北京时间
                 tickMarkFormatter: (unixTime) => {
-                    const date = new Date((unixTime + 8 * 3600) * 1000); // UTC+8
-                    const hours = date.getHours().toString().padStart(2, '0');
-                    const minutes = date.getMinutes().toString().padStart(2, '0');
-                    return `${hours}:${minutes}`;
+                    const date = new Date(unixTime * 1000);
+                    return date.toLocaleTimeString('zh-CN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                        timeZone: timezoneOffsetHours === 0 ? 'UTC' : 'Asia/Shanghai'
+                    });
                 }
             }
         });
 
-        updateTimeFormatter();
-
         candleSeries = chart.addCandlestickSeries();
+
+        // ✅ 订阅鼠标悬浮事件并格式化时间
+        chart.subscribeCrosshairMove(function (param) {
+            if (!param || !param.time || !param.seriesData) return;
+
+            const unixTime = param.time;
+            const date = new Date(unixTime * 1000);
+            const adjustedTime = date.toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+                timeZone: timezoneOffsetHours === 0 ? 'UTC' : 'Asia/Shanghai'
+            });
+
+            console.log(`🕒 鼠标悬浮时间点: ${adjustedTime}`);
+        });
+
+        updateTimeFormatter();
     }
 
     async function fetchKlineUpdate() {
@@ -271,8 +290,6 @@
             console.error("K线图更新失败:", err);
         }
     }
-
-    let timezoneOffsetHours = 8;
 
     function updateTimeFormatter() {
         const select = document.getElementById("timezone_select");

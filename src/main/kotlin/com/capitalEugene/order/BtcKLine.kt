@@ -117,7 +117,7 @@ object BtcKLine {
             val isEnd = first.getOrNull(8)?.jsonPrimitive?.contentOrNull ?: return
 
             if(isEnd == "1") {
-                logger.info("🕐 [$instId | ${channel.uppercase()}] 时间: $timestamp 开: $open 高: $high 低: $low 收: $close 量: $volume")
+//                logger.info("🕐 [$instId | ${channel.uppercase()}] 时间: $timestamp 开: $open 高: $high 低: $low 收: $close 量: $volume")
 
                 val kLineBar = KlineBar(
                     timestamp = timestamp,
