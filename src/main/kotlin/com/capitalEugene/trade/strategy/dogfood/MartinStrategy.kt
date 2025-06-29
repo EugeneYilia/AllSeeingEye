@@ -4,6 +4,7 @@ import com.capitalEugene.agent.exchange.okx.TradeAgent.closePosition
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openLong
 import com.capitalEugene.agent.exchange.okx.TradeAgent.openShort
 import com.capitalEugene.agent.exchange.okx.TradeAgent.setCrossLeverage
+import com.capitalEugene.agent.redis.RedisAgent.coroutineSaveToRedis
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.common.utils.TradeUtils.generateTransactionId
 import com.capitalEugene.common.utils.safeDiv
@@ -77,8 +78,8 @@ class MartinStrategy(
                     val state = stateMap["martin_${config.symbol}_${config.configName}"]!!
 
 //                    logger.info("buy_power: $buyPower       sell_power: $sellPower")
-                    val longSignal = buyPower > sellPower * config.multiplesOfTheGap
-                    val shortSignal = sellPower > buyPower * config.multiplesOfTheGap
+                    val longSignal = buyPower > sellPower.safeMultiply(config.multiplesOfTheGap)
+                    val shortSignal = sellPower > buyPower.safeMultiply(config.multiplesOfTheGap)
 
                     handleLong(config, state, price, longSignal)
                     handleShort(config, state, price, shortSignal)
@@ -93,13 +94,13 @@ class MartinStrategy(
         if (state.longPosition == BigDecimal.ZERO && signal) {
             operateOpen(config, state, price, true)
         } else if (state.longPosition != BigDecimal.ZERO) {
-            val change = (price - state.longEntryPrice!!) .safeDiv(state.longEntryPrice!!)
+            val change = (price - state.longEntryPrice!!).safeDiv(state.longEntryPrice!!)
             // 持仓收益(usdt) = 张数 * 0.01(每张为0.01BTC) * 开仓均价 * 变化率
             val pnl = state.longPosition
                 .safeMultiply(OrderConstants.CONTRACT_VALUE)
                 .safeMultiply(state.longEntryPrice!!)
                 .safeMultiply(change)
-            logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal.valueOf(100))}%")
+            logger.info("💰 多仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change.safeMultiply(BigDecimal.valueOf(100)))}%")
             processPosition(config, state, price, pnl, change, true)
         }
     }
@@ -113,7 +114,7 @@ class MartinStrategy(
                 .safeMultiply(OrderConstants.CONTRACT_VALUE)
                 .safeMultiply(state.shortEntryPrice!!)
                 .safeMultiply(change)
-            logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change * BigDecimal.valueOf(100))}%")
+            logger.info("💰 空仓盈亏: ${"%.5f".format(pnl)} 变动: ${"%.2f".format(change.safeMultiply(BigDecimal.valueOf(100)))}%")
             processPosition(config, state, price, pnl, change, false)
         }
     }
@@ -153,11 +154,11 @@ class MartinStrategy(
             if (isLong) resetLong(state) else resetShort(state)
             // 止盈的时候用运行时的对应的transactionId
             val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-            saveToRedis(config, "close", BigDecimal.ZERO, position.abs() * OrderConstants.CONTRACT_VALUE * entryPrice!! * config.tpRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
+            saveToRedis(config, "close", BigDecimal.ZERO, position.abs().safeMultiply(OrderConstants.CONTRACT_VALUE).safeMultiply(entryPrice!!).safeMultiply(config.tpRatio), LocalDateTime.now().format(dateFormatter), transactionId!!)
         } else if (change < BigDecimal.ZERO && change.abs() > config.addPositionRatio) {
             val addCount = if (isLong) state.longAddCount else state.shortAddCount
             // 只有加仓到对应的阈值的时候且亏损率达到预设值才会涉及到止损
-            if (change < -config.slRatio && addCount >= config.maxAddPositionCount) {
+            if (change < config.slRatio.negate() && addCount >= config.maxAddPositionCount) {
                 val side = if (isLong) "sell" else "buy"
                 val position = if (isLong) state.longPosition else state.shortPosition
                 val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
@@ -167,22 +168,22 @@ class MartinStrategy(
                 if (isLong) resetLong(state) else resetShort(state)
                 // 止损的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
-                saveToRedis(config, "close", BigDecimal.ZERO, position.abs() * OrderConstants.CONTRACT_VALUE * entryPrice!! * -config.slRatio, LocalDateTime.now().format(dateFormatter), transactionId!!)
+                saveToRedis(config, "close", BigDecimal.ZERO, position.abs().safeMultiply(OrderConstants.CONTRACT_VALUE).safeMultiply(entryPrice!!).safeMultiply(config.slRatio.negate()), LocalDateTime.now().format(dateFormatter), transactionId!!)
             } else if (addCount < config.maxAddPositionCount) {
                 // 未达阈值，到达加仓触发点时可以继续加仓
                 // 1 2       2 4       3 8
                 // 4 16      5 32      6 64
-                val addSize = config.positionSize * (BigDecimal.valueOf(2.0.pow(addCount)))
+                val addSize = config.positionSize.safeMultiply(BigDecimal.valueOf(2.0.pow(addCount)))
                 if (isLong) {
                     state.longAddCount++
                     config.accounts.forEach { openLong(config.symbol, price, addSize, it) }
                     state.longPosition += addSize
-                    state.longEntryPrice = (state.longEntryPrice!! * (state.longPosition - addSize) + price * addSize) / state.longPosition
+                    state.longEntryPrice = (state.longEntryPrice!!.safeMultiply(state.longPosition - addSize) + price.safeMultiply(addSize)).safeDiv(state.longPosition)
                 } else {
                     state.shortAddCount++
                     config.accounts.forEach { openShort(config.symbol, price, addSize, it) }
                     state.shortPosition += addSize
-                    state.shortEntryPrice = (state.shortEntryPrice!! * (state.shortPosition - addSize) + price * addSize) / state.shortPosition
+                    state.shortEntryPrice = (state.shortEntryPrice!!.safeMultiply(state.shortPosition - addSize) + price.safeMultiply(addSize)).safeDiv(state.shortPosition)
                 }
                 logger.info("➕ 加仓 @ $price 当前持仓: ${if (isLong) state.longPosition else state.shortPosition}")
                 // 加仓的时候用运行时的对应的transactionId
@@ -216,7 +217,9 @@ class MartinStrategy(
                 // 张数 * 0.01 = btc实际数量
                 // 实际价格 * btc实际数量 = 此价格的实际usdt挂单量
                 // 实时价格 * 张数 * 0.01
-                total += price * sizeRaw * BigDecimal.valueOf(0.01)
+                total += price
+                    .safeMultiply(sizeRaw)
+                    .safeMultiply(BigDecimal.valueOf(0.01))
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")
             }
