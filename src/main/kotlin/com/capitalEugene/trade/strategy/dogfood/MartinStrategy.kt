@@ -45,11 +45,16 @@ class MartinStrategy(
 
         configs.forEach { config ->
             config.accounts.forEach { setCrossLeverage(config.symbol, 100, it) }
-            val positionState = PositionState()
-            positionState.strategyShortName = "martin"
-            positionState.strategyFullName = "martin_${config.symbol}_${config.configName}"
-            positionState.capital = config.initCapital
-            martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"] = positionState
+
+            val strategyName = "martin_${config.symbol}_${config.configName}"
+
+            martinDogFoodStateMap.getOrPut(strategyName) {
+                PositionState(
+                    strategyShortName = "martin",
+                    strategyFullName = strategyName,
+                    capital = config.initCapital
+                )
+            }
         }
 
         while (true) {
