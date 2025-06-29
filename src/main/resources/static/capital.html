@@ -97,6 +97,16 @@
     <div class="item"><span class="label">平仓时间</span><span class="value" id="agg_close">-</span></div>
     <div class="item"><span class="label">收益率</span><span class="value" id="agg_return">-</span></div>
 
+    <div class="section-title">📊 策略统计信息</div>
+    <div class="item"><span class="label">止盈次数</span><span class="value" id="agg_tp_count">-</span></div>
+    <div class="item"><span class="label">止损次数</span><span class="value" id="agg_sl_count">-</span></div>
+    <div class="item"><span class="label">止盈总金额</span><span class="value" id="agg_tp_total">-</span></div>
+    <div class="item"><span class="label">止损总金额</span><span class="value" id="agg_sl_total">-</span></div>
+    <div class="item"><span class="label">平均单次盈利</span><span class="value" id="agg_avg_profit">-</span></div>
+    <div class="item"><span class="label">平均单次亏损</span><span class="value" id="agg_avg_loss">-</span></div>
+    <div class="item"><span class="label">资金变化率</span><span class="value" id="agg_cap_ratio">-</span></div>
+    <div class="item"><span class="label">平均持仓时间</span><span class="value" id="agg_avg_dur">-</span></div>
+
     <div class="section-title">📉 实时K线图（BTC-SWAP）</div>
     <div class="input-group">
         <label style="margin-right: 10px; font-weight: bold;">时区:</label>
@@ -133,7 +143,7 @@
         if (!strategyName) return;
         const res = await fetch(`/v1/strategy/position/state/${strategyName}`);
         const data = await res.json();
-        document.getElementById("strategy_name").innerText = data.strategy;
+        document.getElementById("strategy_name").innerText = data.strategyShortName || data.strategyFullName || "-";
         document.getElementById("long_pos").innerText = data.longPosition;
         document.getElementById("short_pos").innerText = data.shortPosition;
         document.getElementById("long_entry").innerText = data.longEntryPrice || "-";
@@ -149,11 +159,20 @@
         if (!strategyName) return;
         const res = await fetch(`/v1/strategy/aggregate/${strategyName}`);
         const data = await res.json();
-        document.getElementById("agg_id").innerText = data.transactionId;
-        document.getElementById("agg_holding").innerText = data.holdingAmount;
-        document.getElementById("agg_open").innerText = data.openTime;
+        document.getElementById("agg_id").innerText = data.transactionId || "-";
+        document.getElementById("agg_holding").innerText = data.holdingAmount || "-";
+        document.getElementById("agg_open").innerText = data.openTime || "-";
         document.getElementById("agg_close").innerText = data.closeTime || "-";
-        document.getElementById("agg_return").innerText = (parseFloat(data.returnPerformance) * 100).toFixed(2) + "%";
+        document.getElementById("agg_return").innerText = data.returnPerformance ? (parseFloat(data.returnPerformance) * 100).toFixed(2) + "%" : "-";
+
+        document.getElementById("agg_tp_count").innerText = data.takeProfitCount ?? "-";
+        document.getElementById("agg_sl_count").innerText = data.stopLossCount ?? "-";
+        document.getElementById("agg_tp_total").innerText = data.totalTakeProfitAmount ?? "-";
+        document.getElementById("agg_sl_total").innerText = data.totalStopLossAmount ?? "-";
+        document.getElementById("agg_avg_profit").innerText = data.avgProfitPerTrade ?? "-";
+        document.getElementById("agg_avg_loss").innerText = data.avgLossPerTrade ?? "-";
+        document.getElementById("agg_cap_ratio").innerText = data.capitalChangeRatio ? (parseFloat(data.capitalChangeRatio) * 100).toFixed(2) + "%" : "-";
+        document.getElementById("agg_avg_dur").innerText = data.avgHoldingDuration ?? "-";
     }
 
     function loadStrategy() {
@@ -184,18 +203,6 @@
             }
         });
         candleSeries = chart.addCandlestickSeries();
-
-        chart.subscribeCrosshairMove(param => {
-            if (!param?.time) return;
-            const date = new Date(param.time * 1000);
-            const label = date.toLocaleTimeString('zh-CN', {
-                hour: '2-digit', minute: '2-digit',
-                hour12: false,
-                timeZone: timezoneOffsetHours === 0 ? 'UTC' : 'Asia/Shanghai'
-            });
-            console.log(`🕒 鼠标悬浮时间: ${label}`);
-        });
-
         updateTimeFormatter();
     }
 
@@ -224,7 +231,6 @@
     function updateTimeFormatter() {
         timezoneOffsetHours = parseInt(document.getElementById("timezone_select").value);
         const timeZone = timezoneOffsetHours === 0 ? 'UTC' : 'Asia/Shanghai';
-
         chart.applyOptions({
             timeScale: {
                 tickMarkFormatter: (unixTime) => {
