@@ -22,4 +22,6 @@ data class MartinConfig(
     val configName: String = "Default",
     // 买卖方订单量差距倍数，会触发开仓的倍数阈值
     val multiplesOfTheGap : BigDecimal = BigDecimal.valueOf(3.333),
+    // 初始资本数
+    val initCapital : BigDecimal = BigDecimal.valueOf(100.00),
 )

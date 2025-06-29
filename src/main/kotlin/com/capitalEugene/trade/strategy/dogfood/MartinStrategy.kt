@@ -48,6 +48,7 @@ class MartinStrategy(
             val positionState = PositionState()
             positionState.strategyShortName = "martin"
             positionState.strategyFullName = "martin_${config.symbol}_${config.configName}"
+            positionState.capital = config.initCapital
             martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"] = positionState
         }
 

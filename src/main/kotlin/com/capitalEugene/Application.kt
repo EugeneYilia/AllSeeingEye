@@ -84,6 +84,7 @@ suspend fun Application.module() {
                     positionSize = BigDecimal.valueOf(0.05),
                     accounts = dogFoodAccounts,
                     multiplesOfTheGap = BigDecimal.valueOf(1.678),
+                    initCapital = BigDecimal.valueOf(100.00),
                 )
 
                 val selfHostMartinConfig = MartinConfig(
@@ -94,6 +95,7 @@ suspend fun Application.module() {
                     accounts = selfHostAccounts,
                     configName = "handsome_dog_0.5",
                     multiplesOfTheGap = BigDecimal.valueOf(1.888),
+                    initCapital = BigDecimal.valueOf(800.00),
                 )
                 MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
             } catch (e: Exception) {
