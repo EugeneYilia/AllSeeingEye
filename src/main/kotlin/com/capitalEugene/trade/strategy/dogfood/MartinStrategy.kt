@@ -236,10 +236,6 @@ class MartinStrategy(
             holdingAmount = addPositionAmount
         )
 
-        if(serverConfig!!.isLocalDebug) {
-            logger.debug("Local debug, skip save to redis")
-            return
-        }
         saveToRedis(data, op)
     }
 
