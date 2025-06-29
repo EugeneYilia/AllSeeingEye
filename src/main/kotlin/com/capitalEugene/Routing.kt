@@ -25,6 +25,8 @@ fun Application.configureRouting() {
             prettyPrint = false
             isLenient = false
             ignoreUnknownKeys = true
+            // false时会省略所有没有显式修改的默认值字段
+            encodeDefaults = true
         })
     }
 
