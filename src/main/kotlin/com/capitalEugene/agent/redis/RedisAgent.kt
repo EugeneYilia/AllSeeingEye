@@ -1,8 +1,10 @@
 package com.capitalEugene.agent.redis
 
+import com.capitalEugene.agent.exchange.okx.TradeAgent
 import com.capitalEugene.common.utils.safeDiv
 import com.capitalEugene.model.TradingAggregateResult
 import com.capitalEugene.model.TradingData
+import com.capitalEugene.serverConfig
 import io.lettuce.core.RedisClient
 import io.lettuce.core.api.coroutines
 import kotlinx.coroutines.*
@@ -25,6 +27,11 @@ object RedisAgent {
 
     // 启动保存协程
     fun coroutineSaveToRedis(data: TradingData, operation: String) {
+        if(serverConfig!!.isLocalDebug) {
+            logger.debug("Local debug, skip save to redis")
+            return
+        }
+
         redisScope.launch {
             try {
                 saveToRedis(data, operation)

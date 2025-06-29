@@ -4,6 +4,7 @@ import com.capitalEugene.common.constants.TradeConstants
 import com.capitalEugene.common.utils.TimeUtils
 import com.capitalEugene.common.utils.TradeUtils
 import com.capitalEugene.secrets.ApiSecret
+import com.capitalEugene.serverConfig
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -12,6 +13,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.serverConfig
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -69,6 +71,11 @@ object TradeAgent {
         size: BigDecimal,
         apiSecret: ApiSecret): JsonObject?
     {
+        if(serverConfig!!.isLocalDebug) {
+            logger.debug("Local debug, skip place order")
+            return null
+        }
+
         val path = "/api/v5/trade/order"
         val url = "$BASE_URL$path"
         val body = buildJsonObject {

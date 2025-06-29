@@ -2,6 +2,7 @@ package com.capitalEugene
 
 import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.common.constants.OrderConstants
+import com.capitalEugene.loadServerConfig
 import com.capitalEugene.model.config.ServerConfig
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.BtcKLine
@@ -25,9 +26,12 @@ fun main(args: Array<String>) {
     EngineMain.main(args)
 }
 
+var serverConfig : ServerConfig? = null
+
 // 应用模块：既启动 API，也启动 WebSocket 与定时任务
 fun Application.module() {
-    val serverConfig = loadServerConfig()
+
+    serverConfig = loadServerConfig()
 
     // 配置Api服务
     configureRouting()
@@ -67,31 +71,29 @@ fun Application.module() {
             }
         }
 
-        if(!serverConfig.isLocalDebug) {
-            cpuSchedulerScope.launch {
-                try {
-                    logger.info("开始启动策略服务")
-                    // 交易策略配置启动
-                    val dogfoodMartinConfig = MartinConfig(
-                        symbol = OrderConstants.BTC_SWAP,
-                        positionSize = BigDecimal.valueOf(0.05),
-                        accounts = dogFoodAccounts,
-                        multiplesOfTheGap = BigDecimal.valueOf(1.678),
-                    )
+        cpuSchedulerScope.launch {
+            try {
+                logger.info("开始启动策略服务")
+                // 交易策略配置启动
+                val dogfoodMartinConfig = MartinConfig(
+                    symbol = OrderConstants.BTC_SWAP,
+                    positionSize = BigDecimal.valueOf(0.05),
+                    accounts = dogFoodAccounts,
+                    multiplesOfTheGap = BigDecimal.valueOf(1.678),
+                )
 
-                    val selfHostMartinConfig = MartinConfig(
-                        symbol = OrderConstants.BTC_SWAP,
-                        positionSize = BigDecimal.valueOf(0.04),
-                        tpRatio = BigDecimal.valueOf(0.0048),
-                        maxAddPositionCount = 4,
-                        accounts = selfHostAccounts,
-                        configName = "handsome_dog_0.5",
-                        multiplesOfTheGap = BigDecimal.valueOf(1.888),
-                    )
-                    MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
-                } catch (e: Exception) {
-                    logger.error("❌ 运行 MartinStrategy 出错", e)
-                }
+                val selfHostMartinConfig = MartinConfig(
+                    symbol = OrderConstants.BTC_SWAP,
+                    positionSize = BigDecimal.valueOf(0.04),
+                    tpRatio = BigDecimal.valueOf(0.0048),
+                    maxAddPositionCount = 4,
+                    accounts = selfHostAccounts,
+                    configName = "handsome_dog_0.5",
+                    multiplesOfTheGap = BigDecimal.valueOf(1.888),
+                )
+                MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
+            } catch (e: Exception) {
+                logger.error("❌ 运行 MartinStrategy 出错", e)
             }
         }
     }
