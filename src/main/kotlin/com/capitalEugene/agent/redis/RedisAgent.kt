@@ -1,5 +1,6 @@
 package com.capitalEugene.agent.redis
 
+import com.capitalEugene.common.utils.safeDiv
 import com.capitalEugene.model.TradingAggregateResult
 import com.capitalEugene.model.TradingData
 import io.lettuce.core.RedisClient
@@ -9,6 +10,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 
 object RedisAgent {
     // 初始化 Redis
@@ -113,13 +115,13 @@ object RedisAgent {
         val formatter = DateTimeFormatter.ISO_DATE_TIME
         var takeProfitCount = 0
         var stopLossCount = 0
-        var totalTakeProfitAmount = 0.0
-        var totalStopLossAmount = 0.0
-        var totalHoldingDurationSec = 0.0
-        var initialTotal = 0.0
-        var finalTotal = 0.0
-        val profitList = mutableListOf<Double>()
-        val lossList = mutableListOf<Double>()
+        var totalTakeProfitAmount = BigDecimal.ZERO
+        var totalStopLossAmount = BigDecimal.ZERO
+        var totalHoldingDurationSec = BigDecimal.ZERO
+        var initialTotal = BigDecimal.ZERO
+        var finalTotal = BigDecimal.ZERO
+        val profitList = mutableListOf<BigDecimal>()
+        val lossList = mutableListOf<BigDecimal>()
 
         for (key in keys) {
             val data = mutableMapOf<String, String>()
@@ -133,14 +135,14 @@ object RedisAgent {
             val open_timeRaw = data["open_time"]
             if (open_timeRaw.isNullOrBlank()) continue
 
-            val profitAmount = data["profit_amount"]?.toDoubleOrNull() ?: continue
-            val holdingAmount = data["holding_amount"]?.toDoubleOrNull() ?: continue
+            val profitAmount = data["profit_amount"]?.toBigDecimalOrNull() ?: continue
+            val holdingAmount = data["holding_amount"]?.toBigDecimalOrNull() ?: continue
 
-            if (profitAmount > 0) {
+            if (profitAmount > BigDecimal.ZERO) {
                 takeProfitCount++
                 totalTakeProfitAmount += profitAmount
                 profitList.add(profitAmount)
-            } else if (profitAmount < 0) {
+            } else if (profitAmount < BigDecimal.ZERO) {
                 stopLossCount++
                 totalStopLossAmount += profitAmount
                 lossList.add(profitAmount)
@@ -154,7 +156,7 @@ object RedisAgent {
 
             val openTime = LocalDateTime.parse(open_timeRaw, formatter)
             val closeTime = LocalDateTime.parse(closeTimeRaw, formatter)
-            val durationSec = Duration.between(openTime, closeTime).seconds.toDouble()
+            val durationSec = Duration.between(openTime, closeTime).seconds.toBigDecimal()
             // 总持仓时间
             totalHoldingDurationSec += durationSec
         }
@@ -163,15 +165,15 @@ object RedisAgent {
         val totalTrades = takeProfitCount + stopLossCount
 
         // 平均盈利金额
-        val avgProfit = if (takeProfitCount > 0) totalTakeProfitAmount / takeProfitCount else 0.0
+        val avgProfit = if (takeProfitCount > 0) totalTakeProfitAmount.safeDiv(takeProfitCount.toBigDecimal()) else BigDecimal.ZERO
         // 平均亏损金额
-        val avgLoss = if (stopLossCount > 0) totalStopLossAmount / stopLossCount else 0.0
+        val avgLoss = if (stopLossCount > 0) totalStopLossAmount.safeDiv(stopLossCount.toBigDecimal()) else BigDecimal.ZERO
 
         // 总资本变化情况
-        val capitalChange = if (initialTotal > 0) finalTotal - initialTotal else 0.0
+        val capitalChange = if (initialTotal > BigDecimal.ZERO) finalTotal - initialTotal else BigDecimal.ZERO
 
-        // 平均持仓分钟数
-        val avgHoldingMinutes = if (totalTrades > 0) totalHoldingDurationSec / 60 / totalTrades else 0.0
+        // 平均持仓分钟数         持仓总秒数 / 60 = 持仓总分钟数         持仓总分钟数 / totalTrades = 平均持仓分钟数
+        val avgHoldingMinutes = if (totalTrades > 0) totalHoldingDurationSec.safeDiv(60.toBigDecimal()).safeDiv(totalTrades.toBigDecimal()) else BigDecimal.ZERO
 
 
         return TradingAggregateResult(

@@ -1,12 +1,14 @@
 package com.capitalEugene.model
 
+import java.math.BigDecimal
+
 data class TradingAggregateResult(
     val takeProfitCount: Int,
     val stopLossCount: Int,
-    val totalTakeProfitAmount: Double,
-    val totalStopLossAmount: Double,
-    val avgProfitPerTrade: Double,
-    val avgLossPerTrade: Double,
-    val capitalChangeRatio: Double,
-    val avgHoldingDuration: Double,
+    val totalTakeProfitAmount: BigDecimal,
+    val totalStopLossAmount: BigDecimal,
+    val avgProfitPerTrade: BigDecimal,
+    val avgLossPerTrade: BigDecimal,
+    val capitalChangeRatio: BigDecimal,
+    val avgHoldingDuration: BigDecimal,
 )
