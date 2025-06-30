@@ -22,7 +22,7 @@ data class TradingAggregateResult(
     val avgLossPerTrade: BigDecimal,
 
     @Serializable(with = BigDecimalAsStringSerializer::class)
-    val capitalChangeRatio: BigDecimal,
+    val capitalChange: BigDecimal,
 
     @Serializable(with = BigDecimalAsStringSerializer::class)
     val avgHoldingDuration: BigDecimal,

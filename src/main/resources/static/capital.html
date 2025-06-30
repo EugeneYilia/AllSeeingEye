@@ -97,8 +97,8 @@
     <div class="item"><span class="label">止损总金额</span><span class="value" id="agg_sl_total">-</span></div>
     <div class="item"><span class="label">平均单次盈利</span><span class="value" id="agg_avg_profit">-</span></div>
     <div class="item"><span class="label">平均单次亏损</span><span class="value" id="agg_avg_loss">-</span></div>
-    <div class="item"><span class="label">资金变化率</span><span class="value" id="agg_cap_ratio">-</span></div>
-    <div class="item"><span class="label">平均持仓时间</span><span class="value" id="agg_avg_dur">-</span></div>
+    <div class="item"><span class="label">资金变化情况(USDT)</span><span class="value" id="agg_cap_ratio">-</span></div>
+    <div class="item"><span class="label">平均持仓时间(分钟)</span><span class="value" id="agg_avg_dur">-</span></div>
 
     <div class="section-title">📉 实时K线图（BTC-SWAP）</div>
     <div class="input-group">
@@ -159,7 +159,7 @@
         document.getElementById("agg_sl_total").innerText = data.totalStopLossAmount ?? "-";
         document.getElementById("agg_avg_profit").innerText = data.avgProfitPerTrade ?? "-";
         document.getElementById("agg_avg_loss").innerText = data.avgLossPerTrade ?? "-";
-        document.getElementById("agg_cap_ratio").innerText = data.capitalChangeRatio ? (parseFloat(data.capitalChangeRatio) * 100).toFixed(2) + "%" : "-";
+        document.getElementById("agg_cap_ratio").innerText = data.capitalChange ?? "-";
         document.getElementById("agg_avg_dur").innerText = data.avgHoldingDuration ?? "-";
     }
 

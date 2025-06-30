@@ -89,6 +89,7 @@ suspend fun Application.module() {
                     accounts = dogFoodAccounts,
                     multiplesOfTheGap = BigDecimal.valueOf(1.789),
                     initCapital = BigDecimal.valueOf(100.00),
+                    addPositionRatio = BigDecimal.valueOf(0.0089)
                 )
 
                 val dogfoodMartinEthConfig = MartinConfig(
@@ -107,7 +108,7 @@ suspend fun Application.module() {
                     initCapital = BigDecimal.valueOf(100.00),
                 )
 
-                val selfHostMartinConfig = MartinConfig(
+                val selfHostMartinBtcConfig = MartinConfig(
                     symbol = OrderConstants.BTC_SWAP,
                     positionSize = BigDecimal.valueOf(0.12),
                     maxAddPositionCount = 4,
@@ -116,7 +117,22 @@ suspend fun Application.module() {
                     multiplesOfTheGap = BigDecimal.valueOf(1.888),
                     initCapital = BigDecimal.valueOf(800.00),
                 )
-                MartinStrategy(listOf(dogfoodMartinBtcConfig, dogfoodMartinEthConfig, dogfoodMartinDogeConfig, selfHostMartinConfig)).start()
+
+                val selfHostMartinEthConfig = MartinConfig(
+                    symbol = OrderConstants.ETH_SWAP,
+                    positionSize = BigDecimal.valueOf(0.06),
+                    maxAddPositionCount = 4,
+                    accounts = selfHostAccounts,
+                    multiplesOfTheGap = BigDecimal.valueOf(1.888),
+                    initCapital = BigDecimal.valueOf(800.00),
+                )
+
+                MartinStrategy(listOf(
+                    dogfoodMartinBtcConfig,
+                    dogfoodMartinEthConfig,
+                    dogfoodMartinDogeConfig,
+                    selfHostMartinBtcConfig,
+                    selfHostMartinEthConfig)).start()
             } catch (e: Exception) {
                 logger.error("❌ 运行 MartinStrategy 出错", e)
             }
