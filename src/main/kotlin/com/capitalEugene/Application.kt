@@ -87,7 +87,7 @@ suspend fun Application.module() {
                     symbol = OrderConstants.BTC_SWAP,
                     positionSize = BigDecimal.valueOf(0.06),
                     accounts = dogFoodAccounts,
-                    multiplesOfTheGap = BigDecimal.valueOf(1.888),
+                    multiplesOfTheGap = BigDecimal.valueOf(2.018),
                     initCapital = BigDecimal.valueOf(100.00),
                     addPositionRatio = BigDecimal.valueOf(0.0089)
                 )
@@ -104,7 +104,7 @@ suspend fun Application.module() {
                     symbol = OrderConstants.DOGE_SWAP,
                     positionSize = BigDecimal.valueOf(0.01),
                     accounts = dogFoodAccounts,
-                    multiplesOfTheGap = BigDecimal.valueOf(1.333),
+                    multiplesOfTheGap = BigDecimal.valueOf(1.234),
                     initCapital = BigDecimal.valueOf(100.00),
                 )
 
