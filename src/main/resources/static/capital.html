@@ -90,13 +90,6 @@
     <div class="item"><span class="label">多头交易ID</span><span class="value" id="long_id">-</span></div>
     <div class="item"><span class="label">空头交易ID</span><span class="value" id="short_id">-</span></div>
 
-    <div class="section-title">📑 最新交易信息</div>
-    <div class="item"><span class="label">交易ID</span><span class="value" id="agg_id">-</span></div>
-    <div class="item"><span class="label">持仓量</span><span class="value" id="agg_holding">-</span></div>
-    <div class="item"><span class="label">开仓时间</span><span class="value" id="agg_open">-</span></div>
-    <div class="item"><span class="label">平仓时间</span><span class="value" id="agg_close">-</span></div>
-    <div class="item"><span class="label">收益率</span><span class="value" id="agg_return">-</span></div>
-
     <div class="section-title">📊 策略统计信息</div>
     <div class="item"><span class="label">止盈次数</span><span class="value" id="agg_tp_count">-</span></div>
     <div class="item"><span class="label">止损次数</span><span class="value" id="agg_sl_count">-</span></div>
@@ -159,11 +152,6 @@
         if (!strategyName) return;
         const res = await fetch(`/v1/strategy/aggregate/${strategyName}`);
         const data = await res.json();
-        document.getElementById("agg_id").innerText = data.transactionId || "-";
-        document.getElementById("agg_holding").innerText = data.holdingAmount || "-";
-        document.getElementById("agg_open").innerText = data.openTime || "-";
-        document.getElementById("agg_close").innerText = data.closeTime || "-";
-        document.getElementById("agg_return").innerText = data.returnPerformance ? (parseFloat(data.returnPerformance) * 100).toFixed(2) + "%" : "-";
 
         document.getElementById("agg_tp_count").innerText = data.takeProfitCount ?? "-";
         document.getElementById("agg_sl_count").innerText = data.stopLossCount ?? "-";
