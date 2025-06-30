@@ -218,6 +218,7 @@
     function updateTimeFormatter() {
         timezoneOffsetHours = parseInt(document.getElementById("timezone_select").value);
         const timeZone = timezoneOffsetHours === 0 ? 'UTC' : 'Asia/Shanghai';
+
         chart.applyOptions({
             timeScale: {
                 tickMarkFormatter: (unixTime) => {
@@ -229,9 +230,22 @@
                         timeZone: timeZone
                     });
                 }
+            },
+            localization: {
+                timeFormatter: (unixTime) => {
+                    const date = new Date(unixTime * 1000);
+                    return date.toLocaleString('zh-CN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                        timeZone: timeZone
+                    });
+                }
             }
         });
     }
+
 
     window.addEventListener("load", () => {
         fetchAllStrategies();
