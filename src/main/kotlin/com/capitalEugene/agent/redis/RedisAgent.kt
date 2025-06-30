@@ -97,7 +97,7 @@ object RedisAgent {
             return null
         }
 
-        val formatter = DateTimeFormatter.ISO_DATE_TIME
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         var takeProfitCount = 0
         var stopLossCount = 0
         var totalTakeProfitAmount = BigDecimal.ZERO
