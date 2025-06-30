@@ -1,0 +1,2 @@
+# 最后的名称为策略fullName，替换最后的名称即可使用
+EVAL "local result = {} local keys = redis.call('SMEMBERS', KEYS[1]) for i, key in ipairs(keys) do local closeTime = redis.call('HGET', key, 'close_time') if not closeTime or closeTime == '' then table.insert(result, key) end end return result" 1 strategy:martin_BTC-USDT-SWAP_handsome_dog_0.5
