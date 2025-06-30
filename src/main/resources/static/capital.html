@@ -209,9 +209,8 @@
     async function fetchKlineUpdate() {
         const res = await fetch(`/v1/kline/${klineType}`);
         const data = await res.json();
-        const offsetSec = timezoneOffsetHours * 3600;
         const formatted = data.map(d => ({
-            time: Math.floor(d.timestamp / 1000) + offsetSec,
+            time: Math.floor(d.timestamp / 1000),  // ⚠️ 不要加 offset
             open: parseFloat(d.open),
             high: parseFloat(d.high),
             low: parseFloat(d.low),
