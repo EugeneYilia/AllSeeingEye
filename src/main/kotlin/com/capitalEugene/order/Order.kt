@@ -15,33 +15,42 @@ import java.util.TreeMap
 
 // 使用 TreeMap 保证价格自动排序
 val depthCache: MutableMap<String, MutableMap<String, SortedMap<BigDecimal, BigDecimal>>> = mutableMapOf(
-    OrderConstants.BTC_SPOT to mutableMapOf(
-        "bids" to TreeMap(reverseOrder()),
-        "asks" to TreeMap()
-    ),
+//    OrderConstants.BTC_SPOT to mutableMapOf(
+//        "bids" to TreeMap(reverseOrder()),
+//        "asks" to TreeMap()
+//    ),
     OrderConstants.BTC_SWAP to mutableMapOf(
         "bids" to TreeMap(reverseOrder()),
         "asks" to TreeMap()
-    )
+    ),
+    OrderConstants.ETH_SWAP to mutableMapOf(
+        "bids" to TreeMap(reverseOrder()),
+        "asks" to TreeMap()
+    ),
 )
 
 // 当前现货和合约的实时价格
 val priceCache = mutableMapOf<String, BigDecimal?>(
-    OrderConstants.BTC_SPOT to null,
-    OrderConstants.BTC_SWAP to null
+//    OrderConstants.BTC_SPOT to null,
+    OrderConstants.BTC_SWAP to null,
+    OrderConstants.ETH_SWAP to null,
 )
 
 object BtcOrder {
-    private val logger = LoggerFactory.getLogger("btc_order")
+    private val logger = LoggerFactory.getLogger("order")
 
     // 订阅的频道  订单簿和实时价格   分别有btc现货和合约
     val CHANNELS = listOf(
         // 订单簿
-        mapOf("channel" to "books", "instId" to OrderConstants.BTC_SPOT),
+//        mapOf("channel" to "books", "instId" to OrderConstants.BTC_SPOT),
         mapOf("channel" to "books", "instId" to OrderConstants.BTC_SWAP),
+        mapOf("channel" to "books", "instId" to OrderConstants.ETH_SWAP),
+        mapOf("channel" to "books", "instId" to OrderConstants.DOGE_SWAP),
         // 实时价格
-        mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SPOT),
+//        mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SPOT),
         mapOf("channel" to "tickers", "instId" to OrderConstants.BTC_SWAP),
+        mapOf("channel" to "tickers", "instId" to OrderConstants.ETH_SWAP),
+        mapOf("channel" to "tickers", "instId" to OrderConstants.DOGE_SWAP),
     )
 
     // 连接断开之后，也会一直重连

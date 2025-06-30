@@ -5,7 +5,7 @@ import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.model.config.ServerConfig
 import com.capitalEugene.model.strategy.martin.MartinConfig
-import com.capitalEugene.order.BtcKLine
+import com.capitalEugene.order.KLine
 import com.capitalEugene.order.BtcOrder
 import com.capitalEugene.secrets.dogFoodAccounts
 import com.capitalEugene.secrets.selfHostAccounts
@@ -73,7 +73,7 @@ suspend fun Application.module() {
         ioSchedulerScope.launch {
             try {
                 logger.info("开始启动btc k线订阅")
-                BtcKLine.startWs(client)
+                KLine.startWs(client)
             } catch (e: Exception) {
                 logger.error("❌ 运行 BtcKLine 出错", e)
             }
@@ -83,25 +83,40 @@ suspend fun Application.module() {
             try {
                 logger.info("开始启动策略服务")
                 // 交易策略配置启动
-                val dogfoodMartinConfig = MartinConfig(
+                val dogfoodMartinBtcConfig = MartinConfig(
                     symbol = OrderConstants.BTC_SWAP,
-                    positionSize = BigDecimal.valueOf(0.05),
+                    positionSize = BigDecimal.valueOf(0.06),
                     accounts = dogFoodAccounts,
-                    multiplesOfTheGap = BigDecimal.valueOf(1.678),
+                    multiplesOfTheGap = BigDecimal.valueOf(1.789),
+                    initCapital = BigDecimal.valueOf(100.00),
+                )
+
+                val dogfoodMartinEthConfig = MartinConfig(
+                    symbol = OrderConstants.ETH_SWAP,
+                    positionSize = BigDecimal.valueOf(0.03),
+                    accounts = dogFoodAccounts,
+                    multiplesOfTheGap = BigDecimal.valueOf(1.789),
+                    initCapital = BigDecimal.valueOf(100.00),
+                )
+
+                val dogfoodMartinDogeConfig = MartinConfig(
+                    symbol = OrderConstants.DOGE_SWAP,
+                    positionSize = BigDecimal.valueOf(0.01),
+                    accounts = dogFoodAccounts,
+                    multiplesOfTheGap = BigDecimal.valueOf(1.789),
                     initCapital = BigDecimal.valueOf(100.00),
                 )
 
                 val selfHostMartinConfig = MartinConfig(
                     symbol = OrderConstants.BTC_SWAP,
-                    positionSize = BigDecimal.valueOf(0.04),
-                    tpRatio = BigDecimal.valueOf(0.0048),
+                    positionSize = BigDecimal.valueOf(0.12),
                     maxAddPositionCount = 4,
                     accounts = selfHostAccounts,
                     configName = "handsome_dog_0.5",
                     multiplesOfTheGap = BigDecimal.valueOf(1.888),
                     initCapital = BigDecimal.valueOf(800.00),
                 )
-                MartinStrategy(listOf(dogfoodMartinConfig, selfHostMartinConfig)).start()
+                MartinStrategy(listOf(dogfoodMartinBtcConfig, dogfoodMartinEthConfig, dogfoodMartinDogeConfig, selfHostMartinConfig)).start()
             } catch (e: Exception) {
                 logger.error("❌ 运行 MartinStrategy 出错", e)
             }

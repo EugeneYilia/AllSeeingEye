@@ -12,16 +12,17 @@ import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
 
 val klineCache : MutableMap<String, MutableList<KlineBar>> = mutableMapOf(
-    OrderConstants.BTC_SPOT to mutableListOf(),
+    OrderConstants.ETH_SWAP to mutableListOf(),
     OrderConstants.BTC_SWAP to mutableListOf()
 )
 
-object BtcKLine {
-    private val logger = LoggerFactory.getLogger("btc_kline")
+object KLine {
+    private val logger = LoggerFactory.getLogger("kline")
 
     val CANDLE_CHANNELS = listOf(
         // 1分钟级别K线数据
-        mapOf("channel" to "candle1m", "instId" to OrderConstants.BTC_SPOT),
+        mapOf("channel" to "candle1m", "instId" to OrderConstants.DOGE_SWAP),
+        mapOf("channel" to "candle1m", "instId" to OrderConstants.ETH_SWAP),
         mapOf("channel" to "candle1m", "instId" to OrderConstants.BTC_SWAP)
     )
 
