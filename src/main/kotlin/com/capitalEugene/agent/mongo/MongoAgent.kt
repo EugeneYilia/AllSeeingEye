@@ -1,9 +1,11 @@
 package com.capitalEugene.agent.mongo
 
 import com.capitalEugene.model.position.PositionState
+import com.mongodb.client.model.ReplaceOptions
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.slf4j.LoggerFactory
+import org.litote.kmongo.eq
 
 object MongoAgent {
     // kmongo + ktor场景下，不需要配置数据库连接池
@@ -15,9 +17,19 @@ object MongoAgent {
     private val logger = LoggerFactory.getLogger("mongo_agent")
 
     // name, position
-    suspend fun savePositionToMongo(positionState: PositionState){
+    suspend fun savePositionToMongo(positionState: PositionState) {
         try {
-            positionCollection.insertOne(positionState)
+            if (positionState.strategyFullName == null) {
+                logger.warn("⚠️ 写入失败：strategyFullName 为空，无法识别唯一记录")
+                return
+            }
+
+            val filter = PositionState::strategyFullName eq positionState.strategyFullName
+            positionCollection.replaceOne(
+                filter,
+                positionState,
+                ReplaceOptions().upsert(true)
+            )
         } catch (e: Exception) {
             logger.error("❌ mongo 写入异常: ${e.message}", e)
         }
