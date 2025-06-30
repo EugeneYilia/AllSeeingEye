@@ -123,6 +123,7 @@ suspend fun Application.module() {
                     positionSize = BigDecimal.valueOf(0.06),
                     maxAddPositionCount = 4,
                     accounts = selfHostAccounts,
+                    configName = "handsome_dog_0.5",
                     multiplesOfTheGap = BigDecimal.valueOf(1.888),
                     initCapital = BigDecimal.valueOf(800.00),
                 )
