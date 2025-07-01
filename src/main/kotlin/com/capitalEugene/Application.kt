@@ -89,7 +89,7 @@ suspend fun Application.module() {
                     accounts = dogFoodAccounts,
                     multiplesOfTheGap = BigDecimal.valueOf(2.168),
                     initCapital = BigDecimal.valueOf(100.00),
-                    addPositionRatio = BigDecimal.valueOf(0.0089),
+                    addPositionRatio = BigDecimal.valueOf(0.0138),
                     lever = BigDecimal.valueOf(100.00),
                 )
 
