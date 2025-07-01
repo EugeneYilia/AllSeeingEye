@@ -101,7 +101,6 @@
     <div class="item"><span class="label">平均持仓时间(分钟)</span><span class="value" id="agg_avg_dur">-</span></div>
 
     <div class="section-title">📉 实时K线图（BTC-SWAP）</div>
-    <div id="kline_info" style="padding: 6px 10px; font-size: 14px; background: #fefefe; color: #000; border-bottom: 1px solid #ccc;"></div>
     <div class="input-group">
         <label style="margin-right: 10px; font-weight: bold;">时区:</label>
         <select id="timezone_select" onchange="updateTimeFormatter()">
@@ -109,6 +108,7 @@
             <option value="8" selected>UTC+8</option>
         </select>
     </div>
+    <div id="kline_info" style="padding: 6px 10px; font-size: 14px; background: #fefefe; color: #000; border-bottom: 1px solid #ccc;"></div>
     <div id="kline_chart" style="height: 400px;"></div>
 </div>
 
