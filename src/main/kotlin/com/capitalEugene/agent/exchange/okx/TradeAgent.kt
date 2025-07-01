@@ -36,8 +36,13 @@ object TradeAgent {
     suspend fun setCrossLeverage(
         instId: String,
         lever: BigDecimal,
-        apiSecret: ApiSecret): JsonObject
+        apiSecret: ApiSecret): JsonObject?
     {
+        if(serverConfig!!.isLocalDebug) {
+            logger.debug("Local debug, skip set lever")
+            return null
+        }
+
         val path = "/api/v5/account/set-leverage"
         val url = "$BASE_URL$path"
         val body = buildJsonObject {
