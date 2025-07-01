@@ -17,7 +17,7 @@ data class MartinConfig(
     // 操作账户列表
     val accounts: List<ApiSecret>,
     // 最大加仓次数
-    val maxAddPositionCount : Int = 6,
+    val maxAddPositionCount : Int = 7,
     // 策略名称
     val configName: String = "Default",
     // 买卖方订单量差距倍数，会触发开仓的倍数阈值
