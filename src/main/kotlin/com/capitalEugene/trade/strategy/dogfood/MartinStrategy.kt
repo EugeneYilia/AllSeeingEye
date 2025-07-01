@@ -71,8 +71,8 @@ class MartinStrategy(
                     if (bids.isEmpty() || asks.isEmpty() || price == BigDecimal.ZERO) return@forEach
 
                     // 特定币种下的买方力量和卖方力量
-                    val buyPower = getTotalPower(price, bids)
-                    val sellPower = getTotalPower(price, asks)
+                    val buyPower = getTotalPower(price, bids, config.symbol)
+                    val sellPower = getTotalPower(price, asks, config.symbol)
 
                     // 每一个对应的state已在前面做过初始化
                     val state = martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"]!!
@@ -200,7 +200,8 @@ class MartinStrategy(
     // 与当前价格相差200以内的实际挂单对应的usdt量总额
     private fun getTotalPower(
         price: BigDecimal,
-        depth: SortedMap<BigDecimal, BigDecimal>
+        depth: SortedMap<BigDecimal, BigDecimal>,
+        symbol: String
     ): BigDecimal {
         var total = BigDecimal.ZERO
         val range = BigDecimal(200)
@@ -221,9 +222,13 @@ class MartinStrategy(
                 // 张数 * 0.01 = btc实际数量
                 // 实际价格 * btc实际数量 = 此价格的实际usdt挂单量
                 // 实时价格 * 张数 * 0.01
-                total += price
-                    .safeMultiply(sizeRaw)
-                    .safeMultiply(BigDecimal.valueOf(0.01))
+                //
+                // 价值 = 当前价格 * 币种数量
+                // 币种数量 = 张数 * 每张对应的币种数量
+                // 价值 = 当前价格 * 张数 * 每张对应的币种数量
+                total += price // 当前价格
+                    .safeMultiply(sizeRaw) // 张数
+                    .safeMultiply(OrderConstants.contractSizeMap[symbol]!!) // 每张对应的币种数量
             } catch (e: Exception) {
                 logger.error("解析深度失败: ${e.message}")
             }

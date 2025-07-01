@@ -12,4 +12,11 @@ object OrderConstants {
     val DEFAULT_SPOT_VALUE = BigDecimal.valueOf(1.0)
 
     val LUCKY_MAGIC_NUMBER = BigDecimal.valueOf(3.333)
+
+    // 不同币种   每一张对应的币种数量是不同的
+    val contractSizeMap = mapOf(
+        BTC_SWAP to BigDecimal("0.01"),     // 1 张 = 0.01 BTC
+        ETH_SWAP to BigDecimal("0.1"),      // 1 张 = 0.1 ETH
+        DOGE_SWAP to BigDecimal("1000")     // 1 张 = 1000 DOGE
+    )
 }

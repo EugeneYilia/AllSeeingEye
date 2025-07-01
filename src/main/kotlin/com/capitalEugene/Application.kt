@@ -106,8 +106,10 @@ suspend fun Application.module() {
                     symbol = OrderConstants.DOGE_SWAP,
                     positionSize = BigDecimal.valueOf(0.01),
                     accounts = dogFoodAccounts,
-                    multiplesOfTheGap = BigDecimal.valueOf(1.998),
+                    // 1.998
+                    multiplesOfTheGap = BigDecimal.valueOf(1.123),
                     initCapital = BigDecimal.valueOf(100.00),
+                    addPositionRatio = BigDecimal.valueOf(0.0168),
                     lever = BigDecimal.valueOf(50.00),
                 )
 
