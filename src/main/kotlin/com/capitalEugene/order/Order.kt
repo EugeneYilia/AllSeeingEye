@@ -27,6 +27,10 @@ val depthCache: MutableMap<String, MutableMap<String, SortedMap<BigDecimal, BigD
         "bids" to TreeMap(reverseOrder()),
         "asks" to TreeMap()
     ),
+    OrderConstants.DOGE_SWAP to mutableMapOf(
+        "bids" to TreeMap(reverseOrder()),
+        "asks" to TreeMap()
+    ),
 )
 
 // 当前现货和合约的实时价格
@@ -34,6 +38,7 @@ val priceCache = mutableMapOf<String, BigDecimal?>(
 //    OrderConstants.BTC_SPOT to null,
     OrderConstants.BTC_SWAP to null,
     OrderConstants.ETH_SWAP to null,
+    OrderConstants.DOGE_SWAP to null
 )
 
 object BtcOrder {

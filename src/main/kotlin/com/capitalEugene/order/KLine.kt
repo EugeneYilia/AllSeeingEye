@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory
 
 val klineCache : MutableMap<String, MutableList<KlineBar>> = mutableMapOf(
     OrderConstants.ETH_SWAP to mutableListOf(),
-    OrderConstants.BTC_SWAP to mutableListOf()
+    OrderConstants.BTC_SWAP to mutableListOf(),
+    OrderConstants.DOGE_SWAP to mutableListOf(),
 )
 
 object KLine {
