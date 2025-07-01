@@ -101,6 +101,7 @@
     <div class="item"><span class="label">平均持仓时间(分钟)</span><span class="value" id="agg_avg_dur">-</span></div>
 
     <div class="section-title">📉 实时K线图（BTC-SWAP）</div>
+    <div id="kline_info" style="padding: 6px 10px; font-size: 14px; background: #fefefe; color: #000; border-bottom: 1px solid #ccc;"></div>
     <div class="input-group">
         <label style="margin-right: 10px; font-weight: bold;">时区:</label>
         <select id="timezone_select" onchange="updateTimeFormatter()">
@@ -190,6 +191,40 @@
                 }
             }
         });
+
+        chart.subscribeCrosshairMove(function(param) {
+            const infoDiv = document.getElementById("kline_info");
+            if (!param || !param.time || !param.seriesData) {
+                infoDiv.innerText = "";
+                return;
+            }
+
+            const bar = param.seriesData.get(candleSeries);
+            if (!bar) {
+                infoDiv.innerText = "";
+                return;
+            }
+
+            const open = bar.open;
+            const high = bar.high;
+            const low = bar.low;
+            const close = bar.close;
+
+            const amplitude = high - low;
+            const change = close - open;
+            const changePercent = open === 0 ? 0 : (change / open * 100);
+
+            infoDiv.innerHTML = `
+                开=${open.toFixed(2)}
+                高=${high.toFixed(2)}
+                低=${low.toFixed(2)}
+                收=${close.toFixed(2)}
+                振幅=${amplitude.toFixed(2)}
+                涨跌=${change >= 0 ? "+" : ""}${change.toFixed(2)} (${changePercent >= 0 ? "+" : ""}${changePercent.toFixed(2)}%)
+            `;
+        });
+
+
         candleSeries = chart.addCandlestickSeries();
         updateTimeFormatter();
     }
