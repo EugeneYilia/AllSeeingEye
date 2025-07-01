@@ -24,4 +24,6 @@ data class MartinConfig(
     val multiplesOfTheGap : BigDecimal = BigDecimal.valueOf(3.333),
     // 初始资本数
     val initCapital : BigDecimal = BigDecimal.valueOf(100.00),
+    // 杠杆倍数
+    val lever: BigDecimal = BigDecimal.valueOf(100.00),
 )

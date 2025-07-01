@@ -87,9 +87,10 @@ suspend fun Application.module() {
                     symbol = OrderConstants.BTC_SWAP,
                     positionSize = BigDecimal.valueOf(0.06),
                     accounts = dogFoodAccounts,
-                    multiplesOfTheGap = BigDecimal.valueOf(2.018),
+                    multiplesOfTheGap = BigDecimal.valueOf(2.168),
                     initCapital = BigDecimal.valueOf(100.00),
-                    addPositionRatio = BigDecimal.valueOf(0.0089)
+                    addPositionRatio = BigDecimal.valueOf(0.0089),
+                    lever = BigDecimal.valueOf(100.00),
                 )
 
                 val dogfoodMartinEthConfig = MartinConfig(
@@ -98,14 +99,16 @@ suspend fun Application.module() {
                     accounts = dogFoodAccounts,
                     multiplesOfTheGap = BigDecimal.valueOf(1.789),
                     initCapital = BigDecimal.valueOf(100.00),
+                    lever = BigDecimal.valueOf(100.00),
                 )
 
                 val dogfoodMartinDogeConfig = MartinConfig(
                     symbol = OrderConstants.DOGE_SWAP,
                     positionSize = BigDecimal.valueOf(0.01),
                     accounts = dogFoodAccounts,
-                    multiplesOfTheGap = BigDecimal.valueOf(1.234),
+                    multiplesOfTheGap = BigDecimal.valueOf(1.998),
                     initCapital = BigDecimal.valueOf(100.00),
+                    lever = BigDecimal.valueOf(50.00),
                 )
 
                 val selfHostMartinBtcConfig = MartinConfig(
@@ -116,6 +119,7 @@ suspend fun Application.module() {
                     configName = "handsome_dog_0.5",
                     multiplesOfTheGap = BigDecimal.valueOf(1.888),
                     initCapital = BigDecimal.valueOf(800.00),
+                    lever = BigDecimal.valueOf(100.00),
                 )
 
                 val selfHostMartinEthConfig = MartinConfig(
@@ -126,6 +130,7 @@ suspend fun Application.module() {
                     configName = "handsome_dog_0.5",
                     multiplesOfTheGap = BigDecimal.valueOf(1.789),
                     initCapital = BigDecimal.valueOf(800.00),
+                    lever = BigDecimal.valueOf(100.00),
                 )
 
                 MartinStrategy(listOf(

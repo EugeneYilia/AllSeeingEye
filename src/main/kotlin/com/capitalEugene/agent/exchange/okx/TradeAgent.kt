@@ -35,7 +35,7 @@ object TradeAgent {
 
     suspend fun setCrossLeverage(
         instId: String,
-        lever: Int,
+        lever: BigDecimal,
         apiSecret: ApiSecret): JsonObject
     {
         val path = "/api/v5/account/set-leverage"

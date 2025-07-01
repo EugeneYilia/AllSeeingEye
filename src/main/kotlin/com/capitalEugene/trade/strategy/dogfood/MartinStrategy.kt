@@ -44,7 +44,7 @@ class MartinStrategy(
         logger.info("🚀 启动多策略马丁循环...")
 
         configs.forEach { config ->
-            config.accounts.forEach { setCrossLeverage(config.symbol, 100, it) }
+            config.accounts.forEach { setCrossLeverage(config.symbol, config.lever, it) }
 
             val strategyName = "martin_${config.symbol}_${config.configName}"
 
