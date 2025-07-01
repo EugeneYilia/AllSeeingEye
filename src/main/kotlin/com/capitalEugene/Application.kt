@@ -138,7 +138,8 @@ suspend fun Application.module() {
                     dogfoodMartinEthConfig,
                     dogfoodMartinDogeConfig,
                     selfHostMartinBtcConfig,
-                    selfHostMartinEthConfig)).start()
+                    selfHostMartinEthConfig
+                )).start()
             } catch (e: Exception) {
                 logger.error("❌ 运行 MartinStrategy 出错", e)
             }

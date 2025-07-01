@@ -60,6 +60,8 @@ object TradeAgent {
             }
             setBody(body)
         }
+
+        logger.info("Set ${instId} lever response: ${response.status}     ${response.bodyAsText()}")
         return response.body()
     }
 
