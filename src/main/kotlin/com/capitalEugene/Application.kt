@@ -89,27 +89,28 @@ suspend fun Application.module() {
                     accounts = dogFoodAccounts,
                     multiplesOfTheGap = BigDecimal.valueOf(2.168),
                     initCapital = BigDecimal.valueOf(100.00),
-                    addPositionRatio = BigDecimal.valueOf(0.0138),
+                    addPositionRatio = BigDecimal.valueOf(0.0158),
                     lever = BigDecimal.valueOf(100.00),
                 )
 
                 val dogfoodMartinEthConfig = MartinConfig(
                     symbol = OrderConstants.ETH_SWAP,
-                    positionSize = BigDecimal.valueOf(0.03),
+                    positionSize = BigDecimal.valueOf(0.04),
                     accounts = dogFoodAccounts,
                     multiplesOfTheGap = BigDecimal.valueOf(1.789),
                     initCapital = BigDecimal.valueOf(100.00),
+                    addPositionRatio = BigDecimal.valueOf(0.0168),
                     lever = BigDecimal.valueOf(100.00),
                 )
 
                 val dogfoodMartinDogeConfig = MartinConfig(
                     symbol = OrderConstants.DOGE_SWAP,
-                    positionSize = BigDecimal.valueOf(0.01),
+                    positionSize = BigDecimal.valueOf(0.05),
                     accounts = dogFoodAccounts,
                     // 1.998
                     multiplesOfTheGap = BigDecimal.valueOf(1.123),
                     initCapital = BigDecimal.valueOf(100.00),
-                    addPositionRatio = BigDecimal.valueOf(0.0168),
+                    addPositionRatio = BigDecimal.valueOf(0.0178),
                     lever = BigDecimal.valueOf(50.00),
                 )
 

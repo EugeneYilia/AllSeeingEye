@@ -13,7 +13,7 @@ data class MartinConfig(
     // 开仓大小(张)
     val positionSize: BigDecimal = BigDecimal.valueOf(0.01),
     // 加仓触发条件
-    val addPositionRatio: BigDecimal = BigDecimal.valueOf(0.0123),
+    val addPositionRatio: BigDecimal = BigDecimal.valueOf(0.0138),
     // 操作账户列表
     val accounts: List<ApiSecret>,
     // 最大加仓次数
