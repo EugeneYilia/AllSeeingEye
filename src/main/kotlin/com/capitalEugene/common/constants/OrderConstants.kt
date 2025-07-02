@@ -19,4 +19,10 @@ object OrderConstants {
         ETH_SWAP to BigDecimal("0.1"),      // 1 张 = 0.1 ETH
         DOGE_SWAP to BigDecimal("1000")     // 1 张 = 1000 DOGE
     )
+
+    val symbol2RangMap = mapOf(
+        BTC_SWAP to BigDecimal("3333"),     // 1 张 = 0.01 BTC
+        ETH_SWAP to BigDecimal("233"),      // 1 张 = 0.1 ETH
+        DOGE_SWAP to BigDecimal("0.0233")     // 1 张 = 1000 DOGE
+    )
 }

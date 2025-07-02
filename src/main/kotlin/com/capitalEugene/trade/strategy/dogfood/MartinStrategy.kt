@@ -16,7 +16,6 @@ import com.capitalEugene.model.position.PositionState
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.depthCache
 import com.capitalEugene.order.priceCache
-import com.capitalEugene.serverConfig
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -204,7 +203,7 @@ class MartinStrategy(
         symbol: String
     ): BigDecimal {
         var total = BigDecimal.ZERO
-        val range = BigDecimal(200)
+        val range = OrderConstants.symbol2RangMap[symbol]!!
         val lowerBound = price.subtract(range)
         val upperBound = price.add(range)
 
