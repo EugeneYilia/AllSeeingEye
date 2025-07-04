@@ -1,5 +1,6 @@
 package com.capitalEugene.model.strategy.martin
 
+import com.capitalEugene.model.tenant.Account
 import com.capitalEugene.secrets.ApiSecret
 import java.math.BigDecimal
 
@@ -15,7 +16,7 @@ data class MartinConfig(
     // 加仓触发条件
     val addPositionRatio: BigDecimal = BigDecimal.valueOf(0.0138),
     // 操作账户列表
-    val accounts: List<ApiSecret>,
+    val accounts: List<Account>,
     // 最大加仓次数
     val maxAddPositionCount : Int = 7,
     // 策略名称

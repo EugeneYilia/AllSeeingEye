@@ -2,6 +2,7 @@ package com.capitalEugene.riskManagement
 
 import com.capitalEugene.model.position.PositionRunningState
 import com.capitalEugene.model.position.PositionState
+import com.capitalEugene.model.tenant.Account
 import kotlinx.serialization.Serializable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,7 +21,10 @@ class RiskAgent {
 
     private val maxStopLossThreshold : Int = 1
 
-    fun monitorState(positionState: PositionState){
+    fun monitorState(
+        positionState: PositionState,
+        accounts: List<Account>, )
+    {
         if(positionState.positionRunningState != PositionRunningState.Running){
             return
         }
@@ -28,6 +32,16 @@ class RiskAgent {
         if(positionState.stopLossCount > maxStopLossThreshold){
             logger.info("stop strategy ${positionState.strategyFullName} by risk agent")
             positionState.positionRunningState = PositionRunningState.StoppedByRiskAgent
+
+            accounts.forEach { account ->
+                if (account.email != null){
+
+                }
+
+                if(account.phone != null){
+
+                }
+            }
         }
     }
 }

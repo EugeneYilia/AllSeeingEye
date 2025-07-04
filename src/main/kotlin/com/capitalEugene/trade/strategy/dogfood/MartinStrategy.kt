@@ -45,7 +45,9 @@ class MartinStrategy(
         logger.info("🚀 启动多策略马丁循环...")
 
         configs.forEach { config ->
-            config.accounts.forEach { setCrossLeverage(config.symbol, config.lever, it) }
+            config.accounts.forEach {
+                account -> account.apiSecrets.forEach { apiSecret ->
+                setCrossLeverage(config.symbol, config.lever, apiSecret) }}
 
             val strategyName = "martin_${config.symbol}_${config.configName}"
 
@@ -65,7 +67,9 @@ class MartinStrategy(
                     // 每一个对应的state已在前面做过初始化
                     val state = martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"]!!
 
-                    state.RiskAgent?.monitorState(state)
+                    state.RiskAgent?.monitorState(
+                        state,
+                        config.accounts)
 
                     if(state.positionRunningState != PositionRunningState.Running){
                         return@forEach
@@ -128,9 +132,11 @@ class MartinStrategy(
 
     private suspend fun operateOpen(config: MartinConfig, state: PositionState, price: BigDecimal, isLong: Boolean) {
         val side = if (isLong) "LONG" else "SHORT"
-        config.accounts.forEach {
-            if (isLong) openLong(config.symbol, price, config.positionSize, it)
-            else openShort(config.symbol, price, config.positionSize, it)
+        config.accounts.forEach { account ->
+            account.apiSecrets.forEach { apiSecret ->
+                if (isLong) openLong(config.symbol, price, config.positionSize, apiSecret)
+                else openShort(config.symbol, price, config.positionSize, apiSecret)
+            }
         }
         val transactionId = generateTransactionId()
         // 只有在开仓的时候会更新对应的transactionId
@@ -156,7 +162,11 @@ class MartinStrategy(
             val position = if (isLong) state.longPosition else state.shortPosition
             val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
             // 同一批次config的accounts，持仓情况是一样的
-            config.accounts.forEach { closePosition(config.symbol, side, price, position.abs(), it) }
+            config.accounts.forEach { account ->
+                account.apiSecrets.forEach { apiSecret ->
+                    closePosition(config.symbol, side, price, position.abs(), apiSecret)
+                }
+            }
             state.capital += pnl
 //            logger.info("✅ 平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
             if (isLong) resetLong(state) else resetShort(state)
@@ -172,7 +182,11 @@ class MartinStrategy(
                 val side = if (isLong) "sell" else "buy"
                 val position = if (isLong) state.longPosition else state.shortPosition
                 val entryPrice = if (isLong) state.longEntryPrice else state.shortEntryPrice
-                config.accounts.forEach { closePosition(config.symbol, side, price, position.abs(), it) }
+                config.accounts.forEach { account ->
+                    account.apiSecrets.forEach { apiSecret ->
+                        closePosition(config.symbol, side, price, position.abs(), apiSecret)
+                    }
+                }
                 state.capital += pnl
 //                logger.info("❌ 止损平仓 @ $price 盈亏: ${"%.5f".format(pnl)} 本金: ${"%.5f".format(state.capital)}")
                 if (isLong) resetLong(state) else resetShort(state)
@@ -188,12 +202,20 @@ class MartinStrategy(
                 val addSize = config.positionSize.safeMultiply(BigDecimal.valueOf(2.0.pow(addCount)))
                 if (isLong) {
                     state.longAddCount++
-                    config.accounts.forEach { openLong(config.symbol, price, addSize, it) }
+                    config.accounts.forEach { account ->
+                        account.apiSecrets.forEach { apiSecret ->
+                            openLong(config.symbol, price, addSize, apiSecret)
+                        }
+                    }
                     state.longPosition += addSize
                     state.longEntryPrice = (state.longEntryPrice!!.safeMultiply(state.longPosition - addSize) + price.safeMultiply(addSize)).safeDiv(state.longPosition)
                 } else {
                     state.shortAddCount++
-                    config.accounts.forEach { openShort(config.symbol, price, addSize, it) }
+                    config.accounts.forEach { account ->
+                        account.apiSecrets.forEach { apiSecret ->
+                            openShort(config.symbol, price, addSize, apiSecret)
+                        }
+                    }
                     state.shortPosition += addSize
                     state.shortEntryPrice = (state.shortEntryPrice!!.safeMultiply(state.shortPosition - addSize) + price.safeMultiply(addSize)).safeDiv(state.shortPosition)
                 }
