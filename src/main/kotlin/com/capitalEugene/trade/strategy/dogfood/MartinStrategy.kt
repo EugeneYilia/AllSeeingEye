@@ -12,6 +12,7 @@ import com.capitalEugene.common.utils.safeDiv
 import com.capitalEugene.common.utils.safeMultiply
 import com.capitalEugene.common.utils.safeSnapshot
 import com.capitalEugene.model.TradingData
+import com.capitalEugene.model.position.PositionRunningState
 import com.capitalEugene.model.position.PositionState
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.depthCache
@@ -21,6 +22,7 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.contracts.contract
 import kotlin.math.pow
 
 // key: "martin_${config.symbol}_${config.configName}"   value: positionState
@@ -60,6 +62,15 @@ class MartinStrategy(
             try {
                 // 确保当前轮的所有子任务都完成后再进行下一轮
                 configs.forEach { config ->
+                    // 每一个对应的state已在前面做过初始化
+                    val state = martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"]!!
+
+                    state.RiskAgent?.monitorState(state)
+
+                    if(state.positionRunningState != PositionRunningState.Running){
+                        return@forEach
+                    }
+
                     // 不同config下用户想要去操作的币种可能都是不同的
                     val price = priceCache[config.symbol] ?: return@forEach
 
@@ -72,9 +83,6 @@ class MartinStrategy(
                     // 特定币种下的买方力量和卖方力量
                     val buyPower = getTotalPower(price, bids, config.symbol)
                     val sellPower = getTotalPower(price, asks, config.symbol)
-
-                    // 每一个对应的state已在前面做过初始化
-                    val state = martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"]!!
 
 //                    logger.info("buy_power: $buyPower       sell_power: $sellPower")
                     val longSignal = buyPower > sellPower.safeMultiply(config.multiplesOfTheGap)
@@ -154,6 +162,7 @@ class MartinStrategy(
             if (isLong) resetLong(state) else resetShort(state)
             // 止盈的时候用运行时的对应的transactionId
             val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
+            state.takeProfitCount += 1
             buildRedisDataAndSave(config, "close", BigDecimal.ZERO, position.abs().safeMultiply(OrderConstants.CONTRACT_VALUE).safeMultiply(entryPrice!!).safeMultiply(config.tpRatio), LocalDateTime.now().format(dateFormatter), transactionId!!)
             savePositionToMongo(state)
         } else if (change < BigDecimal.ZERO && change.abs() > config.addPositionRatio) {
@@ -169,6 +178,7 @@ class MartinStrategy(
                 if (isLong) resetLong(state) else resetShort(state)
                 // 止损的时候用运行时的对应的transactionId
                 val transactionId = if (isLong) state.longTransactionId else state.shortTransactionId
+                state.stopLossCount += 1
                 buildRedisDataAndSave(config, "close", BigDecimal.ZERO, position.abs().safeMultiply(OrderConstants.CONTRACT_VALUE).safeMultiply(entryPrice!!).safeMultiply(config.slRatio.negate()), LocalDateTime.now().format(dateFormatter), transactionId!!)
                 savePositionToMongo(state)
             } else if (addCount < config.maxAddPositionCount) {

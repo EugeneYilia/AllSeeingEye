@@ -1,6 +1,7 @@
 package com.capitalEugene.model.position
 
 import com.capitalEugene.common.utils.BigDecimalAsStringSerializer
+import com.capitalEugene.riskManagement.RiskAgent
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 
@@ -34,4 +35,13 @@ data class PositionState(
 
     // 例如 martin_${config.symbol}_${config.configName}, fullName不强制限定格式
     var strategyFullName: String? = null,
+
+    // 止盈次数
+    var takeProfitCount: Int = 0,
+    // 止损次数
+    var stopLossCount: Int = 0,
+    // 风控管理
+    val RiskAgent: RiskAgent? = null,
+    // 仓位运行状态
+    var positionRunningState: PositionRunningState = PositionRunningState.Running,
 )
