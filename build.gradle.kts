@@ -36,7 +36,7 @@ dependencies {
     implementation("io.lettuce:lettuce-core:6.7.1.RELEASE")
     implementation("io.ktor:ktor-server-content-negotiation") // ← 核心依赖
     implementation("io.ktor:ktor-serialization-kotlinx-json")
-
+    implementation("com.sun.mail:jakarta.mail:2.0.1")
     // KMongo
     implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongo_version")
     implementation("org.litote.kmongo:kmongo-coroutine:$kmongo_version")
