@@ -5,6 +5,7 @@ import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.common.constants.OrderConstants
 import com.capitalEugene.common.utils.cpuSchedulerScope
 import com.capitalEugene.common.utils.ioSchedulerScope
+import com.capitalEugene.common.utils.mergeWith
 import com.capitalEugene.model.config.ServerConfig
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.BtcOrder
@@ -20,6 +21,7 @@ import io.ktor.client.plugins.websocket.*
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.JsonObject
 import org.slf4j.LoggerFactory
 import java.io.InputStreamReader
 import java.math.BigDecimal
@@ -175,7 +177,15 @@ suspend fun initStrategyStateMap() {
 fun Application.loadServerConfig(): ServerConfig {
     val inputStream = environment.classLoader.getResourceAsStream("config.json")
         ?: throw IllegalStateException("❌ config.json not found in resources")
-    val text = InputStreamReader(inputStream).readText()
+    val mainJson = ApplicationConstants.configJson.parseToJsonElement(InputStreamReader(inputStream).readText()) as JsonObject
 
-    return ApplicationConstants.configJson.decodeFromString(ServerConfig.serializer(), text)
+    val localInputStream = environment.classLoader.getResourceAsStream("local/config.json")
+    val mergedJson = if (localInputStream != null) {
+        val localJson = ApplicationConstants.configJson.parseToJsonElement(InputStreamReader(localInputStream).readText()) as JsonObject
+        mainJson.mergeWith(localJson)
+    } else {
+        mainJson
+    }
+
+    return ApplicationConstants.configJson.decodeFromJsonElement(ServerConfig.serializer(), mergedJson)
 }
