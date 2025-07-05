@@ -67,7 +67,7 @@ object EmailAgent {
 
                     Transport.send(message)
                     logger.info("✅ Email sent to: ${toList.joinToString(", ")}")
-
+                    return@launch
                 } catch (e: MessagingException) {
                     logger.warn("⚠️ Attempt ${attempt + 1} failed to send email: ${e.message}")
                     if (attempt < EmailConstants.MAX_RETRY_COUNT - 1) {
