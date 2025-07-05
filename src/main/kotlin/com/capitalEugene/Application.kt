@@ -13,6 +13,7 @@ import com.capitalEugene.order.KLine
 import com.capitalEugene.riskManagement.RiskAgent
 import com.capitalEugene.secrets.dogFoodAccounts
 import com.capitalEugene.secrets.selfHostAccounts
+import com.capitalEugene.timerJob.InMemoryClearJob
 import com.capitalEugene.trade.strategy.dogfood.MartinStrategy
 import com.capitalEugene.trade.strategy.dogfood.martinDogFoodStateMap
 import io.ktor.client.*
@@ -143,6 +144,19 @@ suspend fun Application.module() {
                 )).start()
             } catch (e: Exception) {
                 logger.error("❌ 运行 MartinStrategy 出错", e)
+            }
+        }
+
+        ioSchedulerScope.launch {
+            while (true) {
+                try {
+                    logger.info("⏰ 开始执行K线缓存清理任务")
+                    InMemoryClearJob.cleanOldKlineData()
+                    logger.info("✅ K线清理任务完成，3天后再次执行")
+                } catch (e: Exception) {
+                    logger.error("❌ 执行K线清理任务出错", e)
+                }
+                delay(3 * 24 * 60 * 60 * 1000L) // 3天
             }
         }
     }
