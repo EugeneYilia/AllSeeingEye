@@ -17,8 +17,8 @@ data class Account(
     @Transient
     // 交易密钥
     var apiSecrets: List<ApiSecret> = emptyList(),
-    // 电话联系方式
-    var phone : String? = null,
-    // 邮件联系方式
-    var email : String? = null,
+    // 电话联系方式,可配置多个
+    var phoneList : List<String>? = null,
+    // 邮件联系方式,可配置多个
+    var emailList : List<String>? = null,
 )

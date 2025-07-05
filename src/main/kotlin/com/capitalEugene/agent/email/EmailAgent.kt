@@ -1,5 +1,6 @@
 package com.capitalEugene.agent.email
 
+import com.capitalEugene.secrets.defaultEmailAccount
 import jakarta.mail.*
 import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
@@ -8,10 +9,6 @@ import java.util.Properties
 object EmailAgent {
 
     fun sendEmail(
-        smtpHost: String,
-        smtpPort: String,
-        username: String,
-        password: String,
         toList: List<String>,                    // 支持多个主收件人
         ccList: List<String> = emptyList(),      // 可选：抄送
         bccList: List<String> = emptyList(),     // 可选：密送
@@ -21,19 +18,19 @@ object EmailAgent {
         val props = Properties().apply {
             put("mail.smtp.auth", "true")
             put("mail.smtp.starttls.enable", "true")
-            put("mail.smtp.host", smtpHost)
-            put("mail.smtp.port", smtpPort)
+            put("mail.smtp.host", defaultEmailAccount.smtpHost)
+            put("mail.smtp.port", defaultEmailAccount.smtpPort)
         }
 
         val session = Session.getInstance(props, object : Authenticator() {
             override fun getPasswordAuthentication(): PasswordAuthentication {
-                return PasswordAuthentication(username, password)
+                return PasswordAuthentication(defaultEmailAccount.smtpUsername, defaultEmailAccount.smtpPassword)
             }
         })
 
         try {
             val message = MimeMessage(session).apply {
-                setFrom(InternetAddress(username))
+                setFrom(InternetAddress(defaultEmailAccount.smtpUsername, "尤金资本"))
 
                 setRecipients(Message.RecipientType.TO, toList.map { InternetAddress(it) }.toTypedArray())
                 if (ccList.isNotEmpty()) {

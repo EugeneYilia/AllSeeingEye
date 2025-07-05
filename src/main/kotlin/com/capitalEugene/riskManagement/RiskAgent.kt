@@ -1,5 +1,6 @@
 package com.capitalEugene.riskManagement
 
+import com.capitalEugene.agent.email.EmailAgent
 import com.capitalEugene.model.position.PositionRunningState
 import com.capitalEugene.model.position.PositionState
 import com.capitalEugene.model.tenant.Account
@@ -34,14 +35,32 @@ class RiskAgent {
             positionState.positionRunningState = PositionRunningState.StoppedByRiskAgent
 
             accounts.forEach { account ->
-                if (account.email != null){
-
+                if (account.emailList != null){
+//                    sendEmail()
                 }
 
-                if(account.phone != null){
-
+                if(account.phoneList != null){
+                    makePhoneCall()
                 }
             }
         }
+    }
+
+    fun sendEmail(
+        receiver: List<String>,
+        ccList: List<String> = emptyList(),
+        bccList: List<String> = emptyList(),
+    ){
+        EmailAgent.sendEmail(
+            toList = receiver,
+            ccList = ccList,
+            bccList = bccList,
+            subject = "海公牛",
+            content = "海公牛，海公牛，海公牛，海公牛，海公牛，海公牛，海公牛"
+        )
+    }
+
+    fun makePhoneCall(){
+
     }
 }
