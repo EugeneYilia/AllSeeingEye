@@ -179,7 +179,7 @@ fun Application.loadServerConfig(): ServerConfig {
         ?: throw IllegalStateException("❌ config.json not found in resources")
     val mainJson = ApplicationConstants.configJson.parseToJsonElement(InputStreamReader(inputStream).readText()) as JsonObject
 
-    val localInputStream = environment.classLoader.getResourceAsStream("local/config.json")
+    val localInputStream = environment.classLoader.getResourceAsStream("local/local_config.json")
     val mergedJson = if (localInputStream != null) {
         val localJson = ApplicationConstants.configJson.parseToJsonElement(InputStreamReader(localInputStream).readText()) as JsonObject
         mainJson.mergeWith(localJson)
