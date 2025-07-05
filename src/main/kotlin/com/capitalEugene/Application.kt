@@ -9,6 +9,7 @@ import com.capitalEugene.model.config.ServerConfig
 import com.capitalEugene.model.strategy.martin.MartinConfig
 import com.capitalEugene.order.BtcOrder
 import com.capitalEugene.order.KLine
+import com.capitalEugene.riskManagement.RiskAgent
 import com.capitalEugene.secrets.dogFoodAccounts
 import com.capitalEugene.secrets.selfHostAccounts
 import com.capitalEugene.trade.strategy.dogfood.MartinStrategy
@@ -81,6 +82,7 @@ suspend fun Application.module() {
                     initCapital = BigDecimal.valueOf(100.00),
                     addPositionRatio = BigDecimal.valueOf(0.0158),
                     lever = BigDecimal.valueOf(100.00),
+                    riskAgent = RiskAgent()
                 )
 
                 val dogfoodMartinEthConfig = MartinConfig(
@@ -91,6 +93,7 @@ suspend fun Application.module() {
                     initCapital = BigDecimal.valueOf(100.00),
                     addPositionRatio = BigDecimal.valueOf(0.0168),
                     lever = BigDecimal.valueOf(100.00),
+                    riskAgent = RiskAgent()
                 )
 
                 val dogfoodMartinDogeConfig = MartinConfig(
@@ -102,6 +105,7 @@ suspend fun Application.module() {
                     initCapital = BigDecimal.valueOf(100.00),
                     addPositionRatio = BigDecimal.valueOf(0.0178),
                     lever = BigDecimal.valueOf(50.00),
+                    riskAgent = RiskAgent()
                 )
 
                 val selfHostMartinBtcConfig = MartinConfig(
@@ -113,6 +117,7 @@ suspend fun Application.module() {
                     multiplesOfTheGap = BigDecimal.valueOf(2.567),
                     initCapital = BigDecimal.valueOf(800.00),
                     lever = BigDecimal.valueOf(100.00),
+                    riskAgent = RiskAgent()
                 )
 
                 val selfHostMartinEthConfig = MartinConfig(
@@ -124,6 +129,7 @@ suspend fun Application.module() {
                     multiplesOfTheGap = BigDecimal.valueOf(1.888),
                     initCapital = BigDecimal.valueOf(800.00),
                     lever = BigDecimal.valueOf(100.00),
+                    riskAgent = RiskAgent()
                 )
 
                 MartinStrategy(listOf(

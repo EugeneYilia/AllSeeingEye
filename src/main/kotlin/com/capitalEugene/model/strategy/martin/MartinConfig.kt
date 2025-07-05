@@ -1,7 +1,7 @@
 package com.capitalEugene.model.strategy.martin
 
 import com.capitalEugene.model.tenant.Account
-import com.capitalEugene.secrets.ApiSecret
+import com.capitalEugene.riskManagement.RiskAgent
 import java.math.BigDecimal
 
 data class MartinConfig(
@@ -27,4 +27,6 @@ data class MartinConfig(
     val initCapital : BigDecimal = BigDecimal.valueOf(100.00),
     // 杠杆倍数
     val lever: BigDecimal = BigDecimal.valueOf(100.00),
+    // 风控管理    不设置风控的话，不管出什么样的止损情况都会一直跑
+    val riskAgent: RiskAgent? = null,
 )

@@ -22,7 +22,6 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.contracts.contract
 import kotlin.math.pow
 
 // key: "martin_${config.symbol}_${config.configName}"   value: positionState
@@ -55,7 +54,8 @@ class MartinStrategy(
                 PositionState(
                     strategyShortName = "martin",
                     strategyFullName = strategyName,
-                    capital = config.initCapital
+                    capital = config.initCapital,
+                    riskAgent = config.riskAgent
                 )
             }
         }
@@ -67,7 +67,7 @@ class MartinStrategy(
                     // 每一个对应的state已在前面做过初始化
                     val state = martinDogFoodStateMap["martin_${config.symbol}_${config.configName}"]!!
 
-                    state.RiskAgent?.monitorState(
+                    state.riskAgent?.monitorState(
                         state,
                         config.accounts)
 
