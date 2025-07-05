@@ -116,8 +116,8 @@ suspend fun Application.module() {
 
                 val selfHostMartinBtcConfig = MartinConfig(
                     symbol = OrderConstants.BTC_SWAP,
-                    positionSize = BigDecimal.valueOf(0.12),
-                    maxAddPositionCount = 4,
+                    positionSize = BigDecimal.valueOf(1.2),
+                    maxAddPositionCount = 7,
                     accounts = selfHostAccounts,
                     configName = "handsome_dog_0.5",
                     multiplesOfTheGap = BigDecimal.valueOf(2.567),
