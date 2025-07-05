@@ -31,10 +31,10 @@ data class PositionState(
     var shortTransactionId: String? = null,
 
     // 例如 martin
-    var strategyShortName: String? = null,
+    var strategyShortName: String,
 
     // 例如 martin_${config.symbol}_${config.configName}, fullName不强制限定格式
-    var strategyFullName: String? = null,
+    var strategyFullName: String,
 
     // 止盈次数
     var takeProfitCount: Int = 0,
@@ -44,4 +44,6 @@ data class PositionState(
     val RiskAgent: RiskAgent? = null,
     // 仓位运行状态
     var positionRunningState: PositionRunningState = PositionRunningState.Running,
+    // 停止时间
+    var stopTime: Long? = null,
 )

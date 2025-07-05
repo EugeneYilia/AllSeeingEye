@@ -10,4 +10,9 @@ object ApplicationConstants {
     }
 
     val httpJson = Json { ignoreUnknownKeys = true }
+
+    const val applicationGeneralName = "CapitalEugene"
+    const val applicationChineseName = "尤金资本"
+
+    const val dashboardUrl = "172.184.97.100:9019"
 }

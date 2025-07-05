@@ -1,19 +1,22 @@
 package com.capitalEugene.agent.email
 
+import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.secrets.defaultEmailAccount
 import jakarta.mail.*
 import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
+import org.slf4j.LoggerFactory
 import java.util.Properties
 
 object EmailAgent {
+    val logger = LoggerFactory.getLogger("email_agent")
 
     fun sendEmail(
+        subject: String,
+        content: String,
         toList: List<String>,                    // 支持多个主收件人
         ccList: List<String> = emptyList(),      // 可选：抄送
         bccList: List<String> = emptyList(),     // 可选：密送
-        subject: String,
-        content: String
     ) {
         val props = Properties().apply {
             put("mail.smtp.auth", "true")
@@ -30,7 +33,7 @@ object EmailAgent {
 
         try {
             val message = MimeMessage(session).apply {
-                setFrom(InternetAddress(defaultEmailAccount.smtpUsername, "尤金资本"))
+                setFrom(InternetAddress(defaultEmailAccount.smtpUsername, ApplicationConstants.applicationChineseName))
 
                 setRecipients(Message.RecipientType.TO, toList.map { InternetAddress(it) }.toTypedArray())
                 if (ccList.isNotEmpty()) {
@@ -41,14 +44,14 @@ object EmailAgent {
                 }
 
                 setSubject(subject)
-                setText(content)
+                setContent(content, "text/html; charset=UTF-8")
             }
 
             Transport.send(message)
-            println("✅ Email sent to: ${toList.joinToString(", ")}")
+            logger.info("✅ Email sent to: ${toList.joinToString(", ")}")
 
         } catch (e: MessagingException) {
-            println("❌ Failed to send email: ${e.message}")
+            logger.error("❌ Failed to send email: ${e.message}")
             e.printStackTrace()
         }
     }
