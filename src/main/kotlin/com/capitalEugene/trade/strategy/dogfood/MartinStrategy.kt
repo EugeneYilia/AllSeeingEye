@@ -56,7 +56,9 @@ class MartinStrategy(
                     strategyFullName = strategyName,
                     capital = config.initCapital,
                     riskAgent = config.riskAgent
-                )
+                ).also {
+                    savePositionToMongo(it) // 仅在首次创建时保存
+                }
             }
         }
 

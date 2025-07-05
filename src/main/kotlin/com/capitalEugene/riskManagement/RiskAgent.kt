@@ -1,6 +1,7 @@
 package com.capitalEugene.riskManagement
 
 import com.capitalEugene.agent.email.EmailAgent
+import com.capitalEugene.agent.mongo.MongoAgent.savePositionToMongo
 import com.capitalEugene.common.constants.ApplicationConstants
 import com.capitalEugene.common.constants.CommunicationConstants
 import com.capitalEugene.common.utils.TimeUtils
@@ -9,24 +10,19 @@ import com.capitalEugene.model.position.PositionRunningState
 import com.capitalEugene.model.position.PositionState
 import com.capitalEugene.model.tenant.Account
 import kotlinx.serialization.Serializable
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 
 @Serializable
 class RiskAgent {
 
-    // lateinit强制需要对字段进行赋值，就一定会走init {}进行赋值
-    @Transient
-    private lateinit var logger : Logger
-
-    init {
-        logger = LoggerFactory.getLogger("RiskAgent")
+    companion object {
+        val logger = LoggerFactory.getLogger("RiskAgent")
     }
 
     private val maxStopLossThreshold : Int = 1
 
-    fun monitorState(
+    suspend fun monitorState(
         positionState: PositionState,
         accounts: List<Account>, )
     {
@@ -40,6 +36,8 @@ class RiskAgent {
 
             val currentTimestamp: Long = System.currentTimeMillis()
             positionState.stopTime = currentTimestamp
+
+            savePositionToMongo(positionState)
 
             accounts.forEach { account ->
                 if (account.emailList != null){

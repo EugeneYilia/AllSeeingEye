@@ -40,8 +40,8 @@ data class PositionState(
     var takeProfitCount: Int = 0,
     // 止损次数
     var stopLossCount: Int = 0,
-    // 风控管理
-    val riskAgent: RiskAgent? = null,
+    // 风控管理   默认配置风控
+    val riskAgent: RiskAgent? = RiskAgent(),
     // 仓位运行状态
     var positionRunningState: PositionRunningState = PositionRunningState.Running,
     // 停止时间
