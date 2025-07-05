@@ -61,7 +61,7 @@ suspend fun Application.module() {
     monitor.subscribe(ApplicationStarted) {
         ioSchedulerScope.launch {
             try {
-                logger.info("开始启动btc订单和实时价格订阅")
+                logger.info("开始启动订单和实时价格订阅")
                 // 订单簿和实时价格ws获取
                 BtcOrder.startWs(client)
             }
@@ -72,7 +72,7 @@ suspend fun Application.module() {
 
         ioSchedulerScope.launch {
             try {
-                logger.info("开始启动btc k线订阅")
+                logger.info("开始启动k线订阅")
                 KLine.startWs(client)
             } catch (e: Exception) {
                 logger.error("❌ 运行 BtcKLine 出错", e)
