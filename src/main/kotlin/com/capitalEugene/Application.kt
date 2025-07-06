@@ -90,23 +90,25 @@ suspend fun Application.module() {
 
                 val dogfoodMartinEthConfig = MartinConfig(
                     symbol = OrderConstants.ETH_SWAP,
-                    positionSize = BigDecimal.valueOf(0.04),
+                    positionSize = BigDecimal.valueOf(0.01),
                     accounts = dogFoodAccounts,
                     multiplesOfTheGap = BigDecimal.valueOf(1.888),
                     initCapital = BigDecimal.valueOf(100.00),
-                    addPositionRatio = BigDecimal.valueOf(0.0168),
+                    tpRatio = BigDecimal.valueOf(0.03),
+                    addPositionRatio = BigDecimal.valueOf(0.0268),
                     lever = BigDecimal.valueOf(100.00),
                     riskAgent = RiskAgent()
                 )
 
                 val dogfoodMartinDogeConfig = MartinConfig(
                     symbol = OrderConstants.DOGE_SWAP,
-                    positionSize = BigDecimal.valueOf(0.05),
+                    positionSize = BigDecimal.valueOf(0.01),
                     accounts = dogFoodAccounts,
                     // 1.998
                     multiplesOfTheGap = BigDecimal.valueOf(1.345),
                     initCapital = BigDecimal.valueOf(100.00),
-                    addPositionRatio = BigDecimal.valueOf(0.0178),
+                    addPositionRatio = BigDecimal.valueOf(0.0338),
+                    tpRatio = BigDecimal.valueOf(0.03),
                     lever = BigDecimal.valueOf(50.00),
                     riskAgent = RiskAgent()
                 )
@@ -120,18 +122,7 @@ suspend fun Application.module() {
                     multiplesOfTheGap = BigDecimal.valueOf(2.567),
                     initCapital = BigDecimal.valueOf(800.00),
                     lever = BigDecimal.valueOf(100.00),
-                    riskAgent = RiskAgent()
-                )
-
-                val selfHostMartinEthConfig = MartinConfig(
-                    symbol = OrderConstants.ETH_SWAP,
-                    positionSize = BigDecimal.valueOf(0.06),
-                    maxAddPositionCount = 4,
-                    accounts = selfHostAccounts,
-                    configName = "handsome_dog_0.5",
-                    multiplesOfTheGap = BigDecimal.valueOf(1.888),
-                    initCapital = BigDecimal.valueOf(800.00),
-                    lever = BigDecimal.valueOf(100.00),
+                    tpRatio = BigDecimal.valueOf(0.00176),
                     riskAgent = RiskAgent()
                 )
 
@@ -139,8 +130,7 @@ suspend fun Application.module() {
                     dogfoodMartinBtcConfig,
                     dogfoodMartinEthConfig,
                     dogfoodMartinDogeConfig,
-                    selfHostMartinBtcConfig,
-                    selfHostMartinEthConfig
+                    selfHostMartinBtcConfig
                 )).start()
             } catch (e: Exception) {
                 logger.error("❌ 运行 MartinStrategy 出错", e)
