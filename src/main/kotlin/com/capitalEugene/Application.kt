@@ -24,6 +24,7 @@ import io.ktor.server.netty.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.JsonObject
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.InputStreamReader
 import java.math.BigDecimal
 
@@ -183,9 +184,9 @@ fun Application.loadServerConfig(): ServerConfig {
         ?: throw IllegalStateException("❌ config.json not found in resources")
     val mainJson = ApplicationConstants.configJson.parseToJsonElement(InputStreamReader(inputStream).readText()) as JsonObject
 
-    val localInputStream = environment.classLoader.getResourceAsStream("local/local_config.json")
-    val mergedJson = if (localInputStream != null) {
-        val localJson = ApplicationConstants.configJson.parseToJsonElement(InputStreamReader(localInputStream).readText()) as JsonObject
+    val localFile = File("local/local_config.json")
+    val mergedJson = if (localFile.exists()) {
+        val localJson = ApplicationConstants.configJson.parseToJsonElement(localFile.readText()) as JsonObject
         mainJson.mergeWith(localJson)
     } else {
         mainJson
