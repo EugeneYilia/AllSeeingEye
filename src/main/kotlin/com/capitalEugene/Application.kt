@@ -14,6 +14,7 @@ import com.capitalEugene.riskManagement.RiskAgent
 import com.capitalEugene.secrets.dogFoodAccounts
 import com.capitalEugene.secrets.selfHostAccounts
 import com.capitalEugene.timerJob.InMemoryClearJob
+import com.capitalEugene.timerJob.SchedulerJob
 import com.capitalEugene.trade.strategy.dogfood.MartinStrategy
 import com.capitalEugene.trade.strategy.dogfood.martinDogFoodStateMap
 import io.ktor.client.*
@@ -148,6 +149,32 @@ suspend fun Application.module() {
                     logger.error("❌ 执行K线清理任务出错", e)
                 }
                 delay(3 * 24 * 60 * 60 * 1000L) // 3天
+            }
+        }
+
+        // ⏰ 计算价格挡位上限平均值，下限平均值，上档差值平均值，下档插值平均值
+        // 每分钟一次
+        ioSchedulerScope.launch {
+            while (true) {
+                try {
+                    SchedulerJob.calcOrderDiffValue()
+                } catch (e: Exception) {
+                    logger.error("❌ 计算均值失败", e)
+                }
+                delay(60 * 1000L) // 1分钟
+            }
+        }
+
+        // 每天一次
+        ioSchedulerScope.launch {
+            while (true) {
+                try {
+                    logger.info("⏰ 输出价格挡位上限平均值，下限平均值，上档差值平均值，下档插值平均值")
+                    SchedulerJob.printOrderDiffValue()
+                } catch (e: Exception) {
+                    logger.error("❌ 输出均线失败", e)
+                }
+                delay(24 * 60 * 60 * 1000L) // 1天
             }
         }
     }

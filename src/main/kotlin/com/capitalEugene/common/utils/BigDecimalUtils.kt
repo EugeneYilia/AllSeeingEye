@@ -21,6 +21,7 @@ object BigDecimalAsStringSerializer : KSerializer<BigDecimal> {
     }
 }
 
+// 默认保留五位小数，并且取整方式为四舍五入
 fun BigDecimal.safeDiv(
     divisor: BigDecimal,
     scale: Int = 5,
@@ -29,11 +30,12 @@ fun BigDecimal.safeDiv(
     return this.divide(divisor, scale, rounding)
 }
 
+// 默认保留五位小数，并且取整方式为四舍五入
 fun BigDecimal.safeMultiply(
     multiplier: BigDecimal,
     scale: Int = 5,
     rounding: RoundingMode = RoundingMode.HALF_UP
 ): BigDecimal {
     return this.multiply(multiplier)
-        .setScale(5, RoundingMode.HALF_UP)
+        .setScale(scale, rounding)
 }
