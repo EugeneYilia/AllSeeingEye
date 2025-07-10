@@ -85,7 +85,7 @@ suspend fun Application.module() {
                     accounts = dogFoodAccounts,
                     multiplesOfTheGap = BigDecimal.valueOf(2.567),
                     initCapital = BigDecimal.valueOf(100.00),
-                    addPositionRatio = BigDecimal.valueOf(0.0158),
+                    addPositionRatio = BigDecimal.valueOf(0.0188),
                     lever = BigDecimal.valueOf(100.00),
                     riskAgent = RiskAgent()
                 )
@@ -97,7 +97,7 @@ suspend fun Application.module() {
                     multiplesOfTheGap = BigDecimal.valueOf(1.888),
                     initCapital = BigDecimal.valueOf(100.00),
                     tpRatio = BigDecimal.valueOf(0.03),
-                    addPositionRatio = BigDecimal.valueOf(0.0268),
+                    addPositionRatio = BigDecimal.valueOf(0.0298),
                     lever = BigDecimal.valueOf(100.00),
                     riskAgent = RiskAgent()
                 )
@@ -109,8 +109,8 @@ suspend fun Application.module() {
                     // 1.998
                     multiplesOfTheGap = BigDecimal.valueOf(1.345),
                     initCapital = BigDecimal.valueOf(100.00),
-                    addPositionRatio = BigDecimal.valueOf(0.0338),
-                    tpRatio = BigDecimal.valueOf(0.03),
+                    addPositionRatio = BigDecimal.valueOf(0.0358),
+                    tpRatio = BigDecimal.valueOf(0.038),
                     lever = BigDecimal.valueOf(50.00),
                     riskAgent = RiskAgent()
                 )
