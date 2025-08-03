@@ -292,60 +292,93 @@
     async function fetchAndRenderZones() {
         const checkbox = document.getElementById("toggle_zones");
         if (!checkbox || !checkbox.checked) {
-            // ❌ 没勾选：清除已有线
-            if (!chart) return;  // 🔐 chart 尚未初始化，先退出
-            zoneSeries.forEach(series => {
-                if (series && typeof chart.removeSeries === 'function') {
-                    try {
+            if (!chart) return;
+
+            console.log("🔄 [Zone] 清除所有已绘制线（未勾选）...");
+            zoneSeries = zoneSeries.filter((series, idx) => {
+                try {
+                    if (series && typeof series.setData === 'function') {
                         chart.removeSeries(series);
-                    } catch (e) {
-                        console.warn("移除线失败:", e);
+                        console.log(`✅ [Zone] 移除 series #${idx}`);
+                        return false;
+                    } else {
+                        console.warn(`⚠️ [Zone] 无效 series #${idx}`, series);
+                        return false;
                     }
+                } catch (e) {
+                    console.error(`❌ [Zone] 移除 series #${idx} 失败`, e);
+                    return true; // 保留以便下轮重试
                 }
             });
-            zoneSeries = [];
             return;
         }
 
         try {
+            console.log("🌐 [Zone] 正在请求支撑/阻力线数据...");
             const res = await fetch(`/v1/level-lines/${klineType}`);
             const levels = await res.json();
 
-            // 清除旧线
-            zoneSeries.forEach(series => {
-                if (series) {
-                    try {
+            console.log(`📊 [Zone] 返回 ${levels.length} 条 zone 数据`);
+
+            // 安全清除旧线
+            zoneSeries = zoneSeries.filter((series, idx) => {
+                try {
+                    if (series && typeof series.setData === 'function') {
                         chart.removeSeries(series);
-                    } catch (e) {
-                        console.warn("移除线失败:", e);
+                        console.log(`✅ [Zone] 移除旧线 #${idx}`);
+                        return false;
+                    } else {
+                        console.warn(`⚠️ [Zone] 无效旧线 #${idx}`, series);
+                        return false;
                     }
+                } catch (e) {
+                    console.error(`❌ [Zone] 移除旧线 #${idx} 失败`, e);
+                    return true;
                 }
             });
-            zoneSeries = [];
+
             const currentTime = lastTimestamp || Math.floor(Date.now() / 1000);
 
-            levels.forEach(level => {
+            levels.forEach((level, idx) => {
                 const volume = parseFloat(level.totalVolume);
-                const scaledVolume = Math.min(6, 1.5 + Math.log10(volume + 1));  // 更平滑
+                const price = parseFloat(level.price);
+                const type = level.type;
 
-                const line = chart.addLineSeries();
+                if (isNaN(volume) || isNaN(price) || !type) {
+                    console.warn(`⚠️ [Zone] 跳过非法 zone #${idx}`, level);
+                    return;
+                }
+
+                const scaledVolume = Math.min(6, 1.5 + Math.log10(volume + 1));
+
+                const line = chart?.addLineSeries?.();
+                if (!line || typeof line.setData !== 'function') {
+                    console.error(`❌ [Zone] 添加线失败 #${idx}`, line);
+                    return;
+                }
+
                 line.applyOptions({
-                    color: level.type === "support" ? "#00b300" : "#cc0000",
+                    color: type === "support" ? "#00b300" : "#cc0000",
                     lineWidth: scaledVolume,
                     priceLineVisible: true,
                     lastValueVisible: false,
                     crossHairMarkerVisible: false,
                     priceLineStyle: 2,
-                    title: `${level.type === "support" ? "支撑" : "阻力"}: ${level.totalVolume}`
+                    title: `${type === "support" ? "支撑" : "阻力"}: ${volume}`
                 });
-                line.setData([{ time: currentTime, value: parseFloat(level.price) }]);
+
+                line.setData([{ time: currentTime, value: price }]);
                 zoneSeries.push(line);
+
+                console.log(`✅ [Zone] 添加 ${type} 线 #${idx}: price=${price}, volume=${volume}, scaled=${scaledVolume.toFixed(2)}`);
             });
+
         } catch (err) {
-            console.error("区间加载失败:", err);
+            console.error("❌ [Zone] 加载或绘制失败:", err);
         }
     }
 </script>
+
 <script>
     window.addEventListener("load", () => {
         fetchAllStrategies();
