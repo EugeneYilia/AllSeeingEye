@@ -84,8 +84,8 @@ fun Route.registerSupportResistanceRoute() {
         val bids = TreeMap(depth["bids"])
         val asks = TreeMap(depth["asks"])
 
-        val supportZones = calculateZones(bids, "support", 10)
-        val resistanceZones = calculateZones(asks, "resistance", 10)
+        val supportZones = calculateZones(bids, "support", 3)
+        val resistanceZones = calculateZones(asks, "resistance", 3)
 
         call.respond(supportZones + resistanceZones)
     }

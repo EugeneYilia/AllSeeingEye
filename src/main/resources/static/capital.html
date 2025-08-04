@@ -287,7 +287,7 @@
     }
 </script>
 <script>
-    let zoneSeries = [];
+    let zoneSeriesMap = new Map(); // Map<uniqueId, series>
     let isRenderingZones = false;
     let zoneIntervalId = null;
 
@@ -296,14 +296,12 @@
         if (!checkbox) return;
 
         checkbox.onclick = () => {
-            fetchAndRenderZones(); // 点击立即刷新
+            fetchAndRenderZones();
             if (checkbox.checked) {
-                // 开始周期刷新
                 if (!zoneIntervalId) {
                     zoneIntervalId = setInterval(fetchAndRenderZones, 5000);
                 }
             } else {
-                // 停止周期刷新
                 clearInterval(zoneIntervalId);
                 zoneIntervalId = null;
             }
@@ -311,66 +309,62 @@
     }
 
     async function fetchAndRenderZones() {
-        if (isRenderingZones) return;
+        if (isRenderingZones || !chart) return;
         isRenderingZones = true;
 
         const checkbox = document.getElementById("toggle_zones");
-        if (!checkbox || !chart) {
+        if (!checkbox) {
             isRenderingZones = false;
             return;
         }
 
         try {
             if (!checkbox.checked) {
-                // 🧹 清空已绘制的线
-                zoneSeries.forEach((obj, idx) => {
+                // 🧹 清除所有已有线
+                for (const [id, series] of zoneSeriesMap.entries()) {
                     try {
-                        if (obj?.line && obj.alive) {
-                            chart.removeSeries(obj.line);
-                            console.log(`✅ [Zone] Removed series #${idx}`);
-                            obj.alive = false;
+                        if (series && typeof series.setData === 'function') {
+                            chart.removeSeries(series);
                         }
                     } catch (e) {
-                        console.warn(`⚠️ [Zone] Remove failed for series #${idx}:`, e);
+                        console.warn(`[Zone] Remove failed for ID=${id}:`, e);
                     }
-                });
-                zoneSeries = [];
+                    zoneSeriesMap.delete(id);
+                }
                 return;
             }
 
             const res = await fetch(`/v1/level-lines/${klineType}`);
             const levels = await res.json();
 
-            // 🧹 清空旧线
-            zoneSeries.forEach((obj, idx) => {
+            // 🧹 清除旧线
+            for (const [id, series] of zoneSeriesMap.entries()) {
                 try {
-                    if (obj?.line && obj.alive) {
-                        chart.removeSeries(obj.line);
-                        obj.alive = false;
-                        console.log(`✅ [Zone] 清除旧线 #${idx}`);
+                    if (series && typeof series.setData === 'function') {
+                        chart.removeSeries(series);
                     }
                 } catch (e) {
-                    console.warn(`⚠️ [Zone] 清除失败 #${idx}:`, e);
+                    console.warn(`[Zone] Remove failed for ID=${id}:`, e);
                 }
-            });
-            zoneSeries = [];
+                zoneSeriesMap.delete(id);
+            }
 
             const currentTime = lastTimestamp || Math.floor(Date.now() / 1000);
 
-            levels.forEach((level, idx) => {
+            levels.forEach((level, index) => {
                 const volume = parseFloat(level.totalVolume);
                 const price = parseFloat(level.price);
                 const type = level.type;
 
-                if (isNaN(volume) || isNaN(price) || !type) {
-                    console.warn(`⚠️ [Zone] 跳过非法线 #${idx}`, level);
+                if (!type || isNaN(volume) || isNaN(price)) {
+                    console.warn(`[Zone] Skipping invalid line at index ${index}`, level);
                     return;
                 }
 
                 const scaledVolume = Math.min(6, 1.5 + Math.log10(volume + 1));
                 const line = chart?.addLineSeries?.();
                 if (!line || typeof line.setData !== "function") {
-                    console.error(`❌ [Zone] 添加失败 #${idx}`, line);
+                    console.error(`[Zone] Failed to add line at index ${index}`);
                     return;
                 }
 
@@ -381,13 +375,19 @@
                     lastValueVisible: false,
                     crossHairMarkerVisible: false,
                     priceLineStyle: 2,
-                    title: `${type === "support" ? "支撑" : "阻力"}: ${volume}`
+                    title: `${type === "support" ? "支撑(张)" : "阻力(张)"}: ${volume}`
                 });
 
-                line.setData([{ time: currentTime, value: price }]);
-                zoneSeries.push({ line, alive: true });
-            });
+                const toTime = currentTime + 3600 * 24 * 3; // 3天后（确保横穿未来）
+                const fromTime = currentTime - 3600 * 24 * 30; // 30天前
 
+                line.setData([
+                    { time: fromTime, value: price },
+                    { time: toTime, value: price }
+                ]);
+                const id = `${type}_${price}`;
+                zoneSeriesMap.set(id, line);
+            });
         } catch (e) {
             console.error("❌ [Zone] 渲染失败:", e);
         } finally {
@@ -395,7 +395,6 @@
         }
     }
 </script>
-
 
 <script>
     window.addEventListener("load", () => {
