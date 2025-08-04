@@ -29,7 +29,7 @@ data class SupportResistanceZone(
 fun calculateZones(
     map: SortedMap<BigDecimal, BigDecimal>,
     type: String,
-    binCount: Int = 10
+    binCount: Int = 3
 ): List<SupportResistanceZone> {
     if (map.isEmpty()) return emptyList()
 
