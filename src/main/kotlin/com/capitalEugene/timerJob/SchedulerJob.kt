@@ -61,7 +61,7 @@ object SchedulerJob {
             if(list.isNotEmpty()){
                 logger.info("key = ${key}, daily average value = ${list.reduce { acc, value -> acc + value }.safeDiv(BigDecimal.valueOf(list.size.toLong()))}")
             } else {
-                logger.error("key = ${key}, daily average value = N/A(empty list)")
+                logger.info("key = ${key}, daily average value = N/A(empty list)")
             }
         }
     }
