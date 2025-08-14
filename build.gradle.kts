@@ -1,15 +1,15 @@
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 
+val kotlin_version: String by project
+val logback_version: String by project
+val serialization_version: String by project
+val kmongo_version: String by project
+
 allprojects {
     repositories.all {
         (this as? MavenArtifactRepository)?.let { it.isAllowInsecureProtocol = true }
     }
 }
-
-val kotlin_version: String by project
-val logback_version: String by project
-val serialization_version: String by project
-val kmongo_version: String by project
 
 plugins {
     kotlin("jvm") version "2.1.10"
