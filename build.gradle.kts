@@ -1,3 +1,11 @@
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+
+allprojects {
+    repositories.all {
+        (this as? MavenArtifactRepository)?.let { it.isAllowInsecureProtocol = true }
+    }
+}
+
 val kotlin_version: String by project
 val logback_version: String by project
 val serialization_version: String by project
