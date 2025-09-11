@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 val kotlin_version: String by project
 val logback_version: String by project
 val serialization_version: String by project
@@ -51,5 +53,21 @@ dependencies {
 kotlin {
     sourceSets.all {
         languageSettings.optIn("kotlinx.serialization.ExperimentalSerializationApi")
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(23))
+    }
+}
+
+kotlin {
+    jvmToolchain(23)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_23)
     }
 }
