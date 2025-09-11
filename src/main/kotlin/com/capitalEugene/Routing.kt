@@ -1,6 +1,7 @@
 package com.capitalEugene
 
 import com.capitalEugene.agent.redis.RedisAgent
+import com.capitalEugene.api.controller.registerSupportResistanceRoute
 import com.capitalEugene.order.klineCache
 import com.capitalEugene.trade.strategy.dogfood.martinDogFoodStateMap
 import io.ktor.http.*
@@ -90,5 +91,7 @@ fun Application.configureRouting() {
                 call.respond(list)
             }
         }
+
+        registerSupportResistanceRoute()
     }
 }

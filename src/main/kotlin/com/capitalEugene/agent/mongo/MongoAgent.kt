@@ -19,11 +19,6 @@ object MongoAgent {
     // name, position
     suspend fun savePositionToMongo(positionState: PositionState) {
         try {
-            if (positionState.strategyFullName == null) {
-                logger.warn("⚠️ 写入失败：strategyFullName 为空，无法识别唯一记录")
-                return
-            }
-
             val filter = PositionState::strategyFullName eq positionState.strategyFullName
             positionCollection.replaceOne(
                 filter,

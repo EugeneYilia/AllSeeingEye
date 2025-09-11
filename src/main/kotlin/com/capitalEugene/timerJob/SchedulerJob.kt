@@ -38,16 +38,25 @@ object SchedulerJob {
     private fun calcDiff(symbol: String){
         val bids = depthCache[symbol]?.get("bids")?.safeSnapshot()?.keys ?: return
         val asks = depthCache[symbol]?.get("asks")?.safeSnapshot()?.keys ?: return
-
         val price = priceCache[symbol] ?: return
 
-        // 该分钟下的最小支撑位和最大压力位
-        val lowestBid = price - (bids.minOrNull() ?: return)
+        // 分别取两侧极值（你的口径：低侧最小价 => 最大支撑差值；高侧最大价 => 最大压力差值）
+        val lowestBid  = price - (bids.minOrNull() ?: return)
         val highestAsk = (asks.maxOrNull() ?: return) - price
 
-        // 该分钟的平均支撑位差值和平均压力位差值
-        val avgBid = bids.reduce { acc, bid -> acc + (price - bid) }.safeDiv(BigDecimal.valueOf(bids.size.toLong()))
-        val avgAsk = asks.reduce { acc, ask -> acc + (ask - price) }.safeDiv(BigDecimal.valueOf(asks.size.toLong()))
+        // —— 关键修正：用 fold 从 0 开始累加（避免 reduce 把第一档 ask/bid 当作初值）——
+        val askCount = asks.size.toLong()
+        val bidCount = bids.size.toLong()
+
+        val avgAsk = asks.fold(BigDecimal.ZERO) { acc, ask -> acc + (ask - price) }
+            .safeDiv(BigDecimal.valueOf(askCount))
+
+        val avgBid = bids.fold(BigDecimal.ZERO) { acc, bid -> acc + (price - bid) }
+            .safeDiv(BigDecimal.valueOf(bidCount))
+
+        // 如需自检，可加入以下断言（可选）
+        // check(avgAsk <= highestAsk) { "avgAsk should not exceed highestAsk" }
+        // check(avgBid <= lowestBid)  { "avgBid should not exceed lowestBid" }
 
         symbolDiffMap[symbol + "_bids_avg"]!!.add(avgBid)
         symbolDiffMap[symbol + "_asks_avg"]!!.add(avgAsk)
@@ -58,10 +67,15 @@ object SchedulerJob {
     // 分钟平均值转化为日平均值
     fun printOrderDiffValue(){
         for ((key, list) in symbolDiffMap) {
-            if(list.isNotEmpty()){
-                logger.info("key = ${key}, daily average value = ${list.reduce { acc, value -> acc + value }.safeDiv(BigDecimal.valueOf(list.size.toLong()))}")
+            if (list.isNotEmpty()) {
+                logger.info(
+                    "key = ${key}, daily average value = ${
+                        list.fold(BigDecimal.ZERO) { acc, v -> acc + v }
+                            .safeDiv(BigDecimal.valueOf(list.size.toLong()))
+                    }"
+                )
             } else {
-                logger.error("key = ${key}, daily average value = N/A(empty list)")
+                logger.info("key = ${key}, daily average value = N/A(empty list)")
             }
         }
     }

@@ -107,6 +107,11 @@
             <option value="0">UTC</option>
             <option value="8" selected>UTC+8</option>
         </select>
+
+        <label style="font-weight: bold;">
+            <input type="checkbox" id="toggle_zones" checked style="margin-right: 5px;">
+            显示支撑 / 阻力线
+        </label>
     </div>
     <div id="kline_info" style="padding: 6px 10px; font-size: 14px; background: #fefefe; color: #000; border-bottom: 1px solid #ccc;"></div>
     <div id="kline_chart" style="height: 400px;"></div>
@@ -280,14 +285,131 @@
             }
         });
     }
+</script>
+<script>
+    let zoneSeriesMap = new Map(); // Map<uniqueId, series>
+    let isRenderingZones = false;
+    let zoneIntervalId = null;
 
+    function initZoneToggle() {
+        const checkbox = document.getElementById("toggle_zones");
+        if (!checkbox) return;
 
+        checkbox.onclick = () => {
+            fetchAndRenderZones();
+            if (checkbox.checked) {
+                if (!zoneIntervalId) {
+                    zoneIntervalId = setInterval(fetchAndRenderZones, 5000);
+                }
+            } else {
+                clearInterval(zoneIntervalId);
+                zoneIntervalId = null;
+            }
+        };
+    }
+
+    async function fetchAndRenderZones() {
+        if (isRenderingZones || !chart) return;
+        isRenderingZones = true;
+
+        const checkbox = document.getElementById("toggle_zones");
+        if (!checkbox) {
+            isRenderingZones = false;
+            return;
+        }
+
+        try {
+            if (!checkbox.checked) {
+                // 🧹 清除所有已有线
+                for (const [id, series] of zoneSeriesMap.entries()) {
+                    try {
+                        if (series && typeof series.setData === 'function') {
+                            chart.removeSeries(series);
+                        }
+                    } catch (e) {
+                        console.warn(`[Zone] Remove failed for ID=${id}:`, e);
+                    }
+                    zoneSeriesMap.delete(id);
+                }
+                return;
+            }
+
+            const res = await fetch(`/v1/level-lines/${klineType}`);
+            const levels = await res.json();
+
+            // 🧹 清除旧线
+            for (const [id, series] of zoneSeriesMap.entries()) {
+                try {
+                    if (series && typeof series.setData === 'function') {
+                        chart.removeSeries(series);
+                    }
+                } catch (e) {
+                    console.warn(`[Zone] Remove failed for ID=${id}:`, e);
+                }
+                zoneSeriesMap.delete(id);
+            }
+
+            const currentTime = lastTimestamp || Math.floor(Date.now() / 1000);
+
+            levels.forEach((level, index) => {
+                const volume = parseFloat(level.totalVolume);
+                const price = parseFloat(level.price);
+                const type = level.type;
+
+                if (!type || isNaN(volume) || isNaN(price)) {
+                    console.warn(`[Zone] Skipping invalid line at index ${index}`, level);
+                    return;
+                }
+
+                const scaledVolume = Math.min(6, 1.5 + Math.log10(volume + 1));
+                const line = chart?.addLineSeries?.();
+                if (!line || typeof line.setData !== "function") {
+                    console.error(`[Zone] Failed to add line at index ${index}`);
+                    return;
+                }
+
+                line.applyOptions({
+                    color: type === "support" ? "#00b300" : "#cc0000",
+                    lineWidth: scaledVolume,
+                    priceLineVisible: true,
+                    lastValueVisible: false,
+                    crossHairMarkerVisible: false,
+                    priceLineStyle: 2,
+                    title: `${type === "support" ? "支撑(张)" : "阻力(张)"}: ${volume}`
+                });
+
+                const toTime = currentTime + 3600 * 24 * 3; // 3天后（确保横穿未来）
+                const fromTime = currentTime - 3600 * 24 * 30; // 30天前
+
+                line.setData([
+                    { time: fromTime, value: price },
+                    { time: toTime, value: price }
+                ]);
+                const id = `${type}_${price}`;
+                zoneSeriesMap.set(id, line);
+            });
+        } catch (e) {
+            console.error("❌ [Zone] 渲染失败:", e);
+        } finally {
+            isRenderingZones = false;
+        }
+    }
+</script>
+
+<script>
     window.addEventListener("load", () => {
         fetchAllStrategies();
         initKlineChart();
         fetchKlineUpdate();
         setInterval(fetchKlineUpdate, 1000);
         setInterval(fetchPosition, 1000);
+
+        initZoneToggle();
+        // ✅ 必须放在 chart 初始化之后再执行
+        setTimeout(() => {
+            fetchAndRenderZones();                    // 初次加载
+            setInterval(fetchAndRenderZones, 5000);   // 每 5 秒自动刷新
+        }, 1000);  // 延迟执行
     });
 </script>
 </body>
