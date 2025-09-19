@@ -51,6 +51,8 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation") // ← 核心依赖
     implementation("io.ktor:ktor-serialization-kotlinx-json")
     implementation("com.sun.mail:jakarta.mail:2.0.1")
+    implementation("io.netty:netty-resolver-dns-native-macos:4.2.2.Final:osx-x86_64")
+
     // KMongo
     implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongo_version")
     implementation("org.litote.kmongo:kmongo-coroutine:$kmongo_version")
