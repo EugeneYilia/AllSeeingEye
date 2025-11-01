@@ -23,7 +23,7 @@ group = "com.capitalEugene"
 version = "0.0.1"
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+    mainClass.set("io.ktor.server.netty.EngineMain")
     applicationDefaultJvmArgs = listOf(
         "-Dio.ktor.development=false",
         "-Dio.ktor.watch.paths="
@@ -80,4 +80,16 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_23)
     }
+}
+
+tasks.register<JavaExec>("runBackTest") {
+    group = "application"
+    mainClass.set("com.capitalEugene.backTest.BackTestKt")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("runApplication") {
+    group = "application"
+    mainClass.set("com.capitalEugene.ApplicationKt")
+    classpath = sourceSets["main"].runtimeClasspath
 }
