@@ -174,9 +174,7 @@ suspend fun mainWithSocksProxy() {
 }
 
 /**
- * 关键函数：保留你原始分页风格（after），但自动检测返回时间戳单位（秒/毫秒）：
- * - 将返回的每条记录归一化为毫秒（用于过滤与保存）
- * - 分页时使用 API 返回的“原始单位”（afterRaw）
+ * 最终修复：probe -> 使用 after 分页（初始 after = end，raw 单位），归一化为 ms 过滤并保存
  */
 suspend fun downloadYearKlines(client: HttpClient, symbol: String, interval: String, year: Int): List<List<String>> {
     val allData = mutableListOf<List<String>>()
@@ -186,31 +184,49 @@ suspend fun downloadYearKlines(client: HttpClient, symbol: String, interval: Str
     val startMs = LocalDateTime.of(year, 1, 1, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli()
     val endMs = LocalDateTime.of(year, 12, 31, 23, 59, 59).toInstant(ZoneOffset.UTC).toEpochMilli()
 
-    // afterRaw：初始使用毫秒（和你原始版本一致）
-    var afterRaw: Long? = startMs
-    // 未知时设为 null；第一次拿到响应后检测 true => 返回的是秒，false => 返回的是毫秒
-    var responseReturnsSeconds: Boolean? = null
-
+    // probe 检测接口返回单位（秒 or 毫秒）
+    var responseReturnsSeconds: Boolean = false
+    var afterRaw: Long? = null // raw unit (秒或毫秒) 用于 after 参数
     var requestCount = 0
 
     println("   📅 时间范围: ${LocalDateTime.ofInstant(Instant.ofEpochMilli(startMs), ZoneOffset.UTC)} 至 ${LocalDateTime.ofInstant(Instant.ofEpochMilli(endMs), ZoneOffset.UTC)}")
 
-    while (afterRaw != null) {
-        // 构造请求参数：如果已知接口返回的是秒，则把 afterRaw 转为秒（因为 afterRaw 可能当前是毫秒）
-        val afterParam = if (responseReturnsSeconds == true) {
-            // afterRaw stored in raw units; ensure we pass seconds
-            // if afterRaw currently is milliseconds (first loop), convert:
-            if (afterRaw > 1_000_000_000_000L) afterRaw / 1000 else afterRaw
-        } else {
-            // 不确定或已知为毫秒 -> 直接传毫秒（和你原始版本一致）
-            afterRaw
+    // probe 请求：limit=1，不带 after，检测返回单位
+    try {
+        val probeUrl = "https://www.okx.com/api/v5/market/history-candles?instId=$symbol&bar=$interval&limit=1"
+        print("   🔎 探测接口时间戳单位 (probe request)... ")
+        val probeResp: HttpResponse = client.get(probeUrl) {
+            headers {
+                append("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+                append("Accept", "application/json")
+            }
         }
+        val probeOkx: OkxResponse = probeResp.body()
+        if (probeOkx.code != "0" || probeOkx.data.isEmpty()) {
+            println("probe 返回异常或空 data（code=${probeOkx.code}, msg=${probeOkx.msg}），回退为毫秒模式")
+            responseReturnsSeconds = false
+            afterRaw = endMs
+        } else {
+            val probeFirst = probeOkx.data.first()[0].toLong()
+            responseReturnsSeconds = probeFirst < 1_000_000_000_000L
+            println(" probe 返回 time unit = ${if (responseReturnsSeconds) "秒" else "毫秒"} (probeFirst=$probeFirst)")
+            // 重要：after 初始值应为 end（raw 单位），因为 after 表示 "return records earlier than requested ts"
+            afterRaw = if (responseReturnsSeconds) (endMs / 1000L) else endMs
+        }
+    } catch (e: Exception) {
+        println(" probe 请求失败: ${e.message}. 回退为毫秒模式")
+        responseReturnsSeconds = false
+        afterRaw = endMs
+    }
 
+    // 主循环：使用 afterRaw（raw 单位）向左（早）翻页
+    while (afterRaw != null) {
         requestCount++
+        val afterParam = afterRaw
         val url = "https://www.okx.com/api/v5/market/history-candles?instId=$symbol&bar=$interval&limit=$limit&after=$afterParam"
 
         try {
-            print("   🔄 请求 #$requestCount... ")
+            print("   🔄 请求 #$requestCount (afterParam=$afterParam)... ")
             val response: HttpResponse = client.get(url) {
                 headers {
                     append("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
@@ -230,31 +246,17 @@ suspend fun downloadYearKlines(client: HttpClient, symbol: String, interval: Str
                 break
             }
 
-            // 读取原始首/末时间戳，检测单位（秒还是毫秒）
+            // 打印原始首/末时间戳（raw 单位）
             val firstRaw = okxResponse.data.first()[0].toLong()
             val lastRaw = okxResponse.data.last()[0].toLong()
-
-            if (responseReturnsSeconds == null) {
-                // 经验阈值：小于 1e12 -> 秒；否则毫秒
-                responseReturnsSeconds = firstRaw < 1_000_000_000_000L
-                println("   🔎 探测到接口返回时间戳单位: ${if (responseReturnsSeconds == true) "秒" else "毫秒"} (firstRaw=$firstRaw)")
-                // 如果我们一开始把 afterRaw 当成毫秒，但接口返回秒，调整 afterRaw 为秒（避免下一次请求传错单位）
-                if (responseReturnsSeconds == true && afterRaw != null && afterRaw > 1_000_000_000_000L) {
-                    afterRaw = afterRaw / 1000
-                }
-            }
-
-            // 调试：打印本批次返回的首/末原始时间戳
             println(" 返回批次原始时间戳: firstRaw=$firstRaw, lastRaw=$lastRaw")
 
-            // 过滤并把每条记录归一化为毫秒（用于比较和保存）
+            // 归一化并过滤：raw -> ms（如果接口为秒则 *1000）
             val filteredNormalized = okxResponse.data.mapNotNull { entry ->
                 try {
                     val rawTs = entry[0].toLong()
-                    val tsMs = if (responseReturnsSeconds == true) rawTs * 1000L else rawTs
-                    // 只保留目标年份范围内的数据
+                    val tsMs = if (responseReturnsSeconds) rawTs * 1000L else rawTs
                     if (tsMs in startMs..endMs) {
-                        // 构造新的 entry：将第一个元素替换为归一化后的毫秒字符串，保留其余字段
                         val newEntry = mutableListOf<String>()
                         newEntry.add(tsMs.toString())
                         if (entry.size > 1) newEntry.addAll(entry.subList(1, entry.size))
@@ -270,26 +272,24 @@ suspend fun downloadYearKlines(client: HttpClient, symbol: String, interval: Str
             allData.addAll(filteredNormalized)
             println(" 获取 ${filteredNormalized.size} 条符合年份的数据, 累计: ${allData.size} 条")
 
-            // 计算本批次中原始最小时间戳（raw）；用于下一次分页（保持与接口相同的单位）
+            // 计算当前批次中最小 raw 时间戳（用于下一页 after）
             val minRawInBatch = okxResponse.data.minByOrNull { it[0].toLong() }?.get(0)?.toLong()
             if (minRawInBatch == null) {
                 println("   ⚠️ 无法取得本批次最小原始时间戳，停止翻页")
                 break
             }
 
-            // 如果接口返回的是秒，则 minRawInBatch 单位为秒；我们把 afterRaw 设为该 raw 单位（与接口一致）
-            afterRaw = minRawInBatch
-            // 继续翻页时，为避免重复，减 1 单位（raw 单位）
-            afterRaw = afterRaw - 1
+            // 下一页的 afterRaw = minRawInBatch - 1（raw 单位）
+            afterRaw = minRawInBatch - 1
 
-            // 检查归一化后是否已经跨出起始范围：先将 afterRaw 转为毫秒再比较
-            val afterRawAsMs = if (responseReturnsSeconds == true) afterRaw * 1000L else afterRaw
+            // 边界判断：将 afterRaw 转为 ms 供比较
+            val afterRawAsMs = if (responseReturnsSeconds) afterRaw * 1000L else afterRaw
             if (afterRawAsMs <= startMs) {
                 println("   💡 已到达或超出开始时间，停止翻页 (afterRawAsMs=$afterRawAsMs <= startMs=$startMs)")
                 break
             }
 
-            // 如果返回的数据少于 limit，通常说明没有更多历史数据可拿
+            // 若本批次少于 limit，则可认为历史已尽
             if (okxResponse.data.size < limit) {
                 println("   💡 本批次小于 limit（$limit），可能已到历史末端")
                 break
@@ -304,7 +304,6 @@ suspend fun downloadYearKlines(client: HttpClient, symbol: String, interval: Str
     }
 
     println("   📊 下载完成: 共 ${requestCount} 次请求, 原始总记录数: ${allData.size}")
-    // 去重并按时间升序返回（这里 timestamp 已归一化为毫秒）
     return allData
         .distinctBy { it[0] }
         .sortedBy { it[0].toLong() }
