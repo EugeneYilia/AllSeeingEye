@@ -82,14 +82,20 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
-tasks.register<JavaExec>("runBackTest") {
+tasks.register<JavaExec>("downloadHistoricalKLine") {
     group = "application"
-    mainClass.set("com.capitalEugene.backTest.BackTestKt")
+    mainClass.set("com.capitalEugene.backTest.DownloadHistoricalKLineKt")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
 tasks.register<JavaExec>("runApplication") {
     group = "application"
     mainClass.set("com.capitalEugene.ApplicationKt")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("runShengStrategyTest") {
+    group = "application"
+    mainClass.set("com.capitalEugene.trade.strategy.sheng.ShengBacktestSummaryFixed")
     classpath = sourceSets["main"].runtimeClasspath
 }

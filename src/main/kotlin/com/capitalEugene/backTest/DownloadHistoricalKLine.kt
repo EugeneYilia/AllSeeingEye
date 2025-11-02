@@ -30,7 +30,7 @@ data class OkxResponse(
 fun main() = runBlocking {
     println("🔧 使用HTTP代理: 127.0.0.1:33210")
 
-    val client = HttpClient(CIO) {
+    var client = HttpClient(CIO) {
         engine {
             // 配置HTTP代理
             proxy = Proxy(Proxy.Type.HTTP, InetSocketAddress("127.0.0.1", 33210))
@@ -57,8 +57,8 @@ fun main() = runBlocking {
         // 如果HTTP代理不行，尝试SOCKS代理
         println("🔄 尝试SOCKS代理...")
         client.close()
-        mainWithSocksProxy()
-        return@runBlocking
+
+        client = buildClientWithSocksProxy()
     }
 
     val symbols = listOf("BTC-USDT-SWAP", "ETH-USDT-SWAP", "SOL-USDT-SWAP")
@@ -109,7 +109,7 @@ fun main() = runBlocking {
 }
 
 // 使用SOCKS代理的备用函数
-suspend fun mainWithSocksProxy() {
+suspend fun buildClientWithSocksProxy() : HttpClient {
     println("🔧 使用SOCKS代理: 127.0.0.1:33211")
 
     val client = HttpClient(CIO) {
@@ -141,36 +141,11 @@ suspend fun mainWithSocksProxy() {
         println("   2. 代理端口是否正确")
         println("   3. 代理软件是否允许本地连接")
         client.close()
-        return
+
+        throw e
     }
 
-    // 下载代码...
-    val symbols = listOf("BTC-USDT")
-    val intervals = listOf("1H")
-    val years = listOf(2024)
-    val outputDir = File("HistoricalKLine")
-    if (!outputDir.exists()) outputDir.mkdirs()
-
-    for (symbol in symbols) {
-        for (interval in intervals) {
-            for (year in years) {
-                println("\n📥 测试下载: $symbol $interval $year")
-                try {
-                    val data = downloadYearKlines(client, symbol, interval, year)
-                    if (data.isNotEmpty()) {
-                        saveToCsv(symbol, interval, year, data, outputDir)
-                        println("✅ 测试成功! 记录数: ${data.size}")
-                    } else {
-                        println("⚠️  无数据")
-                    }
-                } catch (e: Exception) {
-                    println("❌ 下载失败: ${e.message}")
-                }
-            }
-        }
-    }
-
-    client.close()
+    return client
 }
 
 /**
