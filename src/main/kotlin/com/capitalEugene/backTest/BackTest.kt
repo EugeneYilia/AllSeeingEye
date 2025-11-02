@@ -61,7 +61,7 @@ fun main() = runBlocking {
         return@runBlocking
     }
 
-    val symbols = listOf("BTC-USDT", "ETH-USDT", "SOL-USDT")
+    val symbols = listOf("BTC-USDT-SWAP", "ETH-USDT-SWAP", "SOL-USDT-SWAP")
     val intervals = listOf("1H", "4H")
     val years = listOf(2022, 2023, 2024, 2025) // 与你之前一致，按需调整
     val outputDir = File("HistoricalKLine")
@@ -310,7 +310,7 @@ suspend fun downloadYearKlines(client: HttpClient, symbol: String, interval: Str
 }
 
 fun saveToCsv(symbol: String, interval: String, year: Int, data: List<List<String>>, outputDir: File) {
-    val fileName = "${symbol.replace("-USDT", "")}_${year}_${interval}.csv"
+    val fileName = "${symbol}_${year}_${interval}.csv"
     val file = File(outputDir, fileName)
     FileWriter(file).use { writer ->
         writer.append("timestamp,datetime,open,high,low,close,volume,volume_ccy\n")
