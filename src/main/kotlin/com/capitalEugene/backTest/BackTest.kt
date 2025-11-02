@@ -63,7 +63,7 @@ fun main() = runBlocking {
 
     val symbols = listOf("BTC-USDT", "ETH-USDT", "SOL-USDT")
     val intervals = listOf("1H", "4H")
-    val years = listOf(2022, 2025) // 与你之前一致，按需调整
+    val years = listOf(2022, 2023, 2024, 2025) // 与你之前一致，按需调整
     val outputDir = File("HistoricalKLine")
     if (!outputDir.exists()) outputDir.mkdirs()
 
