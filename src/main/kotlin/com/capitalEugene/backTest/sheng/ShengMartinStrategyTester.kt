@@ -1,42 +1,33 @@
 package com.capitalEugene.backTest.sheng
 
-import com.capitalEugene.backTest.BIGDECIMAL_SCALE
-import com.capitalEugene.backTest.DATE_FORMATTER
-import com.capitalEugene.backTest.Kline
-import com.capitalEugene.backTest.ZONE
-import com.capitalEugene.backTest.loadKlines
-import com.capitalEugene.backTest.bd
-import com.capitalEugene.backTest.toStr
-
+import com.capitalEugene.backTest.*
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDateTime
 
 /**
- * 修复版回测：
+ * 修正版马丁策略回测：
  * - 爆仓判定使用实时市值 (equity + unreal - usedMargin <= 0)
- * - 支持爆仓后自动注资并继续回测（AUTO_RESTART_AFTER_LIQUIDATION）
- * - 每年只输出一行中文摘要
+ * - 支持爆仓后自动注资并继续回测
+ * - 第一层及后续加仓层均整仓止盈
  */
 
 object ShengBacktestSummaryFixed {
-    // 参数（按你需求）
+    // 参数
     private val TOTAL_CAPITAL = bd(1000.0)
     private val LEVERAGE = bd(20.0)
     private val INITIAL_POSITION_VALUE = bd(400.0)
     private const val MAX_LAYERS = 5
     private val ADD_STEP_PCT = bd(0.02)
     private val FIRST_LAYER_TP_PCT = bd(0.03)
-    private val FIRST_LAYER_CLOSE_VALUE = bd(12.0)
     private val LATER_LAYERS_TP_PCT = bd(0.02)
     private val CONTRACT_SIZE = bd(1.0)
 
-    // 爆仓处理策略
-    private const val AUTO_RESTART_AFTER_LIQUIDATION = true  // 爆仓后是否自动注资继续
-    private val RESTART_CAPITAL = TOTAL_CAPITAL             // 注资金额，默认恢复到初始资金
+    private const val AUTO_RESTART_AFTER_LIQUIDATION = true
+    private val RESTART_CAPITAL = TOTAL_CAPITAL
 
-    // 年度回测摘要数据结构
+    // 年度回测摘要
     data class YearSummary(
         val year: Int,
         var startCapital: BigDecimal,
@@ -44,32 +35,25 @@ object ShengBacktestSummaryFixed {
         var roiPct: BigDecimal,
         var tradesOpenCount: Int,
         var totalAddCount: Int,
-        var partialTpCount: Int,
         var fullTpCount: Int,
         var liquidationCount: Int
     )
 
-    // 回测一年（以北京时间年划分）
     fun backtestYear(symbol: String, timeframe: String, year: Int, klinesAll: List<Kline>): YearSummary {
         val startMs = LocalDateTime.of(year, 1, 1, 0, 0).atZone(ZONE).toInstant().toEpochMilli()
         val endMs = LocalDateTime.of(year, 12, 31, 23, 59, 59).atZone(ZONE).toInstant().toEpochMilli()
         val klines = klinesAll.filter { it.ts in startMs..endMs }.sortedBy { it.ts }
-        val summary = YearSummary(year, TOTAL_CAPITAL, TOTAL_CAPITAL, bd(0.0), 0, 0, 0, 0, 0)
-        if (klines.size < 10) {
-            summary.endCapital = summary.startCapital
-            summary.roiPct = bd(0.0)
-            return summary
-        }
+        val summary = YearSummary(year, TOTAL_CAPITAL, TOTAL_CAPITAL, bd(0.0), 0, 0, 0, 0)
+        if (klines.size < 10) return summary
 
         var equity = TOTAL_CAPITAL
         var usedMargin = bd(0.0)
         var posSize = bd(0.0)
         var posEntry = bd(0.0)
         var posLayer = 0
-        var posDir = "" // "long" or "short"
+        var posDir = ""
         var tradesOpen = 0
         var totalAdds = 0
-        var partialTps = 0
         var fullTps = 0
         var liquidations = 0
 
@@ -77,102 +61,63 @@ object ShengBacktestSummaryFixed {
             val window = klines.subList(i - 9, i + 1)
             val current = window.last()
             val price = current.close
-            val dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(current.ts), ZONE).format(DATE_FORMATTER)
             val prev9 = window.subList(0, 9)
             val prev9MinLow = prev9.minOf { it.low }
             val prev9MaxHigh = prev9.maxOf { it.high }
 
-            // 每根 bar 都要计算未实现 pnl（若有持仓）
+            // 计算未实现 pnl
             val unreal = if (posLayer > 0) {
                 if (posDir == "long") price.subtract(posEntry).multiply(posSize).multiply(CONTRACT_SIZE)
                 else posEntry.subtract(price).multiply(posSize).multiply(CONTRACT_SIZE)
             } else bd(0.0)
 
-            // 关键：用 标记资产 = equity + unreal 去判断是否爆仓（是否可维持当前保证金）
+            // 爆仓判定
             val marginBalance = equity.add(unreal).subtract(usedMargin)
             if (marginBalance <= BigDecimal.ZERO) {
-                // 触发爆仓（被强平）
                 liquidations++
-                // 清空持仓与释放保证金
                 posSize = bd(0.0); posEntry = bd(0.0); posLayer = 0; posDir = ""
                 usedMargin = bd(0.0)
-                // 对账户处理：根据 AUTO_RESTART_AFTER_LIQUIDATION 决定是否注资继续
-                if (AUTO_RESTART_AFTER_LIQUIDATION) {
-                    equity = RESTART_CAPITAL
-                    // 继续当年交易（如你要求“爆仓了可以投入进去再开”）
-                } else {
-                    equity = bd(0.0)
-                    // 停止当年交易：直接跳出循环
-                    break
-                }
-                // 继续到下一 bar
+                equity = if (AUTO_RESTART_AFTER_LIQUIDATION) RESTART_CAPITAL else bd(0.0)
+                if (!AUTO_RESTART_AFTER_LIQUIDATION) break
+                continue
             }
 
             val longSignal = price <= prev9MinLow
             val shortSignal = price >= prev9MaxHigh
 
-            if (posLayer == 0) {
-                if (longSignal || shortSignal) {
-                    val dir = if (longSignal) "long" else "short"
-                    val value = INITIAL_POSITION_VALUE
-                    val margin = value.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
-                    if (equity.subtract(usedMargin) >= margin) {
-                        val size = value.divide(price, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
-                            .divide(CONTRACT_SIZE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
-                        usedMargin = usedMargin.add(margin)
-                        posSize = size; posEntry = price; posLayer = 1; posDir = dir
-                        tradesOpen++
-                    } else {
-                        // 资金不足无法开仓，跳过
-                    }
+            // 开仓
+            if (posLayer == 0 && (longSignal || shortSignal)) {
+                val dir = if (longSignal) "long" else "short"
+                val value = INITIAL_POSITION_VALUE
+                val margin = value.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                if (equity.subtract(usedMargin) >= margin) {
+                    val size = value.divide(price, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                        .divide(CONTRACT_SIZE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                    usedMargin = usedMargin.add(margin)
+                    posSize = size; posEntry = price; posLayer = 1; posDir = dir
+                    tradesOpen++
                 }
                 continue
             }
 
-            // 若有持仓
+            // 若有持仓，计算当前未实现收益
             val unrealHere = unreal
-            val currentValue = price.multiply(posSize).multiply(CONTRACT_SIZE)
 
-            // 第一层部分止盈
-            if (posLayer == 1) {
+            // 第一层及后续层整仓止盈
+            if (posLayer >= 1) {
                 val retPct = if (posDir == "long") price.subtract(posEntry)
                     .divide(posEntry, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                 else posEntry.subtract(price).divide(posEntry, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
-                if (retPct >= FIRST_LAYER_TP_PCT) {
-                    val closeValue = FIRST_LAYER_CLOSE_VALUE
-                    val closeSize = closeValue.divide(price, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
-                        .divide(CONTRACT_SIZE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
-                    val actualClose = if (closeSize > posSize) posSize else closeSize
-                    val realized =
-                        if (posDir == "long") price.subtract(posEntry).multiply(actualClose).multiply(CONTRACT_SIZE)
-                        else posEntry.subtract(price).multiply(actualClose).multiply(CONTRACT_SIZE)
+                val tpPct = if (posLayer == 1) FIRST_LAYER_TP_PCT else LATER_LAYERS_TP_PCT
+                if (retPct >= tpPct) {
+                    val realized = unrealHere
                     equity = equity.add(realized)
-                    posSize = posSize.subtract(actualClose)
-                    posLayer = if (posSize > BigDecimal.ZERO) posLayer else 0
-                    val marginReleased = closeValue.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                    val totalValue = posEntry.multiply(posSize).multiply(CONTRACT_SIZE)
+                    val marginReleased = totalValue.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                     usedMargin = usedMargin.subtract(marginReleased).coerceAtLeast(bd(0.0))
-                    partialTps++
-                    if (posSize == BigDecimal.ZERO) {
-                        posEntry = bd(0.0); posDir = ""
-                    }
+                    fullTps++
+                    posSize = bd(0.0); posEntry = bd(0.0); posLayer = 0; posDir = ""
                     continue
-                }
-            }
-
-            // 第二到五层整体止盈
-            if (posLayer >= 2) {
-                val denom = posEntry.multiply(posSize).multiply(CONTRACT_SIZE)
-                if (denom > BigDecimal.ZERO) {
-                    val pnlPct = unrealHere.divide(denom, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
-                    if (pnlPct >= LATER_LAYERS_TP_PCT) {
-                        equity = equity.add(unrealHere)
-                        val totalValue = posEntry.multiply(posSize).multiply(CONTRACT_SIZE)
-                        val marginReleased = totalValue.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
-                        usedMargin = usedMargin.subtract(marginReleased).coerceAtLeast(bd(0.0))
-                        fullTps++
-                        posSize = bd(0.0); posEntry = bd(0.0); posLayer = 0; posDir = ""
-                        continue
-                    }
                 }
             }
 
@@ -195,47 +140,38 @@ object ShengBacktestSummaryFixed {
                         val newValue = price.multiply(addSize).multiply(CONTRACT_SIZE)
                         val combinedValue = oldValue.add(newValue)
                         val combinedSize = posSize.add(addSize)
-                        val newEntry =
-                            if (combinedSize.compareTo(BigDecimal.ZERO) == 0) bd(0.0) else combinedValue.divide(
-                                combinedSize.multiply(CONTRACT_SIZE),
-                                BIGDECIMAL_SCALE,
-                                RoundingMode.HALF_UP
-                            )
+                        posEntry = combinedValue.divide(combinedSize.multiply(CONTRACT_SIZE), BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                         posSize = combinedSize
-                        posEntry = newEntry
-                        posLayer = posLayer + 1
+                        posLayer++
                         usedMargin = usedMargin.add(addMargin)
                         totalAdds++
-                    } else {
-                        // 跳过加仓
                     }
                 }
             }
         } // bars end
 
-        // 年末结算：如果仍持仓，计算未实现并加入 endCapital（注：此时若未触发爆仓，说明标记市值仍 > 0）
+        // 年末结算
         val finalUnreal = if (posLayer > 0) {
             val lastPrice = klines.last().close
             if (posDir == "long") lastPrice.subtract(posEntry).multiply(posSize).multiply(CONTRACT_SIZE)
             else posEntry.subtract(lastPrice).multiply(posSize).multiply(CONTRACT_SIZE)
         } else bd(0.0)
 
-        summary.endCapital = if (equity.add(finalUnreal) < bd(0.0)) bd(0.0) else equity.add(finalUnreal)
+        summary.endCapital = equity.add(finalUnreal).coerceAtLeast(bd(0.0))
         summary.tradesOpenCount = tradesOpen
         summary.totalAddCount = totalAdds
-        summary.partialTpCount = partialTps
         summary.fullTpCount = fullTps
         summary.liquidationCount = liquidations
-        summary.roiPct =
-            if (summary.startCapital.compareTo(bd(0.0)) == 0) bd(0.0) else (summary.endCapital.subtract(summary.startCapital)
-                .divide(summary.startCapital, 6, RoundingMode.HALF_UP).multiply(bd(100.0)))
+        summary.roiPct = if (summary.startCapital.compareTo(bd(0.0)) == 0) bd(0.0)
+        else (summary.endCapital.subtract(summary.startCapital)
+            .divide(summary.startCapital, 6, RoundingMode.HALF_UP).multiply(bd(100.0)))
 
         return summary
     }
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val symbols = listOf("BTC-USDT", "ETH-USDT", "SOL-USDT")
+        val symbols = listOf("BTC-USDT-SWAP", "ETH-USDT-SWAP", "SOL-USDT-SWAP")
         val tfs = listOf("1H", "4H")
 
         for (symbol in symbols) {
@@ -250,10 +186,8 @@ object ShengBacktestSummaryFixed {
                     val sum = backtestYear(symbol, tf, y, allK)
                     println(
                         "【$symbol][$tf] 年份 $y：起始资金 ${sum.startCapital.toStr(2)} USDT，期末资金 ${
-                            sum.endCapital.toStr(
-                                2
-                            )
-                        } USDT，收益率 ${sum.roiPct.toStr(4)}%，开仓次数 ${sum.tradesOpenCount}，加仓次数 ${sum.totalAddCount}，第一层部分止盈 ${sum.partialTpCount} 次，后续整仓止盈 ${sum.fullTpCount} 次，爆仓次数 ${sum.liquidationCount}"
+                            sum.endCapital.toStr(2)
+                        } USDT，收益率 ${sum.roiPct.toStr(4)}%，开仓次数 ${sum.tradesOpenCount}，加仓次数 ${sum.totalAddCount}，整仓止盈 ${sum.fullTpCount} 次，爆仓次数 ${sum.liquidationCount}"
                     )
                 }
             }

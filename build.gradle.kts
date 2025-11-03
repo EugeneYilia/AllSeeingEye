@@ -102,6 +102,6 @@ tasks.register<JavaExec>("runShengMartinStrategyTest") {
 
 tasks.register<JavaExec>("runShengTradingFollowStrategyTest") {
     group = "application"
-    mainClass.set("com.capitalEugene.backTest.sheng.ShengMartinPyramidBacktest")
+    mainClass.set("com.capitalEugene.backTest.sheng.ShengTrendBacktest")
     classpath = sourceSets["main"].runtimeClasspath
 }
