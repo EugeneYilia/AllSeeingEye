@@ -1,4 +1,4 @@
-package com.capitalEugene.trade.strategy.sheng
+package com.capitalEugene.backTest.sheng
 
 import java.io.File
 import java.math.BigDecimal
@@ -7,7 +7,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlin.math.pow
 
 /**
  * 修复版回测：
