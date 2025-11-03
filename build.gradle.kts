@@ -82,9 +82,15 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
-tasks.register<JavaExec>("downloadHistoricalKLine") {
+tasks.register<JavaExec>("downloadHistoricalKLineByDay") {
     group = "application"
-    mainClass.set("com.capitalEugene.backTest.DownloadHistoricalKLineKt")
+    mainClass.set("com.capitalEugene.backTest.DownloadHistoricalKLineByDay")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
+tasks.register<JavaExec>("downloadHistoricalKLineByHour") {
+    group = "application"
+    mainClass.set("com.capitalEugene.backTest.DownloadHistoricalKLineByHour")
     classpath = sourceSets["main"].runtimeClasspath
 }
 
