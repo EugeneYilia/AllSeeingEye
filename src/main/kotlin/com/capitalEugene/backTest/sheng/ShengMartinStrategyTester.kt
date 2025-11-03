@@ -1,12 +1,17 @@
 package com.capitalEugene.backTest.sheng
 
-import java.io.File
+import com.capitalEugene.backTest.BIGDECIMAL_SCALE
+import com.capitalEugene.backTest.DATE_FORMATTER
+import com.capitalEugene.backTest.Kline
+import com.capitalEugene.backTest.ZONE
+import com.capitalEugene.backTest.loadKlines
+import com.capitalEugene.backTest.bd
+import com.capitalEugene.backTest.toStr
+
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 /**
  * 修复版回测：
@@ -26,47 +31,10 @@ object ShengBacktestSummaryFixed {
     private val FIRST_LAYER_CLOSE_VALUE = bd(12.0)
     private val LATER_LAYERS_TP_PCT = bd(0.02)
     private val CONTRACT_SIZE = bd(1.0)
-    private val SCALE = 8
-    private val zone = ZoneId.of("Asia/Shanghai") // 按北京时间划年
-    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     // 爆仓处理策略
     private const val AUTO_RESTART_AFTER_LIQUIDATION = true  // 爆仓后是否自动注资继续
     private val RESTART_CAPITAL = TOTAL_CAPITAL             // 注资金额，默认恢复到初始资金
-
-    private fun bd(v: Double) = BigDecimal.valueOf(v)
-    private fun bd(v: String) = try { BigDecimal(v) } catch (_: Exception) { BigDecimal.ZERO }
-    private fun BigDecimal.toStr(scale: Int = 6) = this.setScale(scale, RoundingMode.HALF_UP).toPlainString()
-
-    data class Kline(val open: BigDecimal, val high: BigDecimal, val low: BigDecimal, val close: BigDecimal, val ts: Long)
-
-    // 读取 CSV（与你之前一致）
-    fun loadKlines(symbol: String, timeframe: String, folder: String = "HistoricalKLine"): List<Kline> {
-        val dir = File(folder)
-        if (!dir.exists() || !dir.isDirectory) return emptyList()
-        val symbolShort = symbol.replace("-USDT", "", ignoreCase = true)
-        val files = dir.listFiles()?.filter {
-            it.isFile && it.name.contains(symbolShort, ignoreCase = true) && it.name.contains(timeframe, ignoreCase = true)
-        } ?: emptyList()
-        val list = mutableListOf<Kline>()
-        for (f in files) {
-            f.useLines { lines ->
-                val it = lines.iterator()
-                if (!it.hasNext()) return@useLines
-                it.next() // header
-                while (it.hasNext()) {
-                    val line = it.next().trim()
-                    if (line.isEmpty()) continue
-                    val parts = line.split(",")
-                    if (parts.size < 6) continue
-                    val ts = parts[0].toLongOrNull() ?: continue
-                    val open = bd(parts[2]); val high = bd(parts[3]); val low = bd(parts[4]); val close = bd(parts[5])
-                    list.add(Kline(open, high, low, close, ts))
-                }
-            }
-        }
-        return list.sortedBy { it.ts }
-    }
 
     // 年度回测摘要数据结构
     data class YearSummary(
@@ -83,8 +51,8 @@ object ShengBacktestSummaryFixed {
 
     // 回测一年（以北京时间年划分）
     fun backtestYear(symbol: String, timeframe: String, year: Int, klinesAll: List<Kline>): YearSummary {
-        val startMs = LocalDateTime.of(year,1,1,0,0).atZone(zone).toInstant().toEpochMilli()
-        val endMs = LocalDateTime.of(year,12,31,23,59,59).atZone(zone).toInstant().toEpochMilli()
+        val startMs = LocalDateTime.of(year, 1, 1, 0, 0).atZone(ZONE).toInstant().toEpochMilli()
+        val endMs = LocalDateTime.of(year, 12, 31, 23, 59, 59).atZone(ZONE).toInstant().toEpochMilli()
         val klines = klinesAll.filter { it.ts in startMs..endMs }.sortedBy { it.ts }
         val summary = YearSummary(year, TOTAL_CAPITAL, TOTAL_CAPITAL, bd(0.0), 0, 0, 0, 0, 0)
         if (klines.size < 10) {
@@ -106,11 +74,11 @@ object ShengBacktestSummaryFixed {
         var liquidations = 0
 
         for (i in 9 until klines.size) {
-            val window = klines.subList(i-9, i+1)
+            val window = klines.subList(i - 9, i + 1)
             val current = window.last()
             val price = current.close
-            val dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(current.ts), zone).format(dateFormatter)
-            val prev9 = window.subList(0,9)
+            val dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(current.ts), ZONE).format(DATE_FORMATTER)
+            val prev9 = window.subList(0, 9)
             val prev9MinLow = prev9.minOf { it.low }
             val prev9MaxHigh = prev9.maxOf { it.high }
 
@@ -147,9 +115,10 @@ object ShengBacktestSummaryFixed {
                 if (longSignal || shortSignal) {
                     val dir = if (longSignal) "long" else "short"
                     val value = INITIAL_POSITION_VALUE
-                    val margin = value.divide(LEVERAGE, SCALE, RoundingMode.HALF_UP)
+                    val margin = value.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                     if (equity.subtract(usedMargin) >= margin) {
-                        val size = value.divide(price, SCALE, RoundingMode.HALF_UP).divide(CONTRACT_SIZE, SCALE, RoundingMode.HALF_UP)
+                        val size = value.divide(price, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                            .divide(CONTRACT_SIZE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                         usedMargin = usedMargin.add(margin)
                         posSize = size; posEntry = price; posLayer = 1; posDir = dir
                         tradesOpen++
@@ -166,21 +135,26 @@ object ShengBacktestSummaryFixed {
 
             // 第一层部分止盈
             if (posLayer == 1) {
-                val retPct = if (posDir == "long") price.subtract(posEntry).divide(posEntry, SCALE, RoundingMode.HALF_UP)
-                else posEntry.subtract(price).divide(posEntry, SCALE, RoundingMode.HALF_UP)
+                val retPct = if (posDir == "long") price.subtract(posEntry)
+                    .divide(posEntry, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                else posEntry.subtract(price).divide(posEntry, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                 if (retPct >= FIRST_LAYER_TP_PCT) {
                     val closeValue = FIRST_LAYER_CLOSE_VALUE
-                    val closeSize = closeValue.divide(price, SCALE, RoundingMode.HALF_UP).divide(CONTRACT_SIZE, SCALE, RoundingMode.HALF_UP)
+                    val closeSize = closeValue.divide(price, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                        .divide(CONTRACT_SIZE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                     val actualClose = if (closeSize > posSize) posSize else closeSize
-                    val realized = if (posDir == "long") price.subtract(posEntry).multiply(actualClose).multiply(CONTRACT_SIZE)
-                    else posEntry.subtract(price).multiply(actualClose).multiply(CONTRACT_SIZE)
+                    val realized =
+                        if (posDir == "long") price.subtract(posEntry).multiply(actualClose).multiply(CONTRACT_SIZE)
+                        else posEntry.subtract(price).multiply(actualClose).multiply(CONTRACT_SIZE)
                     equity = equity.add(realized)
                     posSize = posSize.subtract(actualClose)
                     posLayer = if (posSize > BigDecimal.ZERO) posLayer else 0
-                    val marginReleased = closeValue.divide(LEVERAGE, SCALE, RoundingMode.HALF_UP)
+                    val marginReleased = closeValue.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                     usedMargin = usedMargin.subtract(marginReleased).coerceAtLeast(bd(0.0))
                     partialTps++
-                    if (posSize == BigDecimal.ZERO) { posEntry = bd(0.0); posDir = "" }
+                    if (posSize == BigDecimal.ZERO) {
+                        posEntry = bd(0.0); posDir = ""
+                    }
                     continue
                 }
             }
@@ -189,11 +163,11 @@ object ShengBacktestSummaryFixed {
             if (posLayer >= 2) {
                 val denom = posEntry.multiply(posSize).multiply(CONTRACT_SIZE)
                 if (denom > BigDecimal.ZERO) {
-                    val pnlPct = unrealHere.divide(denom, SCALE, RoundingMode.HALF_UP)
+                    val pnlPct = unrealHere.divide(denom, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                     if (pnlPct >= LATER_LAYERS_TP_PCT) {
                         equity = equity.add(unrealHere)
                         val totalValue = posEntry.multiply(posSize).multiply(CONTRACT_SIZE)
-                        val marginReleased = totalValue.divide(LEVERAGE, SCALE, RoundingMode.HALF_UP)
+                        val marginReleased = totalValue.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                         usedMargin = usedMargin.subtract(marginReleased).coerceAtLeast(bd(0.0))
                         fullTps++
                         posSize = bd(0.0); posEntry = bd(0.0); posLayer = 0; posDir = ""
@@ -204,21 +178,29 @@ object ShengBacktestSummaryFixed {
 
             // 加仓（基于 entry）
             if (posLayer in 1 until MAX_LAYERS) {
-                val dropPct = if (posDir == "long") posEntry.subtract(price).divide(posEntry, SCALE, RoundingMode.HALF_UP)
-                else price.subtract(posEntry).divide(posEntry, SCALE, RoundingMode.HALF_UP)
-                val thresholdsCrossed = dropPct.divide(ADD_STEP_PCT, SCALE, RoundingMode.HALF_UP).toBigInteger().toInt()
+                val dropPct = if (posDir == "long") posEntry.subtract(price)
+                    .divide(posEntry, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                else price.subtract(posEntry).divide(posEntry, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                val thresholdsCrossed =
+                    dropPct.divide(ADD_STEP_PCT, BIGDECIMAL_SCALE, RoundingMode.HALF_UP).toBigInteger().toInt()
                 val currentLayer = posLayer
                 if (thresholdsCrossed >= currentLayer) {
                     val multiplier = BigDecimal.valueOf(2).pow(currentLayer)
                     val addValue = INITIAL_POSITION_VALUE.multiply(multiplier)
-                    val addMargin = addValue.divide(LEVERAGE, SCALE, RoundingMode.HALF_UP)
+                    val addMargin = addValue.divide(LEVERAGE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                     if (equity.subtract(usedMargin) >= addMargin) {
-                        val addSize = addValue.divide(price, SCALE, RoundingMode.HALF_UP).divide(CONTRACT_SIZE, SCALE, RoundingMode.HALF_UP)
+                        val addSize = addValue.divide(price, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
+                            .divide(CONTRACT_SIZE, BIGDECIMAL_SCALE, RoundingMode.HALF_UP)
                         val oldValue = posEntry.multiply(posSize).multiply(CONTRACT_SIZE)
                         val newValue = price.multiply(addSize).multiply(CONTRACT_SIZE)
                         val combinedValue = oldValue.add(newValue)
                         val combinedSize = posSize.add(addSize)
-                        val newEntry = if (combinedSize.compareTo(BigDecimal.ZERO) == 0) bd(0.0) else combinedValue.divide(combinedSize.multiply(CONTRACT_SIZE), SCALE, RoundingMode.HALF_UP)
+                        val newEntry =
+                            if (combinedSize.compareTo(BigDecimal.ZERO) == 0) bd(0.0) else combinedValue.divide(
+                                combinedSize.multiply(CONTRACT_SIZE),
+                                BIGDECIMAL_SCALE,
+                                RoundingMode.HALF_UP
+                            )
                         posSize = combinedSize
                         posEntry = newEntry
                         posLayer = posLayer + 1
@@ -244,7 +226,9 @@ object ShengBacktestSummaryFixed {
         summary.partialTpCount = partialTps
         summary.fullTpCount = fullTps
         summary.liquidationCount = liquidations
-        summary.roiPct = if (summary.startCapital.compareTo(bd(0.0)) == 0) bd(0.0) else (summary.endCapital.subtract(summary.startCapital).divide(summary.startCapital, 6, RoundingMode.HALF_UP).multiply(bd(100.0)))
+        summary.roiPct =
+            if (summary.startCapital.compareTo(bd(0.0)) == 0) bd(0.0) else (summary.endCapital.subtract(summary.startCapital)
+                .divide(summary.startCapital, 6, RoundingMode.HALF_UP).multiply(bd(100.0)))
 
         return summary
     }
@@ -261,10 +245,16 @@ object ShengBacktestSummaryFixed {
                     println("[$symbol][$tf] 未找到数据，跳过")
                     continue
                 }
-                val years = allK.map { Instant.ofEpochMilli(it.ts).atZone(zone).year }.distinct().sorted()
+                val years = allK.map { Instant.ofEpochMilli(it.ts).atZone(ZONE).year }.distinct().sorted()
                 for (y in years) {
                     val sum = backtestYear(symbol, tf, y, allK)
-                    println("【$symbol][$tf] 年份 $y：起始资金 ${sum.startCapital.toStr(2)} USDT，期末资金 ${sum.endCapital.toStr(2)} USDT，收益率 ${sum.roiPct.toStr(4)}%，开仓次数 ${sum.tradesOpenCount}，加仓次数 ${sum.totalAddCount}，第一层部分止盈 ${sum.partialTpCount} 次，后续整仓止盈 ${sum.fullTpCount} 次，爆仓次数 ${sum.liquidationCount}")
+                    println(
+                        "【$symbol][$tf] 年份 $y：起始资金 ${sum.startCapital.toStr(2)} USDT，期末资金 ${
+                            sum.endCapital.toStr(
+                                2
+                            )
+                        } USDT，收益率 ${sum.roiPct.toStr(4)}%，开仓次数 ${sum.tradesOpenCount}，加仓次数 ${sum.totalAddCount}，第一层部分止盈 ${sum.partialTpCount} 次，后续整仓止盈 ${sum.fullTpCount} 次，爆仓次数 ${sum.liquidationCount}"
+                    )
                 }
             }
         }
