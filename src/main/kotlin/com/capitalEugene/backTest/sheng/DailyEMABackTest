@@ -1,0 +1,652 @@
+[2022-02-06 00:00:00] OPEN LONG price=41518.9000 size=0.072256 entry=41518.9000 equity=1000.00 usedMargin=1000.0000 stop=39442.9550 notional=3000.0000
+[2022-02-19 00:00:00] STOP LOSS dir=long stop=39442.9550 realized=-150.0000 equity=850.0000
+[2022-02-20 00:00:00] OPEN SHORT price=38327.4000 size=0.066532 entry=38327.4000 equity=850.00 usedMargin=850.0000 stop=40243.7700 notional=2550.0000
+[2022-02-26 00:00:00] STOP LOSS dir=short stop=40243.7700 realized=-127.5000 equity=722.5000
+[2022-03-01 00:00:00] OPEN LONG price=43647.1000 size=0.049660 entry=43647.1000 equity=722.50 usedMargin=722.5000 stop=41464.7450 notional=2167.5000
+[2022-03-04 00:00:00] STOP LOSS dir=long stop=41464.7450 realized=-108.3750 equity=614.1250
+[2022-03-06 00:00:00] OPEN SHORT price=38858.6000 size=0.047412 entry=38858.6000 equity=614.12 usedMargin=614.1250 stop=40801.5300 notional=1842.3750
+[2022-03-09 00:00:00] STOP LOSS dir=short stop=40801.5300 realized=-92.1187 equity=522.0062
+[2022-03-18 00:00:00] OPEN LONG price=40920.5000 size=0.038270 entry=40920.5000 equity=522.01 usedMargin=522.0062 stop=38874.4750 notional=1566.0187
+[2022-04-09 00:00:00] TAKE PROFIT dir=long price=42377.3000 realized=55.7514 equity=577.7577
+[2022-07-18 00:00:00] OPEN LONG price=22681.2000 size=0.076419 entry=22681.2000 equity=577.76 usedMargin=577.7577 stop=21547.1400 notional=1733.2730
+[2022-07-19 00:00:00] STOP LOSS dir=long stop=21547.1400 realized=-86.6637 equity=491.0940
+[2022-08-19 00:00:00] OPEN SHORT price=21440.0000 size=0.068717 entry=21440.0000 equity=491.09 usedMargin=491.0940 stop=22512.0000 notional=1473.2820
+[2022-09-12 00:00:00] TAKE PROFIT dir=short price=22112.3000 realized=-46.1981 equity=444.8959
+[2022-09-14 00:00:00] OPEN SHORT price=20176.5000 size=0.066151 entry=20176.5000 equity=444.90 usedMargin=444.8959 stop=21185.3250 notional=1334.6877
+[2022-10-06 00:00:00] TAKE PROFIT dir=short price=20010.0000 realized=11.0141 equity=455.9100
+[2022-10-08 00:00:00] OPEN SHORT price=19488.8000 size=0.070180 entry=19488.8000 equity=455.91 usedMargin=455.9100 stop=20463.2400 notional=1367.7299
+[2022-10-25 00:00:00] TAKE PROFIT dir=short price=19749.9000 realized=-18.3241 equity=437.5859
+[2022-11-09 00:00:00] OPEN SHORT price=17123.7000 size=0.076663 entry=17123.7000 equity=437.59 usedMargin=437.5859 stop=17979.8850 notional=1312.7577
+[2022-11-11 00:00:00] STOP LOSS dir=short stop=17979.8850 realized=-65.6379 equity=371.9480
+[2022-12-10 00:00:00] OPEN LONG price=17212.9000 size=0.064826 entry=17212.9000 equity=371.95 usedMargin=371.9480 stop=16352.2550 notional=1115.8441
+[2022-12-18 00:00:00] TAKE PROFIT dir=long price=16733.8000 realized=-31.0582 equity=340.8899
+【BTC-USDT-SWAP][1D] 年份 2022：起始资金 1000.00 USDT，期末资金 340.89 USDT，收益率 -65.9110%，开仓 11，加仓 0，止损 6，整仓止盈 5，爆仓 0
+=== BTC-USDT-SWAP 1D 2022 全部交易序列（共 11 组） ===
+--- 序列 1 / 11 （2 步）---
+[2022-02-06 00:00:00] OPEN L1 long @41518.9000 size=0.072256 unreal=0.0000
+[2022-02-19 00:00:00] STOP LOSS L1 long @39442.9550 size=0.072256 unreal=-150.0000
+--- 序列 2 / 11 （2 步）---
+[2022-02-20 00:00:00] OPEN L1 short @38327.4000 size=0.066532 unreal=0.0000
+[2022-02-26 00:00:00] STOP LOSS L1 short @40243.7700 size=0.066532 unreal=-127.5000
+--- 序列 3 / 11 （2 步）---
+[2022-03-01 00:00:00] OPEN L1 long @43647.1000 size=0.049660 unreal=0.0000
+[2022-03-04 00:00:00] STOP LOSS L1 long @41464.7450 size=0.049660 unreal=-108.3750
+--- 序列 4 / 11 （2 步）---
+[2022-03-06 00:00:00] OPEN L1 short @38858.6000 size=0.047412 unreal=0.0000
+[2022-03-09 00:00:00] STOP LOSS L1 short @40801.5300 size=0.047412 unreal=-92.1187
+--- 序列 5 / 11 （2 步）---
+[2022-03-18 00:00:00] OPEN L1 long @40920.5000 size=0.038270 unreal=0.0000
+[2022-04-09 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @42377.3000 size=0.038270 unreal=55.7514
+--- 序列 6 / 11 （2 步）---
+[2022-07-18 00:00:00] OPEN L1 long @22681.2000 size=0.076419 unreal=0.0000
+[2022-07-19 00:00:00] STOP LOSS L1 long @21547.1400 size=0.076419 unreal=-86.6637
+--- 序列 7 / 11 （2 步）---
+[2022-08-19 00:00:00] OPEN L1 short @21440.0000 size=0.068717 unreal=0.0000
+[2022-09-12 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @22112.3000 size=0.068717 unreal=-46.1981
+--- 序列 8 / 11 （2 步）---
+[2022-09-14 00:00:00] OPEN L1 short @20176.5000 size=0.066151 unreal=0.0000
+[2022-10-06 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @20010.0000 size=0.066151 unreal=11.0141
+--- 序列 9 / 11 （2 步）---
+[2022-10-08 00:00:00] OPEN L1 short @19488.8000 size=0.070180 unreal=0.0000
+[2022-10-25 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @19749.9000 size=0.070180 unreal=-18.3241
+--- 序列 10 / 11 （2 步）---
+[2022-11-09 00:00:00] OPEN L1 short @17123.7000 size=0.076663 unreal=0.0000
+[2022-11-11 00:00:00] STOP LOSS L1 short @17979.8850 size=0.076663 unreal=-65.6379
+--- 序列 11 / 11 （2 步）---
+[2022-12-10 00:00:00] OPEN L1 long @17212.9000 size=0.064826 unreal=0.0000
+[2022-12-18 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @16733.8000 size=0.064826 unreal=-31.0582
+=== END OF ALL SEQUENCES ===
+[2023-02-13 00:00:00] OPEN SHORT price=21565.1000 size=0.139114 entry=21565.1000 equity=1000.00 usedMargin=1000.0000 stop=22643.3550 notional=3000.0000
+[2023-02-15 00:00:00] STOP LOSS dir=short stop=22643.3550 realized=-150.0000 equity=850.0000
+[2023-03-03 00:00:00] OPEN SHORT price=22338.1000 size=0.114155 entry=22338.1000 equity=850.00 usedMargin=850.0000 stop=23455.0050 notional=2550.0000
+[2023-03-13 00:00:00] STOP LOSS dir=short stop=23455.0050 realized=-127.5000 equity=722.5000
+[2023-03-14 00:00:00] OPEN LONG price=25915.9000 size=0.083636 entry=25915.9000 equity=722.50 usedMargin=722.5000 stop=24620.1050 notional=2167.5000
+[2023-03-15 00:00:00] STOP LOSS dir=long stop=24620.1050 realized=-108.3750 equity=614.1250
+[2023-04-22 00:00:00] OPEN SHORT price=27484.8000 size=0.067033 entry=27484.8000 equity=614.13 usedMargin=614.1250 stop=28859.0400 notional=1842.3750
+[2023-04-26 00:00:00] STOP LOSS dir=short stop=28859.0400 realized=-92.1188 equity=522.0063
+[2023-04-27 00:00:00] OPEN LONG price=29149.5000 size=0.053724 entry=29149.5000 equity=522.01 usedMargin=522.0063 stop=27692.0250 notional=1566.0188
+[2023-05-02 00:00:00] STOP LOSS dir=long stop=27692.0250 realized=-78.3009 equity=443.7053
+[2023-05-03 00:00:00] OPEN SHORT price=28314.0000 size=0.047013 entry=28314.0000 equity=443.71 usedMargin=443.7053 stop=29729.7000 notional=1331.1159
+[2023-05-04 00:00:00] TAKE PROFIT dir=short price=28871.4000 realized=-26.2048 equity=417.5005
+[2023-05-08 00:00:00] OPEN SHORT price=27890.3000 size=0.044908 entry=27890.3000 equity=417.50 usedMargin=417.5005 stop=29284.8150 notional=1252.5014
+[2023-06-20 00:00:00] TAKE PROFIT dir=short price=27068.5000 realized=36.9055 equity=454.4060
+[2023-07-21 00:00:00] OPEN SHORT price=29866.1000 size=0.045644 entry=29866.1000 equity=454.41 usedMargin=454.4060 stop=31359.4050 notional=1363.2179
+[2023-08-14 00:00:00] TAKE PROFIT dir=short price=29607.7000 realized=11.7945 equity=466.2005
+[2023-08-15 00:00:00] OPEN SHORT price=29334.0000 size=0.047679 entry=29334.0000 equity=466.20 usedMargin=466.2005 stop=30800.7000 notional=1398.6014
+[2023-09-17 00:00:00] TAKE PROFIT dir=short price=26548.1000 realized=132.8276 equity=599.0280
+[2023-09-26 00:00:00] OPEN SHORT price=26126.4000 size=0.068784 entry=26126.4000 equity=599.03 usedMargin=599.0280 stop=27432.7200 notional=1797.0841
+[2023-09-28 00:00:00] TAKE PROFIT dir=short price=27028.3000 realized=-62.0365 equity=536.9915
+[2023-10-13 00:00:00] OPEN SHORT price=26707.5000 size=0.060319 entry=26707.5000 equity=536.99 usedMargin=536.9915 stop=28042.8750 notional=1610.9746
+[2023-10-16 00:00:00] STOP LOSS dir=short stop=28042.8750 realized=-80.5487 equity=456.4428
+【BTC-USDT-SWAP][1D] 年份 2023：起始资金 1000.00 USDT，期末资金 456.44 USDT，收益率 -54.3557%，开仓 11，加仓 0，止损 6，整仓止盈 5，爆仓 0
+=== BTC-USDT-SWAP 1D 2023 全部交易序列（共 11 组） ===
+--- 序列 1 / 11 （2 步）---
+[2023-02-13 00:00:00] OPEN L1 short @21565.1000 size=0.139114 unreal=0.0000
+[2023-02-15 00:00:00] STOP LOSS L1 short @22643.3550 size=0.139114 unreal=-150.0000
+--- 序列 2 / 11 （2 步）---
+[2023-03-03 00:00:00] OPEN L1 short @22338.1000 size=0.114155 unreal=0.0000
+[2023-03-13 00:00:00] STOP LOSS L1 short @23455.0050 size=0.114155 unreal=-127.5000
+--- 序列 3 / 11 （2 步）---
+[2023-03-14 00:00:00] OPEN L1 long @25915.9000 size=0.083636 unreal=0.0000
+[2023-03-15 00:00:00] STOP LOSS L1 long @24620.1050 size=0.083636 unreal=-108.3750
+--- 序列 4 / 11 （2 步）---
+[2023-04-22 00:00:00] OPEN L1 short @27484.8000 size=0.067033 unreal=0.0000
+[2023-04-26 00:00:00] STOP LOSS L1 short @28859.0400 size=0.067033 unreal=-92.1188
+--- 序列 5 / 11 （2 步）---
+[2023-04-27 00:00:00] OPEN L1 long @29149.5000 size=0.053724 unreal=0.0000
+[2023-05-02 00:00:00] STOP LOSS L1 long @27692.0250 size=0.053724 unreal=-78.3009
+--- 序列 6 / 11 （2 步）---
+[2023-05-03 00:00:00] OPEN L1 short @28314.0000 size=0.047013 unreal=0.0000
+[2023-05-04 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @28871.4000 size=0.047013 unreal=-26.2048
+--- 序列 7 / 11 （2 步）---
+[2023-05-08 00:00:00] OPEN L1 short @27890.3000 size=0.044908 unreal=0.0000
+[2023-06-20 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @27068.5000 size=0.044908 unreal=36.9055
+--- 序列 8 / 11 （2 步）---
+[2023-07-21 00:00:00] OPEN L1 short @29866.1000 size=0.045644 unreal=0.0000
+[2023-08-14 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @29607.7000 size=0.045644 unreal=11.7945
+--- 序列 9 / 11 （2 步）---
+[2023-08-15 00:00:00] OPEN L1 short @29334.0000 size=0.047679 unreal=0.0000
+[2023-09-17 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @26548.1000 size=0.047679 unreal=132.8276
+--- 序列 10 / 11 （2 步）---
+[2023-09-26 00:00:00] OPEN L1 short @26126.4000 size=0.068784 unreal=0.0000
+[2023-09-28 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @27028.3000 size=0.068784 unreal=-62.0365
+--- 序列 11 / 11 （2 步）---
+[2023-10-13 00:00:00] OPEN L1 short @26707.5000 size=0.060319 unreal=0.0000
+[2023-10-16 00:00:00] STOP LOSS L1 short @28042.8750 size=0.060319 unreal=-80.5487
+=== END OF ALL SEQUENCES ===
+[2024-02-02 00:00:00] OPEN LONG price=43232.3000 size=0.069393 entry=43232.3000 equity=1000.00 usedMargin=1000.0000 stop=41070.6850 notional=3000.0000
+[2024-04-14 00:00:00] TAKE PROFIT dir=long price=64187.3000 realized=1454.1211 equity=2454.1211
+[2024-05-16 00:00:00] OPEN LONG price=65830.1000 size=0.111839 entry=65830.1000 equity=2454.12 usedMargin=2454.1211 stop=62538.5950 notional=7362.3633
+[2024-06-13 00:00:00] TAKE PROFIT dir=long price=66470.1000 realized=71.5769 equity=2525.6980
+[2024-07-16 00:00:00] OPEN LONG price=64881.8000 size=0.116783 entry=64881.8000 equity=2525.70 usedMargin=2525.6980 stop=61637.7100 notional=7577.0939
+[2024-08-03 00:00:00] STOP LOSS dir=long stop=61637.7100 realized=-378.8547 equity=2146.8433
+[2024-08-24 00:00:00] OPEN LONG price=63982.6000 size=0.100661 entry=63982.6000 equity=2146.84 usedMargin=2146.8433 stop=60783.4700 notional=6440.5298
+[2024-08-28 00:00:00] STOP LOSS dir=long stop=60783.4700 realized=-322.0265 equity=1824.8168
+[2024-08-30 00:00:00] OPEN SHORT price=58094.0000 size=0.094234 entry=58094.0000 equity=1824.82 usedMargin=1824.8168 stop=60998.7000 notional=5474.4503
+[2024-09-15 00:00:00] TAKE PROFIT dir=short price=60336.8000 realized=-211.3488 equity=1613.4680
+[2024-10-10 00:00:00] OPEN SHORT price=60797.5000 size=0.079615 entry=60797.5000 equity=1613.47 usedMargin=1613.4680 stop=63837.3750 notional=4840.4039
+[2024-10-12 00:00:00] TAKE PROFIT dir=short price=63166.0000 realized=-188.5686 equity=1424.8994
+[2024-12-23 00:00:00] OPEN SHORT price=93260.0000 size=0.045836 entry=93260.0000 equity=1424.90 usedMargin=1424.8994 stop=97923.0000 notional=4274.6982
+[2024-12-24 00:00:00] STOP LOSS dir=short stop=97923.0000 realized=-213.7349 equity=1211.1645
+【BTC-USDT-SWAP][1D] 年份 2024：起始资金 1000.00 USDT，期末资金 1211.16 USDT，收益率 21.1165%，开仓 7，加仓 0，止损 3，整仓止盈 4，爆仓 0
+=== BTC-USDT-SWAP 1D 2024 全部交易序列（共 7 组） ===
+--- 序列 1 / 7 （2 步）---
+[2024-02-02 00:00:00] OPEN L1 long @43232.3000 size=0.069393 unreal=0.0000
+[2024-04-14 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @64187.3000 size=0.069393 unreal=1454.1211
+--- 序列 2 / 7 （2 步）---
+[2024-05-16 00:00:00] OPEN L1 long @65830.1000 size=0.111839 unreal=0.0000
+[2024-06-13 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @66470.1000 size=0.111839 unreal=71.5769
+--- 序列 3 / 7 （2 步）---
+[2024-07-16 00:00:00] OPEN L1 long @64881.8000 size=0.116783 unreal=0.0000
+[2024-08-03 00:00:00] STOP LOSS L1 long @61637.7100 size=0.116783 unreal=-378.8547
+--- 序列 4 / 7 （2 步）---
+[2024-08-24 00:00:00] OPEN L1 long @63982.6000 size=0.100661 unreal=0.0000
+[2024-08-28 00:00:00] STOP LOSS L1 long @60783.4700 size=0.100661 unreal=-322.0265
+--- 序列 5 / 7 （2 步）---
+[2024-08-30 00:00:00] OPEN L1 short @58094.0000 size=0.094234 unreal=0.0000
+[2024-09-15 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @60336.8000 size=0.094234 unreal=-211.3488
+--- 序列 6 / 7 （2 步）---
+[2024-10-10 00:00:00] OPEN L1 short @60797.5000 size=0.079615 unreal=0.0000
+[2024-10-12 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @63166.0000 size=0.079615 unreal=-188.5686
+--- 序列 7 / 7 （2 步）---
+[2024-12-23 00:00:00] OPEN L1 short @93260.0000 size=0.045836 unreal=0.0000
+[2024-12-24 00:00:00] STOP LOSS L1 short @97923.0000 size=0.045836 unreal=-213.7349
+=== END OF ALL SEQUENCES ===
+[2025-02-04 00:00:00] OPEN SHORT price=99351.8000 size=0.030196 entry=99351.8000 equity=1000.00 usedMargin=1000.0000 stop=104319.3900 notional=3000.0000
+[2025-03-25 00:00:00] TAKE PROFIT dir=short price=87770.2000 realized=349.7149 equity=1349.7149
+[2025-03-29 00:00:00] OPEN SHORT price=82415.1000 size=0.049131 entry=82415.1000 equity=1349.71 usedMargin=1349.7149 stop=86535.8550 notional=4049.1446
+[2025-04-02 00:00:00] STOP LOSS dir=short stop=86535.8550 realized=-202.4572 equity=1147.2576
+[2025-04-15 00:00:00] OPEN LONG price=84922.7000 size=0.040528 entry=84922.7000 equity=1147.26 usedMargin=1147.2576 stop=80676.5650 notional=3441.7729
+[2025-06-17 00:00:00] TAKE PROFIT dir=long price=104194.1000 realized=781.0371 equity=1928.2947
+[2025-06-26 00:00:00] OPEN LONG price=107259.5000 size=0.053934 entry=107259.5000 equity=1928.29 usedMargin=1928.2947 stop=101896.5250 notional=5784.8842
+[2025-08-02 00:00:00] TAKE PROFIT dir=long price=112801.9000 realized=298.9213 equity=2227.2160
+[2025-08-09 00:00:00] OPEN LONG price=116846.0000 size=0.057183 entry=116846.0000 equity=2227.22 usedMargin=2227.2160 stop=111003.7000 notional=6681.6479
+[2025-08-19 00:00:00] TAKE PROFIT dir=long price=113733.9000 realized=-177.9604 equity=2049.2556
+[2025-09-11 00:00:00] OPEN LONG price=114124.2000 size=0.053869 entry=114124.2000 equity=2049.26 usedMargin=2049.2556 stop=108417.9900 notional=6147.7668
+[2025-09-25 00:00:00] TAKE PROFIT dir=long price=111533.0000 realized=-139.5856 equity=1909.6700
+[2025-10-01 00:00:00] OPEN LONG price=117363.8000 size=0.048814 entry=117363.8000 equity=1909.67 usedMargin=1909.6700 stop=111495.6100 notional=5729.0101
+[2025-10-11 00:00:00] STOP LOSS dir=long stop=111495.6100 realized=-286.4505 equity=1623.2195
+[2025-10-13 00:00:00] OPEN SHORT price=114268.0000 size=0.042616 entry=114268.0000 equity=1623.22 usedMargin=1623.2195 stop=119981.4000 notional=4869.6585
+[2025-10-28 00:00:00] TAKE PROFIT dir=short price=114592.4000 realized=-13.8247 equity=1609.3948
+[2025-10-29 00:00:00] OPEN SHORT price=111459.5000 size=0.043318 entry=111459.5000 equity=1609.39 usedMargin=1609.3948 stop=117032.4750 notional=4828.1845
+【BTC-USDT-SWAP][1D] 年份 2025：起始资金 1000.00 USDT，期末资金 1669.93 USDT，收益率 66.9932%，开仓 9，加仓 0，止损 2，整仓止盈 6，爆仓 0
+=== BTC-USDT-SWAP 1D 2025 全部交易序列（共 9 组） ===
+--- 序列 1 / 9 （2 步）---
+[2025-02-04 00:00:00] OPEN L1 short @99351.8000 size=0.030196 unreal=0.0000
+[2025-03-25 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @87770.2000 size=0.030196 unreal=349.7149
+--- 序列 2 / 9 （2 步）---
+[2025-03-29 00:00:00] OPEN L1 short @82415.1000 size=0.049131 unreal=0.0000
+[2025-04-02 00:00:00] STOP LOSS L1 short @86535.8550 size=0.049131 unreal=-202.4572
+--- 序列 3 / 9 （2 步）---
+[2025-04-15 00:00:00] OPEN L1 long @84922.7000 size=0.040528 unreal=0.0000
+[2025-06-17 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @104194.1000 size=0.040528 unreal=781.0371
+--- 序列 4 / 9 （2 步）---
+[2025-06-26 00:00:00] OPEN L1 long @107259.5000 size=0.053934 unreal=0.0000
+[2025-08-02 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @112801.9000 size=0.053934 unreal=298.9213
+--- 序列 5 / 9 （2 步）---
+[2025-08-09 00:00:00] OPEN L1 long @116846.0000 size=0.057183 unreal=0.0000
+[2025-08-19 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @113733.9000 size=0.057183 unreal=-177.9604
+--- 序列 6 / 9 （2 步）---
+[2025-09-11 00:00:00] OPEN L1 long @114124.2000 size=0.053869 unreal=0.0000
+[2025-09-25 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @111533.0000 size=0.053869 unreal=-139.5856
+--- 序列 7 / 9 （2 步）---
+[2025-10-01 00:00:00] OPEN L1 long @117363.8000 size=0.048814 unreal=0.0000
+[2025-10-11 00:00:00] STOP LOSS L1 long @111495.6100 size=0.048814 unreal=-286.4505
+--- 序列 8 / 9 （2 步）---
+[2025-10-13 00:00:00] OPEN L1 short @114268.0000 size=0.042616 unreal=0.0000
+[2025-10-28 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @114592.4000 size=0.042616 unreal=-13.8247
+--- 序列 9 / 9 （2 步）---
+[2025-10-29 00:00:00] OPEN L1 short @111459.5000 size=0.043318 unreal=0.0000
+[2025-11-02 00:00:00] EOD_UNREAL_SETTLE L1 short @110062.0000 size=0.043318 unreal=60.5367
+=== END OF ALL SEQUENCES ===
+[2022-02-07 00:00:00] OPEN LONG price=3121.2300 size=0.961160 entry=3121.2300 equity=1000.00 usedMargin=1000.0000 stop=2965.1685 notional=3000.0000
+[2022-02-12 00:00:00] STOP LOSS dir=long stop=2965.1685 realized=-150.0000 equity=850.0000
+[2022-02-19 00:00:00] OPEN SHORT price=2745.0700 size=0.928938 entry=2745.0700 equity=850.00 usedMargin=850.0000 stop=2882.3235 notional=2550.0000
+[2022-02-26 00:00:00] STOP LOSS dir=short stop=2882.3235 realized=-127.5000 equity=722.5000
+[2022-03-02 00:00:00] OPEN LONG price=2952.6100 size=0.734096 entry=2952.6100 equity=722.50 usedMargin=722.5000 stop=2804.9795 notional=2167.5000
+[2022-03-04 00:00:00] STOP LOSS dir=long stop=2804.9795 realized=-108.3750 equity=614.1250
+[2022-03-18 00:00:00] OPEN LONG price=2895.6100 size=0.636265 entry=2895.6100 equity=614.13 usedMargin=614.1250 stop=2750.8295 notional=1842.3750
+[2022-04-12 00:00:00] TAKE PROFIT dir=long price=3043.7900 realized=94.2817 equity=708.4067
+[2022-07-16 00:00:00] OPEN LONG price=1274.4200 size=1.667598 entry=1274.4200 equity=708.41 usedMargin=708.4067 stop=1210.6990 notional=2125.2202
+[2022-08-21 00:00:00] TAKE PROFIT dir=long price=1621.1100 realized=578.1395 equity=1286.5463
+[2022-09-09 00:00:00] OPEN LONG price=1719.1300 size=2.245112 entry=1719.1300 equity=1286.55 usedMargin=1286.5463 stop=1633.1735 notional=3859.6388
+[2022-09-13 00:00:00] STOP LOSS dir=long stop=1633.1735 realized=-192.9819 equity=1093.5643
+[2022-09-15 00:00:00] OPEN SHORT price=1493.9800 size=2.195942 entry=1493.9800 equity=1093.56 usedMargin=1093.5643 stop=1568.6790 notional=3280.6930
+[2022-10-25 00:00:00] TAKE PROFIT dir=short price=1407.8500 realized=189.1365 equity=1282.7008
+[2022-11-09 00:00:00] OPEN SHORT price=1163.3900 size=3.307663 entry=1163.3900 equity=1282.70 usedMargin=1282.7008 stop=1221.5595 notional=3848.1024
+[2022-11-10 00:00:00] STOP LOSS dir=short stop=1221.5595 realized=-192.4051 equity=1090.2957
+[2022-12-04 00:00:00] OPEN LONG price=1259.9600 size=2.596024 entry=1259.9600 equity=1090.30 usedMargin=1090.2957 stop=1196.9620 notional=3270.8870
+[2022-12-07 00:00:00] TAKE PROFIT dir=long price=1233.5600 realized=-68.5350 equity=1021.7606
+[2022-12-09 00:00:00] OPEN LONG price=1277.6800 size=2.399100 entry=1277.6800 equity=1021.76 usedMargin=1021.7606 stop=1213.7960 notional=3065.2819
+[2022-12-16 00:00:00] STOP LOSS dir=long stop=1213.7960 realized=-153.2641 equity=868.4965
+[2022-12-17 00:00:00] OPEN SHORT price=1180.0900 size=2.207874 entry=1180.0900 equity=868.50 usedMargin=868.4965 stop=1239.0945 notional=2605.4896
+[2022-12-23 00:00:00] STOP LOSS dir=short stop=1239.0945 realized=-130.2745 equity=738.2221
+【ETH-USDT-SWAP][1D] 年份 2022：起始资金 1000.00 USDT，期末资金 738.22 USDT，收益率 -26.1778%，开仓 11，加仓 0，止损 7，整仓止盈 4，爆仓 0
+=== ETH-USDT-SWAP 1D 2022 全部交易序列（共 11 组） ===
+--- 序列 1 / 11 （2 步）---
+[2022-02-07 00:00:00] OPEN L1 long @3121.2300 size=0.961160 unreal=0.0000
+[2022-02-12 00:00:00] STOP LOSS L1 long @2965.1685 size=0.961160 unreal=-150.0000
+--- 序列 2 / 11 （2 步）---
+[2022-02-19 00:00:00] OPEN L1 short @2745.0700 size=0.928938 unreal=0.0000
+[2022-02-26 00:00:00] STOP LOSS L1 short @2882.3235 size=0.928938 unreal=-127.5000
+--- 序列 3 / 11 （2 步）---
+[2022-03-02 00:00:00] OPEN L1 long @2952.6100 size=0.734096 unreal=0.0000
+[2022-03-04 00:00:00] STOP LOSS L1 long @2804.9795 size=0.734096 unreal=-108.3750
+--- 序列 4 / 11 （2 步）---
+[2022-03-18 00:00:00] OPEN L1 long @2895.6100 size=0.636265 unreal=0.0000
+[2022-04-12 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @3043.7900 size=0.636265 unreal=94.2817
+--- 序列 5 / 11 （2 步）---
+[2022-07-16 00:00:00] OPEN L1 long @1274.4200 size=1.667598 unreal=0.0000
+[2022-08-21 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @1621.1100 size=1.667598 unreal=578.1395
+--- 序列 6 / 11 （2 步）---
+[2022-09-09 00:00:00] OPEN L1 long @1719.1300 size=2.245112 unreal=0.0000
+[2022-09-13 00:00:00] STOP LOSS L1 long @1633.1735 size=2.245112 unreal=-192.9819
+--- 序列 7 / 11 （2 步）---
+[2022-09-15 00:00:00] OPEN L1 short @1493.9800 size=2.195942 unreal=0.0000
+[2022-10-25 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @1407.8500 size=2.195942 unreal=189.1365
+--- 序列 8 / 11 （2 步）---
+[2022-11-09 00:00:00] OPEN L1 short @1163.3900 size=3.307663 unreal=0.0000
+[2022-11-10 00:00:00] STOP LOSS L1 short @1221.5595 size=3.307663 unreal=-192.4051
+--- 序列 9 / 11 （2 步）---
+[2022-12-04 00:00:00] OPEN L1 long @1259.9600 size=2.596024 unreal=0.0000
+[2022-12-07 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @1233.5600 size=2.596024 unreal=-68.5350
+--- 序列 10 / 11 （2 步）---
+[2022-12-09 00:00:00] OPEN L1 long @1277.6800 size=2.399100 unreal=0.0000
+[2022-12-16 00:00:00] STOP LOSS L1 long @1213.7960 size=2.399100 unreal=-153.2641
+--- 序列 11 / 11 （2 步）---
+[2022-12-17 00:00:00] OPEN L1 short @1180.0900 size=2.207874 unreal=0.0000
+[2022-12-23 00:00:00] STOP LOSS L1 short @1239.0945 size=2.207874 unreal=-130.2745
+=== END OF ALL SEQUENCES ===
+[2023-02-13 00:00:00] OPEN SHORT price=1476.0400 size=2.032465 entry=1476.0400 equity=1000.00 usedMargin=1000.0000 stop=1549.8420 notional=3000.0000
+[2023-02-14 00:00:00] STOP LOSS dir=short stop=1549.8420 realized=-150.0000 equity=850.0000
+[2023-02-16 00:00:00] OPEN LONG price=1724.3000 size=1.478861 entry=1724.3000 equity=850.00 usedMargin=850.0000 stop=1638.0850 notional=2550.0000
+[2023-02-17 00:00:00] STOP LOSS dir=long stop=1638.0850 realized=-127.5000 equity=722.5000
+[2023-03-03 00:00:00] OPEN SHORT price=1567.2200 size=1.383022 entry=1567.2200 equity=722.50 usedMargin=722.5000 stop=1645.5810 notional=2167.5000
+[2023-03-13 00:00:00] STOP LOSS dir=short stop=1645.5810 realized=-108.3750 equity=614.1250
+[2023-03-14 00:00:00] OPEN LONG price=1770.2900 size=1.040719 entry=1770.2900 equity=614.12 usedMargin=614.1250 stop=1681.7755 notional=1842.3750
+[2023-03-15 00:00:00] STOP LOSS dir=long stop=1681.7755 realized=-92.1188 equity=522.0062
+[2023-04-24 00:00:00] OPEN SHORT price=1834.5800 size=0.853612 entry=1834.5800 equity=522.01 usedMargin=522.0062 stop=1926.3090 notional=1566.0187
+[2023-04-26 00:00:00] STOP LOSS dir=short stop=1926.3090 realized=-78.3009 equity=443.7053
+[2023-05-29 00:00:00] OPEN LONG price=1889.9900 size=0.704298 entry=1889.9900 equity=443.71 usedMargin=443.7053 stop=1795.4905 notional=1331.1159
+[2023-06-06 00:00:00] STOP LOSS dir=long stop=1795.4905 realized=-66.5558 equity=377.1495
+[2023-06-10 00:00:00] OPEN SHORT price=1737.7300 size=0.651107 entry=1737.7300 equity=377.15 usedMargin=377.1495 stop=1824.6165 notional=1131.4485
+[2023-06-21 00:00:00] STOP LOSS dir=short stop=1824.6165 realized=-56.5724 equity=320.5771
+[2023-06-22 00:00:00] OPEN LONG price=1877.6600 size=0.512197 entry=1877.6600 equity=320.58 usedMargin=320.5771 stop=1783.7770 notional=961.7313
+[2023-07-23 00:00:00] TAKE PROFIT dir=long price=1874.2600 realized=-1.7415 equity=318.8356
+[2023-09-29 00:00:00] OPEN LONG price=1672.1900 size=0.572008 entry=1672.1900 equity=318.84 usedMargin=318.8356 stop=1588.5805 notional=956.5069
+[2023-10-09 00:00:00] STOP LOSS dir=long stop=1588.5805 realized=-47.8253 equity=271.0103
+[2023-10-22 00:00:00] OPEN LONG price=1625.9900 size=0.500022 entry=1625.9900 equity=271.01 usedMargin=271.0103 stop=1544.6905 notional=813.0308
+【ETH-USDT-SWAP][1D] 年份 2023：起始资金 1000.00 USDT，期末资金 607.96 USDT，收益率 -39.2045%，开仓 10，加仓 0，止损 8，整仓止盈 1，爆仓 0
+=== ETH-USDT-SWAP 1D 2023 全部交易序列（共 10 组） ===
+--- 序列 1 / 10 （2 步）---
+[2023-02-13 00:00:00] OPEN L1 short @1476.0400 size=2.032465 unreal=0.0000
+[2023-02-14 00:00:00] STOP LOSS L1 short @1549.8420 size=2.032465 unreal=-150.0000
+--- 序列 2 / 10 （2 步）---
+[2023-02-16 00:00:00] OPEN L1 long @1724.3000 size=1.478861 unreal=0.0000
+[2023-02-17 00:00:00] STOP LOSS L1 long @1638.0850 size=1.478861 unreal=-127.5000
+--- 序列 3 / 10 （2 步）---
+[2023-03-03 00:00:00] OPEN L1 short @1567.2200 size=1.383022 unreal=0.0000
+[2023-03-13 00:00:00] STOP LOSS L1 short @1645.5810 size=1.383022 unreal=-108.3750
+--- 序列 4 / 10 （2 步）---
+[2023-03-14 00:00:00] OPEN L1 long @1770.2900 size=1.040719 unreal=0.0000
+[2023-03-15 00:00:00] STOP LOSS L1 long @1681.7755 size=1.040719 unreal=-92.1188
+--- 序列 5 / 10 （2 步）---
+[2023-04-24 00:00:00] OPEN L1 short @1834.5800 size=0.853612 unreal=0.0000
+[2023-04-26 00:00:00] STOP LOSS L1 short @1926.3090 size=0.853612 unreal=-78.3009
+--- 序列 6 / 10 （2 步）---
+[2023-05-29 00:00:00] OPEN L1 long @1889.9900 size=0.704298 unreal=0.0000
+[2023-06-06 00:00:00] STOP LOSS L1 long @1795.4905 size=0.704298 unreal=-66.5558
+--- 序列 7 / 10 （2 步）---
+[2023-06-10 00:00:00] OPEN L1 short @1737.7300 size=0.651107 unreal=0.0000
+[2023-06-21 00:00:00] STOP LOSS L1 short @1824.6165 size=0.651107 unreal=-56.5724
+--- 序列 8 / 10 （2 步）---
+[2023-06-22 00:00:00] OPEN L1 long @1877.6600 size=0.512197 unreal=0.0000
+[2023-07-23 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @1874.2600 size=0.512197 unreal=-1.7415
+--- 序列 9 / 10 （2 步）---
+[2023-09-29 00:00:00] OPEN L1 long @1672.1900 size=0.572008 unreal=0.0000
+[2023-10-09 00:00:00] STOP LOSS L1 long @1588.5805 size=0.572008 unreal=-47.8253
+--- 序列 10 / 10 （2 步）---
+[2023-10-22 00:00:00] OPEN L1 long @1625.9900 size=0.500022 unreal=0.0000
+[2023-12-31 00:00:00] EOD_UNREAL_SETTLE L1 long @2299.8500 size=0.500022 unreal=336.9448
+=== END OF ALL SEQUENCES ===
+[2024-01-24 00:00:00] OPEN SHORT price=2234.5200 size=1.342570 entry=2234.5200 equity=1000.00 usedMargin=1000.0000 stop=2346.2460 notional=3000.0000
+[2024-01-30 00:00:00] STOP LOSS dir=short stop=2346.2460 realized=-150.0000 equity=850.0000
+[2024-02-08 00:00:00] OPEN LONG price=2454.0400 size=1.039103 entry=2454.0400 equity=850.00 usedMargin=850.0000 stop=2331.3380 notional=2550.0000
+[2024-03-20 00:00:00] TAKE PROFIT dir=long price=3294.1500 realized=872.9607 equity=1722.9607
+[2024-03-28 00:00:00] OPEN LONG price=3578.9100 size=1.444262 entry=3578.9100 equity=1722.96 usedMargin=1722.9607 stop=3399.9645 notional=5168.8821
+[2024-03-29 00:00:00] TAKE PROFIT dir=long price=3488.2800 realized=-130.8934 equity=1592.0673
+[2024-03-31 00:00:00] OPEN LONG price=3618.9900 size=1.319761 entry=3618.9900 equity=1592.07 usedMargin=1592.0673 stop=3438.0405 notional=4776.2019
+[2024-04-01 00:00:00] STOP LOSS dir=long stop=3438.0405 realized=-238.8101 equity=1353.2572
+[2024-04-10 00:00:00] OPEN LONG price=3478.6900 size=1.167040 entry=3478.6900 equity=1353.26 usedMargin=1353.2572 stop=3304.7555 notional=4059.7716
+[2024-04-13 00:00:00] STOP LOSS dir=long stop=3304.7555 realized=-202.9886 equity=1150.2686
+[2024-05-20 00:00:00] OPEN LONG price=3118.1500 size=1.106684 entry=3118.1500 equity=1150.27 usedMargin=1150.2686 stop=2962.2425 notional=3450.8058
+[2024-06-13 00:00:00] TAKE PROFIT dir=long price=3443.1100 realized=359.6279 equity=1509.8966
+[2024-07-16 00:00:00] OPEN LONG price=3477.2900 size=1.302649 entry=3477.2900 equity=1509.90 usedMargin=1509.8966 stop=3303.4255 notional=4529.6897
+[2024-07-25 00:00:00] STOP LOSS dir=long stop=3303.4255 realized=-226.4845 equity=1283.4121
+[2024-07-26 00:00:00] OPEN SHORT price=3255.3100 size=1.182756 entry=3255.3100 equity=1283.41 usedMargin=1283.4121 stop=3418.0755 notional=3850.2362
+[2024-09-21 00:00:00] TAKE PROFIT dir=short price=2559.7600 realized=822.6657 equity=2106.0778
+[2024-10-03 00:00:00] OPEN SHORT price=2340.3600 size=2.699684 entry=2340.3600 equity=2106.08 usedMargin=2106.0778 stop=2457.3780 notional=6318.2333
+[2024-10-06 00:00:00] STOP LOSS dir=short stop=2457.3780 realized=-315.9117 equity=1790.1661
+[2024-10-14 00:00:00] OPEN LONG price=2635.8400 size=2.037490 entry=2635.8400 equity=1790.17 usedMargin=1790.1661 stop=2504.0480 notional=5370.4983
+[2024-10-24 00:00:00] STOP LOSS dir=long stop=2504.0480 realized=-268.5249 equity=1521.6412
+[2024-10-26 00:00:00] OPEN SHORT price=2457.7700 size=1.857344 entry=2457.7700 equity=1521.64 usedMargin=1521.6412 stop=2580.6585 notional=4564.9235
+[2024-10-29 00:00:00] STOP LOSS dir=short stop=2580.6585 realized=-228.2462 equity=1293.3950
+[2024-11-02 00:00:00] OPEN SHORT price=2488.9800 size=1.558946 entry=2488.9800 equity=1293.39 usedMargin=1293.3950 stop=2613.4290 notional=3880.1850
+[2024-11-06 00:00:00] STOP LOSS dir=short stop=2613.4290 realized=-194.0092 equity=1099.3857
+[2024-11-07 00:00:00] OPEN LONG price=2847.6500 size=1.158203 entry=2847.6500 equity=1099.39 usedMargin=1099.3857 stop=2705.2675 notional=3298.1572
+[2024-12-20 00:00:00] TAKE PROFIT dir=long price=3373.8000 realized=609.3886 equity=1708.7743
+【ETH-USDT-SWAP][1D] 年份 2024：起始资金 1000.00 USDT，期末资金 1708.77 USDT，收益率 70.8774%，开仓 13，加仓 0，止损 8，整仓止盈 5，爆仓 0
+=== ETH-USDT-SWAP 1D 2024 全部交易序列（共 13 组） ===
+--- 序列 1 / 13 （2 步）---
+[2024-01-24 00:00:00] OPEN L1 short @2234.5200 size=1.342570 unreal=0.0000
+[2024-01-30 00:00:00] STOP LOSS L1 short @2346.2460 size=1.342570 unreal=-150.0000
+--- 序列 2 / 13 （2 步）---
+[2024-02-08 00:00:00] OPEN L1 long @2454.0400 size=1.039103 unreal=0.0000
+[2024-03-20 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @3294.1500 size=1.039103 unreal=872.9607
+--- 序列 3 / 13 （2 步）---
+[2024-03-28 00:00:00] OPEN L1 long @3578.9100 size=1.444262 unreal=0.0000
+[2024-03-29 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @3488.2800 size=1.444262 unreal=-130.8934
+--- 序列 4 / 13 （2 步）---
+[2024-03-31 00:00:00] OPEN L1 long @3618.9900 size=1.319761 unreal=0.0000
+[2024-04-01 00:00:00] STOP LOSS L1 long @3438.0405 size=1.319761 unreal=-238.8101
+--- 序列 5 / 13 （2 步）---
+[2024-04-10 00:00:00] OPEN L1 long @3478.6900 size=1.167040 unreal=0.0000
+[2024-04-13 00:00:00] STOP LOSS L1 long @3304.7555 size=1.167040 unreal=-202.9886
+--- 序列 6 / 13 （2 步）---
+[2024-05-20 00:00:00] OPEN L1 long @3118.1500 size=1.106684 unreal=0.0000
+[2024-06-13 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @3443.1100 size=1.106684 unreal=359.6279
+--- 序列 7 / 13 （2 步）---
+[2024-07-16 00:00:00] OPEN L1 long @3477.2900 size=1.302649 unreal=0.0000
+[2024-07-25 00:00:00] STOP LOSS L1 long @3303.4255 size=1.302649 unreal=-226.4845
+--- 序列 8 / 13 （2 步）---
+[2024-07-26 00:00:00] OPEN L1 short @3255.3100 size=1.182756 unreal=0.0000
+[2024-09-21 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @2559.7600 size=1.182756 unreal=822.6657
+--- 序列 9 / 13 （2 步）---
+[2024-10-03 00:00:00] OPEN L1 short @2340.3600 size=2.699684 unreal=0.0000
+[2024-10-06 00:00:00] STOP LOSS L1 short @2457.3780 size=2.699684 unreal=-315.9117
+--- 序列 10 / 13 （2 步）---
+[2024-10-14 00:00:00] OPEN L1 long @2635.8400 size=2.037490 unreal=0.0000
+[2024-10-24 00:00:00] STOP LOSS L1 long @2504.0480 size=2.037490 unreal=-268.5249
+--- 序列 11 / 13 （2 步）---
+[2024-10-26 00:00:00] OPEN L1 short @2457.7700 size=1.857344 unreal=0.0000
+[2024-10-29 00:00:00] STOP LOSS L1 short @2580.6585 size=1.857344 unreal=-228.2462
+--- 序列 12 / 13 （2 步）---
+[2024-11-02 00:00:00] OPEN L1 short @2488.9800 size=1.558946 unreal=0.0000
+[2024-11-06 00:00:00] STOP LOSS L1 short @2613.4290 size=1.558946 unreal=-194.0092
+--- 序列 13 / 13 （2 步）---
+[2024-11-07 00:00:00] OPEN L1 long @2847.6500 size=1.158203 unreal=0.0000
+[2024-12-20 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @3373.8000 size=1.158203 unreal=609.3886
+=== END OF ALL SEQUENCES ===
+[2025-04-24 00:00:00] OPEN LONG price=1764.2000 size=1.700487 entry=1764.2000 equity=1000.00 usedMargin=1000.0000 stop=1675.9900 notional=3000.0000
+[2025-06-18 00:00:00] TAKE PROFIT dir=long price=2507.6000 realized=1264.1424 equity=2264.1424
+[2025-07-03 00:00:00] OPEN LONG price=2569.3200 size=2.643667 entry=2569.3200 equity=2264.14 usedMargin=2264.1424 stop=2440.8540 notional=6792.4272
+[2025-09-05 00:00:00] TAKE PROFIT dir=long price=4281.0000 realized=4525.1124 equity=6789.2548
+[2025-09-11 00:00:00] OPEN LONG price=4410.8500 size=4.617651 entry=4410.8500 equity=6789.25 usedMargin=6789.2548 stop=4190.3075 notional=20367.7643
+[2025-09-22 00:00:00] STOP LOSS dir=long stop=4190.3075 realized=-1018.3882 equity=5770.8665
+[2025-10-03 00:00:00] OPEN LONG price=4533.1800 size=3.819085 entry=4533.1800 equity=5770.87 usedMargin=5770.8665 stop=4306.5210 notional=17312.5996
+[2025-10-09 00:00:00] STOP LOSS dir=long stop=4306.5210 realized=-865.6300 equity=4905.2366
+[2025-10-10 00:00:00] OPEN SHORT price=4101.0100 size=3.588314 entry=4101.0100 equity=4905.24 usedMargin=4905.2366 stop=4306.0605 notional=14715.7097
+【ETH-USDT-SWAP][1D] 年份 2025：起始资金 1000.00 USDT，期末资金 5800.41 USDT，收益率 480.0413%，开仓 5，加仓 0，止损 2，整仓止盈 2，爆仓 0
+=== ETH-USDT-SWAP 1D 2025 全部交易序列（共 5 组） ===
+--- 序列 1 / 5 （2 步）---
+[2025-04-24 00:00:00] OPEN L1 long @1764.2000 size=1.700487 unreal=0.0000
+[2025-06-18 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @2507.6000 size=1.700487 unreal=1264.1424
+--- 序列 2 / 5 （2 步）---
+[2025-07-03 00:00:00] OPEN L1 long @2569.3200 size=2.643667 unreal=0.0000
+[2025-09-05 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @4281.0000 size=2.643667 unreal=4525.1124
+--- 序列 3 / 5 （2 步）---
+[2025-09-11 00:00:00] OPEN L1 long @4410.8500 size=4.617651 unreal=0.0000
+[2025-09-22 00:00:00] STOP LOSS L1 long @4190.3075 size=4.617651 unreal=-1018.3882
+--- 序列 4 / 5 （2 步）---
+[2025-10-03 00:00:00] OPEN L1 long @4533.1800 size=3.819085 unreal=0.0000
+[2025-10-09 00:00:00] STOP LOSS L1 long @4306.5210 size=3.819085 unreal=-865.6300
+--- 序列 5 / 5 （2 步）---
+[2025-10-10 00:00:00] OPEN L1 short @4101.0100 size=3.588314 unreal=0.0000
+[2025-11-02 00:00:00] EOD_UNREAL_SETTLE L1 short @3851.5400 size=3.588314 unreal=895.1766
+=== END OF ALL SEQUENCES ===
+[2022-03-21 00:00:00] OPEN LONG price=89.5400 size=33.504579 entry=89.5400 equity=1000.00 usedMargin=1000.0000 stop=85.0630 notional=3000.0000
+[2022-04-12 00:00:00] TAKE PROFIT dir=long price=106.0100 realized=551.8204 equity=1551.8204
+[2022-06-26 00:00:00] OPEN LONG price=40.6100 size=114.638297 entry=40.6100 equity=1551.82 usedMargin=1551.8204 stop=38.5795 notional=4655.4612
+[2022-06-27 00:00:00] STOP LOSS dir=long stop=38.5795 realized=-232.7731 equity=1319.0474
+[2022-06-29 00:00:00] OPEN SHORT price=34.6700 size=114.137354 entry=34.6700 equity=1319.05 usedMargin=1319.0474 stop=36.4035 notional=3957.1421
+[2022-07-05 00:00:00] STOP LOSS dir=short stop=36.4035 realized=-197.8571 equity=1121.1903
+[2022-07-08 00:00:00] OPEN LONG price=38.5400 size=87.274799 entry=38.5400 equity=1121.19 usedMargin=1121.1903 stop=36.6130 notional=3363.5708
+[2022-07-10 00:00:00] STOP LOSS dir=long stop=36.6130 realized=-168.1785 equity=953.0117
+[2022-07-12 00:00:00] OPEN SHORT price=34.2100 size=83.573082 entry=34.2100 equity=953.01 usedMargin=953.0117 stop=35.9205 notional=2859.0351
+[2022-07-15 00:00:00] STOP LOSS dir=short stop=35.9205 realized=-142.9518 equity=810.0600
+[2022-07-16 00:00:00] OPEN LONG price=37.9400 size=64.053238 entry=37.9400 equity=810.06 usedMargin=810.0600 stop=36.0430 notional=2430.1799
+[2022-07-26 00:00:00] STOP LOSS dir=long stop=36.0430 realized=-121.5090 equity=688.5510
+[2022-07-27 00:00:00] OPEN SHORT price=37.1600 size=55.588076 entry=37.1600 equity=688.55 usedMargin=688.5510 stop=39.0180 notional=2065.6529
+[2022-07-28 00:00:00] STOP LOSS dir=short stop=39.0180 realized=-103.2826 equity=585.2683
+[2022-08-19 00:00:00] OPEN SHORT price=36.9500 size=47.518402 entry=36.9500 equity=585.27 usedMargin=585.2683 stop=38.7975 notional=1755.8050
+[2022-09-12 00:00:00] TAKE PROFIT dir=short price=37.1500 realized=-9.5037 equity=575.7646
+[2022-09-15 00:00:00] OPEN SHORT price=32.9800 size=52.373982 entry=32.9800 equity=575.76 usedMargin=575.7646 stop=34.6290 notional=1727.2939
+[2022-09-24 00:00:00] STOP LOSS dir=short stop=34.6290 realized=-86.3647 equity=489.3999
+[2022-09-29 00:00:00] OPEN LONG price=34.1200 size=43.030476 entry=34.1200 equity=489.40 usedMargin=489.3999 stop=32.4140 notional=1468.1998
+[2022-10-02 00:00:00] STOP LOSS dir=long stop=32.4140 realized=-73.4100 equity=415.9900
+[2022-10-04 00:00:00] OPEN LONG price=34.1800 size=36.511698 entry=34.1800 equity=415.99 usedMargin=415.9900 stop=32.4710 notional=1247.9699
+[2022-10-07 00:00:00] STOP LOSS dir=long stop=32.4710 realized=-62.3985 equity=353.5915
+[2022-10-08 00:00:00] OPEN SHORT price=32.8200 size=32.320974 entry=32.8200 equity=353.59 usedMargin=353.5915 stop=34.4610 notional=1060.7744
+[2022-10-29 00:00:00] TAKE PROFIT dir=short price=33.1700 realized=-11.3123 equity=342.2791
+[2022-11-09 00:00:00] OPEN SHORT price=13.2900 size=77.263909 entry=13.2900 equity=342.28 usedMargin=342.2791 stop=13.9545 notional=1026.8374
+[2022-11-10 00:00:00] STOP LOSS dir=short stop=13.9545 realized=-51.3419 equity=290.9372
+【SOL-USDT-SWAP][1D] 年份 2022：起始资金 1000.00 USDT，期末资金 290.94 USDT，收益率 -70.9063%，开仓 13，加仓 0，止损 10，整仓止盈 3，爆仓 0
+=== SOL-USDT-SWAP 1D 2022 全部交易序列（共 13 组） ===
+--- 序列 1 / 13 （2 步）---
+[2022-03-21 00:00:00] OPEN L1 long @89.5400 size=33.504579 unreal=0.0000
+[2022-04-12 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @106.0100 size=33.504579 unreal=551.8204
+--- 序列 2 / 13 （2 步）---
+[2022-06-26 00:00:00] OPEN L1 long @40.6100 size=114.638297 unreal=0.0000
+[2022-06-27 00:00:00] STOP LOSS L1 long @38.5795 size=114.638297 unreal=-232.7731
+--- 序列 3 / 13 （2 步）---
+[2022-06-29 00:00:00] OPEN L1 short @34.6700 size=114.137354 unreal=0.0000
+[2022-07-05 00:00:00] STOP LOSS L1 short @36.4035 size=114.137354 unreal=-197.8571
+--- 序列 4 / 13 （2 步）---
+[2022-07-08 00:00:00] OPEN L1 long @38.5400 size=87.274799 unreal=0.0000
+[2022-07-10 00:00:00] STOP LOSS L1 long @36.6130 size=87.274799 unreal=-168.1785
+--- 序列 5 / 13 （2 步）---
+[2022-07-12 00:00:00] OPEN L1 short @34.2100 size=83.573082 unreal=0.0000
+[2022-07-15 00:00:00] STOP LOSS L1 short @35.9205 size=83.573082 unreal=-142.9518
+--- 序列 6 / 13 （2 步）---
+[2022-07-16 00:00:00] OPEN L1 long @37.9400 size=64.053238 unreal=0.0000
+[2022-07-26 00:00:00] STOP LOSS L1 long @36.0430 size=64.053238 unreal=-121.5090
+--- 序列 7 / 13 （2 步）---
+[2022-07-27 00:00:00] OPEN L1 short @37.1600 size=55.588076 unreal=0.0000
+[2022-07-28 00:00:00] STOP LOSS L1 short @39.0180 size=55.588076 unreal=-103.2826
+--- 序列 8 / 13 （2 步）---
+[2022-08-19 00:00:00] OPEN L1 short @36.9500 size=47.518402 unreal=0.0000
+[2022-09-12 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @37.1500 size=47.518402 unreal=-9.5037
+--- 序列 9 / 13 （2 步）---
+[2022-09-15 00:00:00] OPEN L1 short @32.9800 size=52.373982 unreal=0.0000
+[2022-09-24 00:00:00] STOP LOSS L1 short @34.6290 size=52.373982 unreal=-86.3647
+--- 序列 10 / 13 （2 步）---
+[2022-09-29 00:00:00] OPEN L1 long @34.1200 size=43.030476 unreal=0.0000
+[2022-10-02 00:00:00] STOP LOSS L1 long @32.4140 size=43.030476 unreal=-73.4100
+--- 序列 11 / 13 （2 步）---
+[2022-10-04 00:00:00] OPEN L1 long @34.1800 size=36.511698 unreal=0.0000
+[2022-10-07 00:00:00] STOP LOSS L1 long @32.4710 size=36.511698 unreal=-62.3985
+--- 序列 12 / 13 （2 步）---
+[2022-10-08 00:00:00] OPEN L1 short @32.8200 size=32.320974 unreal=0.0000
+[2022-10-29 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @33.1700 size=32.320974 unreal=-11.3123
+--- 序列 13 / 13 （2 步）---
+[2022-11-09 00:00:00] OPEN L1 short @13.2900 size=77.263909 unreal=0.0000
+[2022-11-10 00:00:00] STOP LOSS L1 short @13.9545 size=77.263909 unreal=-51.3419
+=== END OF ALL SEQUENCES ===
+[2023-02-11 00:00:00] OPEN SHORT price=20.5110 size=146.262981 entry=20.5110 equity=1000.00 usedMargin=1000.0000 stop=21.5366 notional=3000.0000
+[2023-02-12 00:00:00] STOP LOSS dir=short stop=21.5366 realized=-150.0000 equity=850.0000
+[2023-02-16 00:00:00] OPEN LONG price=23.8550 size=106.895829 entry=23.8550 equity=850.00 usedMargin=850.0000 stop=22.6623 notional=2550.0000
+[2023-02-17 00:00:00] STOP LOSS dir=long stop=22.6623 realized=-127.5000 equity=722.5000
+[2023-02-28 00:00:00] OPEN SHORT price=22.5390 size=96.166644 entry=22.5390 equity=722.50 usedMargin=722.5000 stop=23.6660 notional=2167.5000
+[2023-03-20 00:00:00] STOP LOSS dir=short stop=23.6660 realized=-108.3750 equity=614.1250
+[2023-03-27 00:00:00] OPEN SHORT price=19.7770 size=93.157456 entry=19.7770 equity=614.12 usedMargin=614.1250 stop=20.7659 notional=1842.3750
+[2023-03-29 00:00:00] STOP LOSS dir=short stop=20.7659 realized=-92.1187 equity=522.0062
+[2023-04-11 00:00:00] OPEN LONG price=23.3090 size=67.185154 entry=23.3090 equity=522.01 usedMargin=522.0063 stop=22.1436 notional=1566.0187
+[2023-04-19 00:00:00] STOP LOSS dir=long stop=22.1436 realized=-78.3009 equity=443.7053
+[2023-04-24 00:00:00] OPEN SHORT price=21.3520 size=62.341511 entry=21.3520 equity=443.71 usedMargin=443.7053 stop=22.4196 notional=1331.1159
+[2023-04-26 00:00:00] STOP LOSS dir=short stop=22.4196 realized=-66.5558 equity=377.1495
+[2023-04-29 00:00:00] OPEN LONG price=23.3520 size=48.451891 entry=23.3520 equity=377.15 usedMargin=377.1495 stop=22.1844 notional=1131.4485
+[2023-05-01 00:00:00] STOP LOSS dir=long stop=22.1844 realized=-56.5724 equity=320.5771
+[2023-05-03 00:00:00] OPEN SHORT price=21.3340 size=45.079744 entry=21.3340 equity=320.58 usedMargin=320.5771 stop=22.4007 notional=961.7313
+[2023-05-04 00:00:00] STOP LOSS dir=short stop=22.4007 realized=-48.0866 equity=272.4905
+[2023-06-02 00:00:00] OPEN LONG price=21.2040 size=38.552706 entry=21.2040 equity=272.49 usedMargin=272.4905 stop=20.1438 notional=817.4716
+[2023-06-05 00:00:00] STOP LOSS dir=long stop=20.1438 realized=-40.8736 equity=231.6169
+[2023-06-06 00:00:00] OPEN SHORT price=19.9540 size=34.822634 entry=19.9540 equity=231.62 usedMargin=231.6169 stop=20.9517 notional=694.8508
+[2023-06-30 00:00:00] TAKE PROFIT dir=short price=18.2790 realized=58.3279 equity=289.9449
+[2023-08-03 00:00:00] OPEN SHORT price=22.7930 size=38.162356 entry=22.7930 equity=289.94 usedMargin=289.9449 stop=23.9327 notional=869.8346
+[2023-08-09 00:00:00] STOP LOSS dir=short stop=23.9327 realized=-43.4917 equity=246.4531
+[2023-08-10 00:00:00] OPEN LONG price=24.5550 size=30.110340 entry=24.5550 equity=246.45 usedMargin=246.4531 stop=23.3273 notional=739.3594
+[2023-08-16 00:00:00] STOP LOSS dir=long stop=23.3273 realized=-36.9680 equity=209.4852
+[2023-08-17 00:00:00] OPEN SHORT price=22.8600 size=27.491491 entry=22.8600 equity=209.49 usedMargin=209.4852 stop=24.0030 notional=628.4555
+[2023-09-29 00:00:00] TAKE PROFIT dir=short price=20.3340 realized=69.4435 equity=278.9287
+【SOL-USDT-SWAP][1D] 年份 2023：起始资金 1000.00 USDT，期末资金 278.93 USDT，收益率 -72.1071%，开仓 13，加仓 0，止损 11，整仓止盈 2，爆仓 0
+=== SOL-USDT-SWAP 1D 2023 全部交易序列（共 13 组） ===
+--- 序列 1 / 13 （2 步）---
+[2023-02-11 00:00:00] OPEN L1 short @20.5110 size=146.262981 unreal=0.0000
+[2023-02-12 00:00:00] STOP LOSS L1 short @21.5366 size=146.262981 unreal=-150.0000
+--- 序列 2 / 13 （2 步）---
+[2023-02-16 00:00:00] OPEN L1 long @23.8550 size=106.895829 unreal=0.0000
+[2023-02-17 00:00:00] STOP LOSS L1 long @22.6623 size=106.895829 unreal=-127.5000
+--- 序列 3 / 13 （2 步）---
+[2023-02-28 00:00:00] OPEN L1 short @22.5390 size=96.166644 unreal=0.0000
+[2023-03-20 00:00:00] STOP LOSS L1 short @23.6660 size=96.166644 unreal=-108.3750
+--- 序列 4 / 13 （2 步）---
+[2023-03-27 00:00:00] OPEN L1 short @19.7770 size=93.157456 unreal=0.0000
+[2023-03-29 00:00:00] STOP LOSS L1 short @20.7659 size=93.157456 unreal=-92.1187
+--- 序列 5 / 13 （2 步）---
+[2023-04-11 00:00:00] OPEN L1 long @23.3090 size=67.185154 unreal=0.0000
+[2023-04-19 00:00:00] STOP LOSS L1 long @22.1436 size=67.185154 unreal=-78.3009
+--- 序列 6 / 13 （2 步）---
+[2023-04-24 00:00:00] OPEN L1 short @21.3520 size=62.341511 unreal=0.0000
+[2023-04-26 00:00:00] STOP LOSS L1 short @22.4196 size=62.341511 unreal=-66.5558
+--- 序列 7 / 13 （2 步）---
+[2023-04-29 00:00:00] OPEN L1 long @23.3520 size=48.451891 unreal=0.0000
+[2023-05-01 00:00:00] STOP LOSS L1 long @22.1844 size=48.451891 unreal=-56.5724
+--- 序列 8 / 13 （2 步）---
+[2023-05-03 00:00:00] OPEN L1 short @21.3340 size=45.079744 unreal=0.0000
+[2023-05-04 00:00:00] STOP LOSS L1 short @22.4007 size=45.079744 unreal=-48.0866
+--- 序列 9 / 13 （2 步）---
+[2023-06-02 00:00:00] OPEN L1 long @21.2040 size=38.552706 unreal=0.0000
+[2023-06-05 00:00:00] STOP LOSS L1 long @20.1438 size=38.552706 unreal=-40.8736
+--- 序列 10 / 13 （2 步）---
+[2023-06-06 00:00:00] OPEN L1 short @19.9540 size=34.822634 unreal=0.0000
+[2023-06-30 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @18.2790 size=34.822634 unreal=58.3279
+--- 序列 11 / 13 （2 步）---
+[2023-08-03 00:00:00] OPEN L1 short @22.7930 size=38.162356 unreal=0.0000
+[2023-08-09 00:00:00] STOP LOSS L1 short @23.9327 size=38.162356 unreal=-43.4917
+--- 序列 12 / 13 （2 步）---
+[2023-08-10 00:00:00] OPEN L1 long @24.5550 size=30.110340 unreal=0.0000
+[2023-08-16 00:00:00] STOP LOSS L1 long @23.3273 size=30.110340 unreal=-36.9680
+--- 序列 13 / 13 （2 步）---
+[2023-08-17 00:00:00] OPEN L1 short @22.8600 size=27.491491 unreal=0.0000
+[2023-09-29 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @20.3340 size=27.491491 unreal=69.4435
+=== END OF ALL SEQUENCES ===
+[2024-01-30 00:00:00] OPEN LONG price=104.8200 size=28.620492 entry=104.8200 equity=1000.00 usedMargin=1000.0000 stop=99.5790 notional=3000.0000
+[2024-01-31 00:00:00] STOP LOSS dir=long stop=99.5790 realized=-150.0000 equity=850.0000
+[2024-02-24 00:00:00] OPEN SHORT price=101.9600 size=25.009808 entry=101.9600 equity=850.00 usedMargin=850.0000 stop=107.0580 notional=2550.0000
+[2024-02-27 00:00:00] STOP LOSS dir=short stop=107.0580 realized=-127.5000 equity=722.5000
+[2024-02-28 00:00:00] OPEN LONG price=113.1200 size=19.161068 entry=113.1200 equity=722.50 usedMargin=722.5000 stop=107.4640 notional=2167.5000
+[2024-02-29 00:00:00] STOP LOSS dir=long stop=107.4640 realized=-108.3750 equity=614.1250
+[2024-04-10 00:00:00] OPEN SHORT price=167.8700 size=10.975010 entry=167.8700 equity=614.13 usedMargin=614.1250 stop=176.2635 notional=1842.3750
+[2024-04-12 00:00:00] STOP LOSS dir=short stop=176.2635 realized=-92.1188 equity=522.0062
+[2024-05-07 00:00:00] OPEN LONG price=154.6700 size=10.124903 entry=154.6700 equity=522.01 usedMargin=522.0062 stop=146.9365 notional=1566.0187
+[2024-05-08 00:00:00] STOP LOSS dir=long stop=146.9365 realized=-78.3009 equity=443.7053
+[2024-05-09 00:00:00] OPEN SHORT price=146.4300 size=9.090459 entry=146.4300 equity=443.71 usedMargin=443.7053 stop=153.7515 notional=1331.1159
+[2024-05-10 00:00:00] STOP LOSS dir=short stop=153.7515 realized=-66.5558 equity=377.1495
+[2024-05-11 00:00:00] OPEN SHORT price=145.6200 size=7.769871 entry=145.6200 equity=377.15 usedMargin=377.1495 stop=152.9010 notional=1131.4485
+[2024-05-15 00:00:00] STOP LOSS dir=short stop=152.9010 realized=-56.5724 equity=320.5771
+[2024-06-10 00:00:00] OPEN SHORT price=162.3700 size=5.923085 entry=162.3700 equity=320.58 usedMargin=320.5771 stop=170.4885 notional=961.7313
+[2024-07-15 00:00:00] TAKE PROFIT dir=short price=152.9100 realized=56.0324 equity=376.6095
+[2024-08-03 00:00:00] OPEN SHORT price=146.1900 size=7.728493 entry=146.1900 equity=376.61 usedMargin=376.6095 stop=153.4995 notional=1129.8284
+[2024-08-07 00:00:00] STOP LOSS dir=short stop=153.4995 realized=-56.4914 equity=320.1180
+[2024-08-25 00:00:00] OPEN LONG price=159.3700 size=6.025941 entry=159.3700 equity=320.12 usedMargin=320.1180 stop=151.4015 notional=960.3541
+[2024-08-28 00:00:00] STOP LOSS dir=long stop=151.4015 realized=-48.0177 equity=272.1003
+[2024-08-29 00:00:00] OPEN SHORT price=146.0600 size=5.588806 entry=146.0600 equity=272.10 usedMargin=272.1003 stop=153.3630 notional=816.3010
+[2024-09-20 00:00:00] TAKE PROFIT dir=short price=147.8400 realized=-9.9481 equity=262.1523
+[2024-10-08 00:00:00] OPEN SHORT price=142.8100 size=5.507015 entry=142.8100 equity=262.15 usedMargin=262.1523 stop=149.9505 notional=786.4568
+[2024-10-14 00:00:00] STOP LOSS dir=short stop=149.9505 realized=-39.3228 equity=222.8294
+[2024-12-10 00:00:00] OPEN SHORT price=206.5200 size=3.236918 entry=206.5200 equity=222.83 usedMargin=222.8294 stop=216.8460 notional=668.4883
+[2024-12-11 00:00:00] STOP LOSS dir=short stop=216.8460 realized=-33.4244 equity=189.4050
+【SOL-USDT-SWAP][1D] 年份 2024：起始资金 1000.00 USDT，期末资金 189.41 USDT，收益率 -81.0595%，开仓 13，加仓 0，止损 11，整仓止盈 2，爆仓 0
+=== SOL-USDT-SWAP 1D 2024 全部交易序列（共 13 组） ===
+--- 序列 1 / 13 （2 步）---
+[2024-01-30 00:00:00] OPEN L1 long @104.8200 size=28.620492 unreal=0.0000
+[2024-01-31 00:00:00] STOP LOSS L1 long @99.5790 size=28.620492 unreal=-150.0000
+--- 序列 2 / 13 （2 步）---
+[2024-02-24 00:00:00] OPEN L1 short @101.9600 size=25.009808 unreal=0.0000
+[2024-02-27 00:00:00] STOP LOSS L1 short @107.0580 size=25.009808 unreal=-127.5000
+--- 序列 3 / 13 （2 步）---
+[2024-02-28 00:00:00] OPEN L1 long @113.1200 size=19.161068 unreal=0.0000
+[2024-02-29 00:00:00] STOP LOSS L1 long @107.4640 size=19.161068 unreal=-108.3750
+--- 序列 4 / 13 （2 步）---
+[2024-04-10 00:00:00] OPEN L1 short @167.8700 size=10.975010 unreal=0.0000
+[2024-04-12 00:00:00] STOP LOSS L1 short @176.2635 size=10.975010 unreal=-92.1188
+--- 序列 5 / 13 （2 步）---
+[2024-05-07 00:00:00] OPEN L1 long @154.6700 size=10.124903 unreal=0.0000
+[2024-05-08 00:00:00] STOP LOSS L1 long @146.9365 size=10.124903 unreal=-78.3009
+--- 序列 6 / 13 （2 步）---
+[2024-05-09 00:00:00] OPEN L1 short @146.4300 size=9.090459 unreal=0.0000
+[2024-05-10 00:00:00] STOP LOSS L1 short @153.7515 size=9.090459 unreal=-66.5558
+--- 序列 7 / 13 （2 步）---
+[2024-05-11 00:00:00] OPEN L1 short @145.6200 size=7.769871 unreal=0.0000
+[2024-05-15 00:00:00] STOP LOSS L1 short @152.9010 size=7.769871 unreal=-56.5724
+--- 序列 8 / 13 （2 步）---
+[2024-06-10 00:00:00] OPEN L1 short @162.3700 size=5.923085 unreal=0.0000
+[2024-07-15 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @152.9100 size=5.923085 unreal=56.0324
+--- 序列 9 / 13 （2 步）---
+[2024-08-03 00:00:00] OPEN L1 short @146.1900 size=7.728493 unreal=0.0000
+[2024-08-07 00:00:00] STOP LOSS L1 short @153.4995 size=7.728493 unreal=-56.4914
+--- 序列 10 / 13 （2 步）---
+[2024-08-25 00:00:00] OPEN L1 long @159.3700 size=6.025941 unreal=0.0000
+[2024-08-28 00:00:00] STOP LOSS L1 long @151.4015 size=6.025941 unreal=-48.0177
+--- 序列 11 / 13 （2 步）---
+[2024-08-29 00:00:00] OPEN L1 short @146.0600 size=5.588806 unreal=0.0000
+[2024-09-20 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @147.8400 size=5.588806 unreal=-9.9481
+--- 序列 12 / 13 （2 步）---
+[2024-10-08 00:00:00] OPEN L1 short @142.8100 size=5.507015 unreal=0.0000
+[2024-10-14 00:00:00] STOP LOSS L1 short @149.9505 size=5.507015 unreal=-39.3228
+--- 序列 13 / 13 （2 步）---
+[2024-12-10 00:00:00] OPEN L1 short @206.5200 size=3.236918 unreal=0.0000
+[2024-12-11 00:00:00] STOP LOSS L1 short @216.8460 size=3.236918 unreal=-33.4244
+=== END OF ALL SEQUENCES ===
+[2025-02-03 00:00:00] OPEN SHORT price=206.9700 size=14.494854 entry=206.9700 equity=1000.00 usedMargin=1000.0000 stop=217.3185 notional=3000.0000
+[2025-02-04 00:00:00] STOP LOSS dir=short stop=217.3185 realized=-150.0000 equity=850.0000
+[2025-04-15 00:00:00] OPEN LONG price=129.6000 size=19.675926 entry=129.6000 equity=850.00 usedMargin=850.0000 stop=123.1200 notional=2550.0000
+[2025-05-31 00:00:00] TAKE PROFIT dir=long price=155.5300 realized=510.1968 equity=1360.1968
+[2025-06-30 00:00:00] OPEN LONG price=157.7600 size=25.865811 entry=157.7600 equity=1360.20 usedMargin=1360.1968 stop=149.8720 notional=4080.5903
+[2025-07-01 00:00:00] STOP LOSS dir=long stop=149.8720 realized=-204.0295 equity=1156.1672
+[2025-07-05 00:00:00] OPEN SHORT price=147.0300 size=23.590436 entry=147.0300 equity=1156.17 usedMargin=1156.1672 stop=154.3815 notional=3468.5017
+[2025-07-06 00:00:00] TAKE PROFIT dir=short price=151.4600 realized=-104.5056 equity=1051.6616
+[2025-08-02 00:00:00] OPEN SHORT price=161.4100 size=19.546403 entry=161.4100 equity=1051.66 usedMargin=1051.6616 stop=169.4805 notional=3154.9848
+[2025-08-05 00:00:00] STOP LOSS dir=short stop=169.4805 realized=-157.7492 equity=893.9124
+[2025-08-09 00:00:00] OPEN LONG price=180.0100 size=14.897712 entry=180.0100 equity=893.91 usedMargin=893.9124 stop=171.0095 notional=2681.7371
+[2025-09-25 00:00:00] TAKE PROFIT dir=long price=201.0300 realized=313.1499 equity=1207.0623
+[2025-10-03 00:00:00] OPEN LONG price=234.6800 size=15.430317 entry=234.6800 equity=1207.06 usedMargin=1207.0623 stop=222.9460 notional=3621.1868
+[2025-10-07 00:00:00] STOP LOSS dir=long stop=222.9460 realized=-181.0593 equity=1026.0029
+[2025-10-10 00:00:00] OPEN SHORT price=210.5500 size=14.618897 entry=210.5500 equity=1026.00 usedMargin=1026.0029 stop=221.0775 notional=3078.0088
+【SOL-USDT-SWAP][1D] 年份 2025：起始资金 1000.00 USDT，期末资金 1418.52 USDT，收益率 41.8520%，开仓 8，加仓 0，止损 4，整仓止盈 3，爆仓 0
+=== SOL-USDT-SWAP 1D 2025 全部交易序列（共 8 组） ===
+--- 序列 1 / 8 （2 步）---
+[2025-02-03 00:00:00] OPEN L1 short @206.9700 size=14.494854 unreal=0.0000
+[2025-02-04 00:00:00] STOP LOSS L1 short @217.3185 size=14.494854 unreal=-150.0000
+--- 序列 2 / 8 （2 步）---
+[2025-04-15 00:00:00] OPEN L1 long @129.6000 size=19.675926 unreal=0.0000
+[2025-05-31 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @155.5300 size=19.675926 unreal=510.1968
+--- 序列 3 / 8 （2 步）---
+[2025-06-30 00:00:00] OPEN L1 long @157.7600 size=25.865811 unreal=0.0000
+[2025-07-01 00:00:00] STOP LOSS L1 long @149.8720 size=25.865811 unreal=-204.0295
+--- 序列 4 / 8 （2 步）---
+[2025-07-05 00:00:00] OPEN L1 short @147.0300 size=23.590436 unreal=0.0000
+[2025-07-06 00:00:00] TAKE PROFIT (EMA CROSS) L1 short @151.4600 size=23.590436 unreal=-104.5056
+--- 序列 5 / 8 （2 步）---
+[2025-08-02 00:00:00] OPEN L1 short @161.4100 size=19.546403 unreal=0.0000
+[2025-08-05 00:00:00] STOP LOSS L1 short @169.4805 size=19.546403 unreal=-157.7492
+--- 序列 6 / 8 （2 步）---
+[2025-08-09 00:00:00] OPEN L1 long @180.0100 size=14.897712 unreal=0.0000
+[2025-09-25 00:00:00] TAKE PROFIT (EMA CROSS) L1 long @201.0300 size=14.897712 unreal=313.1499
+--- 序列 7 / 8 （2 步）---
+[2025-10-03 00:00:00] OPEN L1 long @234.6800 size=15.430317 unreal=0.0000
+[2025-10-07 00:00:00] STOP LOSS L1 long @222.9460 size=15.430317 unreal=-181.0593
+--- 序列 8 / 8 （2 步）---
+[2025-10-10 00:00:00] OPEN L1 short @210.5500 size=14.618897 unreal=0.0000
+[2025-11-02 00:00:00] EOD_UNREAL_SETTLE L1 short @183.7000 size=14.618897 unreal=392.5174
+=== END OF ALL SEQUENCES ===
